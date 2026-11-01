@@ -1,0 +1,38 @@
+@import 'tailwindcss';
+
+@source '../js/**/*.tsx';
+@source '../views/app.blade.php';
+
+:root {
+    --paper: #f8fafc;
+    --ink: #0f172a;
+    --accent: #b42318;
+    --ok: #10b981;
+    --muted: #64748b;
+    --line: #cbd5e1;
+    --display: Georgia, 'Times New Roman', serif;
+}
+
+@theme {
+    --font-sans: 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+    --font-display: var(--display);
+    --font-serif: var(--display);
+    --color-paper: var(--paper);
+    --color-ink: var(--ink);
+    --color-accent: var(--accent);
+    --color-ok: var(--ok);
+}
+
+@layer base {
+    body {
+        @apply bg-paper font-sans text-ink antialiased;
+    }
+    html {
+        scroll-behavior: smooth;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+    }
+}
