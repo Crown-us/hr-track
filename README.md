@@ -1,6 +1,6 @@
 # HRIS Lite
 
-Prototipe HRIS independen untuk portofolio wawancara magang. Bukan sistem pesanan perusahaan dan belum siap production. Antarmuka Indonesia; seluruh data demo nantinya fiktif.
+Aplikasi HRIS mandiri yang sedang disiapkan untuk kebutuhan magang. Antarmuka berbahasa Indonesia; data pada pratinjau bersifat fiktif. Fitur operasional diimplementasikan bertahap.
 
 ## Status — Phase 1
 
@@ -87,5 +87,7 @@ Pada sandbox Codex Windows, socket localhost atau akses file PHP/Pint bisa ditol
 Laravel menangani route, session dan response Inertia; React merender halaman. Entry resources/js/app.tsx, root resources/views/app.blade.php, middleware HandleInertiaRequests, halaman resources/js/pages/welcome.tsx. Token warna, tipografi dan aturan anti-AI-slop ada di [DESIGN.md](DESIGN.md). Tidak ada API atau layanan eksternal terpisah.
 
 Belum ada route privat/data domain. Tiga migration bawaan hanya menyediakan user/session, cache dan jobs. Schema HR dan otorisasi server-side dilanjutkan pada Phase 2. Welcome memuat indeks dan spesimen antarmuka dengan data contoh yang diberi label jelas; bukan data nyata dan bukan route privat.
+
+Route `/lab` menampilkan komponen impor `ink-orbit-features` sebagai spesimen (tema gelap, copy Indonesia). Halaman ini bukan bagian alur produk dan sengaja tidak mengikuti aturan `DESIGN.md`; lihat bagian "Karantina" di sana.
 
 Screenshot tahap ini: jalankan aplikasi dan ambil halaman awal pada desktop/mobile tanpa devtools. Walkthrough wawancara tiga menit, akun demo, screenshot fitur dan panduan PDF/CV ditambahkan setelah fitur terkait bekerja.

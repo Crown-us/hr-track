@@ -46,3 +46,50 @@ Phase 1 complete: final gate 5 tests / 18 assertions PASS; Pint PASS; ESLint PAS
 - Metrik contoh dilabeli "angka contoh" pada header indeks dan "Contoh tampilan. Data fiktif." pada spesimen. Tidak ada gradient, emoji, kartu rounded, shadow, blob, gambar eksternal atau copy pengisi.
 - Verifikasi: 375px tanpa overflow; Lighthouse accessibility/best-practices/SEO 100; console bersih; Pint, ESLint, Prettier, TypeScript dan build lolos; 5 tes/18 assertions lolos.
 
+## Komponen impor: bento fitur — 1 November 2026
+
+- Pengguna meminta komponen `ink-orbit-features` (bento fitur tiga diagram) dipasang. Komponen disalin ke `resources/js/components/ui/ink-orbit-features.tsx` — folder `components/ui` dibuat karena proyek belum punya; semua impor memakai path relatif sebab `tsconfig.json` tidak mendefinisikan alias `@/`.
+- Komponen tidak bergantung pada paket baru; React saja. Font Manrope/JetBrains Mono tidak diunduh, jatuh ke fallback sistem.
+- Perbaikan saat integrasi: literal regex `parseTitle` yang rusak diganti `/\n|\\n/`; `"use client"` dibuang karena bukan Next.js; state tema dan reduced-motion diganti `useSyncExternalStore` agar lolos aturan `react-hooks/set-state-in-effect`; `useInView` diberi fallback 2 detik agar section tidak tinggal transparan bila IntersectionObserver tidak pernah terpanggil.
+- Halaman `resources/js/pages/lab.tsx` + route `/lab` menampilkan komponen dengan tema gelap, copy Indonesia, dan label "angka fiktif". Komponen **tidak** dipasang di halaman awal: gradient, shadow, sudut membulat, judul rata tengah, dan `REPORT #155` melanggar P0/P1 `DESIGN.md`.
+- Tautan "Lab komponen" ditambahkan di colophon halaman awal.
+- Verifikasi: `npm run lint`, `format:check`, `types:check`, `build` lolos; Lighthouse /lab 100 accessibility/best-practices/SEO; console bersih; viewport 375px tanpa overflow; 6 tes/29 assertions dan Pint lolos.
+
+
+## Referensi pengguna — light bento, timeline, status badge
+
+- Bento InkOrbit homepage dipertahankan lengkap; hanya theme light dan penyesuaian token/font scoped. File animasi asli tidak diubah pada iterasi ini.
+- ProcessTimeline reusable menerapkan garis vertikal, check selesai, clock aktif, tahap mendatang netral sesuai screenshot; data kandidat tetap fiktif.
+- StatusBadge reusable menyediakan tujuh varian pastel berikon. Digunakan pada tabel pegawai dan palet status proses.
+- Layout spesimen menjadi tabel 7 kolom / timeline 5 kolom, formulir satu baris terpisah pada desktop; susun vertikal mobile. DESIGN.md diperbarui dengan pengecualian eksplisit sesuai instruksi pengguna terbaru.
+- Verifikasi: ESLint, TypeScript dan build Vite PASS. Kontrol browser gagal dengan error konektor, sehingga tidak mengklaim visual terbaru sudah diverifikasi di browser.
+- Backend, route dan data database tidak diubah pada iterasi ini. Perubahan pengguna yang sudah ada dipertahankan.
+
+Landing dirombak menjadi pengenalan produk: navigasi, bento light utuh, enam cakupan fitur, tiga langkah cara kerja, cuplikan tabel/timeline/badge, akses akun dan footer. Narasi portofolio/progres/stack dihapus dari UI. Lint, format, type-check, Vite build PASS; FoundationTest 2 tests/22 assertions PASS. Browser berhasil merender landing terbaru; screenshot lokal .local/landing-redesign.png. Login masih belum tersedia dan tombol diberi penjelasan eksplisit.
+
+
+## Taste Skill pass
+
+Landing dimatangkan mengikuti editorial-report / The printed annual, seed 1718636150. Judul desktop 120px (sebelumnya 44px), mobile 50px (sebelumnya 28px), body 17px (sebelumnya 14px). Pemilih fitur interaktif, field cara kerja, layout preview adaptif dan footer baru. Bento/timeline/badge tetap ada. Inspector awal 13 FAIL; final 0 FAIL/4 WARN dengan pengecualian icon-cards untuk bento yang wajib dipertahankan. Source lint Taste 0 FAIL/0 WARN. Build/lint/types/format PASS; 2 tests/22 assertions PASS; browser click + keyboard, anchor dan console terverifikasi. Kritik jujur dan batasan ada di docs/TASTE-REVIEW.md. Tidak ada deployment/push atau perubahan database.
+
+## Northstar reference pass
+
+Atas persetujuan pengguna, komposisi landing mengikuti referensi Northstar: hero centre sans-serif, aksen biru tua, navigasi dengan wordmark tengah di desktop, dua CTA, menu fitur kiri + detail dan contoh isi kanan. Setiap modul memperbarui preview fiktifnya; pipeline default tiga kandidat, modul training menampilkan tiga agenda/evaluasi. Bento animasi, timeline dan badge tetap ada, backend tidak berubah. Tidak mengambil kode/aset dari referensi.
+
+Verifikasi aktual: ESLint, TypeScript, Prettier, Vite build PASS; FoundationTest 2 tests/22 assertions PASS. Screenshot 1440/768/390 dibuka seluruhnya. Headline masing-masing dua baris, tanpa laporan overflow/clipping. Klik Pelatihan mengganti detail dan preview; console bersih.
+
+Inspector Taste mentah: 5 FAIL / 6 WARN. Empat FAIL merupakan larangan gaya (shadow, hairline, outlined-box, icon-cards) yang sengaja dikesampingkan sesuai referensi dan komponen wajib pengguna; small-text menandai metadata 12px, tidak diklaim lolos house style Taste. Batasan tetap: auth belum tersedia, data contoh fiktif, sebagian microcopy diagram asli masih Inggris. Screenshot di .taste-skill/northstar. Bukan klaim 0 FAIL seperti desain sebelumnya karena preferensi visual sekarang berbeda.
+
+## Font pairing — 2 November 2026
+
+Space Grotesk + DM Sans dipasang lokal dari Google Fonts, dengan lisensi OFL dari repository google/fonts. Stylesheet lokal public/fonts/fonts.css dan preload DM Sans400/SpaceGrotesk600 pada root Blade. Build PASS. Browser memverifikasi kedua font loaded=true serta computed font headline/body benar. Mobile 390px: headline 75.59px / line-height37.8px = 2 baris, documentWidth375 <= viewport390. Screenshot .local/font-preview.png. Layout serta komponen pilihan pengguna dipertahankan.
+
+## Tipografi netral ala Apple — 2 November 2026
+
+Native Apple system font + Inter lokal pada Windows/Android, satu keluarga untuk heading dan body. SF Pro tidak disalin/self-host. Font Inter400/500/600/700 dari Google Fonts, lisensi OFL disertakan. Root Blade memuat inter.css dan preload400/600; theme-color putih. Build Vite dan Prettier check PASS. Browser Inter loaded=true. Mobile390: headline72.44px / line-height36.22px =2 baris; documentWidth375 <=390. Screenshot .local/neutral-type-preview.png. Tidak ada perubahan backend.
+
+## Checkpoint landing — 2 November 2026
+
+Bahasa bento, tooltip dan label aksesibilitas dirapikan ke Indonesia: rekap, sinkron, proyeksi, dokumen dan nama fiktif. Semua animasi serta komponen pilihan pengguna dipertahankan. Header sticky dan offset anchor telah dicek; screenshot mobile final390 dibuka, headline2 baris dan tidak ada laporan overflow. Peringatan inspector tetap terkait style pilihan pengguna dan metadata12px; bukan klaim lolos house style Taste.
+
+Quality gate: Pint PASS; seluruh suite6 tests/29 assertions PASS; ESLint, TypeScript, Prettier dan Vite build PASS. Git ignore memastikan .env/.env.testing/.local/.tools tidak masuk checkpoint. Push diminta pengguna, target origin/feat/hris-foundation pada github.com/Crown-us/hr-track; tanpa force-push, merge atau deployment. Login/domain backend tetap pekerjaan berikutnya.

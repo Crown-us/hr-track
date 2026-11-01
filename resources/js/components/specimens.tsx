@@ -1,5 +1,7 @@
 import { ChevronDown } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { StatusBadge } from './ui/status-badge';
+import { ProcessTimeline, type TimelineItem } from './ui/process-timeline';
 
 const pipeline = [
     { label: 'Screening', value: 18, width: '53%', className: 'bg-slate-900' },
@@ -15,7 +17,7 @@ const employees = [
     { name: 'Dimas Nugroho', department: 'Marketing', status: 'Aktif', tone: 'emerald' },
 ];
 
-const timeline = [
+const timeline: TimelineItem[] = [
     {
         label: 'Screening',
         time: '02 Nov 2026 · 09:14',
@@ -28,14 +30,19 @@ const timeline = [
         state: 'current',
         note: 'HR interview · 45 menit',
     },
-    { label: 'Offering', time: 'Menunggu', state: 'pending', note: '' },
-    { label: 'Diterima', time: '—', state: 'pending', note: '' },
+    {
+        label: 'Penawaran kerja',
+        time: 'Tahap berikutnya',
+        state: 'pending',
+        note: 'Penawaran disiapkan setelah evaluasi wawancara.',
+    },
+    {
+        label: 'Bergabung dengan tim',
+        time: 'Belum dijadwalkan',
+        state: 'pending',
+        note: 'Konfirmasi penerimaan dan persiapan orientasi.',
+    },
 ];
-
-const statusTone: Record<string, string> = {
-    emerald: 'bg-emerald-500',
-    amber: 'bg-amber-500',
-};
 
 export function PipelinePlate() {
     return (
@@ -135,13 +142,11 @@ export function EmployeeTable() {
                                 {employee.department}
                             </td>
                             <td className="py-3 text-right">
-                                <span className="inline-flex items-center gap-2 font-mono text-[9px] tracking-[0.1em] text-slate-600 uppercase">
-                                    <span
-                                        aria-hidden="true"
-                                        className={cn('size-1.5', statusTone[employee.tone])}
-                                    />
+                                <StatusBadge
+                                    variant={employee.tone === 'emerald' ? 'success' : 'pending'}
+                                >
                                     {employee.status}
-                                </span>
+                                </StatusBadge>
                             </td>
                         </tr>
                     ))}
@@ -163,7 +168,7 @@ export function EmployeeForm() {
                 <span className="text-slate-500">Baru</span>
             </div>
 
-            <div aria-hidden="true" className="mt-5 space-y-4">
+            <div aria-hidden="true" className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
                     <span className="font-mono text-[9px] tracking-[0.12em] text-slate-500 uppercase">
                         Nama lengkap
@@ -230,35 +235,9 @@ export function ApplicationTimeline() {
                 <span className="text-slate-500">#A-014</span>
             </div>
 
-            <ol className="mt-5 space-y-4 border-l border-slate-300 pl-4">
-                {timeline.map((item) => (
-                    <li key={item.label} className="relative">
-                        <span
-                            aria-hidden="true"
-                            className={cn(
-                                'absolute top-1 -left-[21px] size-2.5',
-                                item.state === 'done' && 'bg-emerald-500',
-                                item.state === 'current' && 'bg-accent',
-                                item.state === 'pending' && 'border border-slate-400 bg-white',
-                            )}
-                        />
-                        <p
-                            className={cn(
-                                'text-[13px] font-medium',
-                                item.state === 'pending' ? 'text-slate-500' : 'text-slate-900',
-                            )}
-                        >
-                            {item.label}
-                        </p>
-                        <p className="mt-0.5 font-mono text-[9px] tracking-[0.1em] text-slate-500 uppercase">
-                            {item.time}
-                        </p>
-                        {item.note ? (
-                            <p className="mt-1 text-[11px] leading-5 text-slate-500">{item.note}</p>
-                        ) : null}
-                    </li>
-                ))}
-            </ol>
+            <div className="mt-6">
+                <ProcessTimeline items={timeline} />
+            </div>
 
             <figcaption className="mt-4 text-[11px] leading-5 text-slate-500">
                 Contoh tampilan. Data fiktif.

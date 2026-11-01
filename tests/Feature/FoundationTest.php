@@ -18,4 +18,16 @@ class FoundationTest extends TestCase
                 ->missing('applicants')
                 ->missing('database'));
     }
+
+    public function test_lab_page_renders_the_imported_component_specimen(): void
+    {
+        $this->withoutVite()
+            ->get('/lab')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('lab', false)
+                ->missing('employees')
+                ->missing('applicants')
+                ->missing('database'));
+    }
 }

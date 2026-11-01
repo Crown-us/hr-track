@@ -1,321 +1,438 @@
 import { Head } from '@inertiajs/react';
-import { ArrowDown, ArrowUp, ArrowUpRight } from 'lucide-react';
-import {
-    ApplicationTimeline,
-    EmployeeForm,
-    EmployeeTable,
-    PipelinePlate,
-} from '../components/specimens';
+import { ArrowRight, ArrowUpRight, ChevronDown, Check } from 'lucide-react';
+import { useState } from 'react';
+import { ApplicationTimeline, EmployeeTable } from '../components/specimens';
+import InkOrbitFeatures from '../components/ui/ink-orbit-features';
+import { StatusBadge, StatusPalette } from '../components/ui/status-badge';
 
-const indexItems = [
+const modules = [
     {
-        number: '01',
-        title: 'Data pegawai',
-        description: 'Departemen, jabatan, status, dan arsip dalam satu catatan.',
-        metric: '128 aktif',
-        href: '#tabel-pegawai',
+        name: 'Pegawai',
+        title: 'Kenali tim Anda.',
+        text: 'Direktori pegawai dengan departemen, jabatan, dan status kerja. Informasi dasar yang tertata menjadi titik awal administrasi sehari-hari.',
+        items: ['Profil & kontak kerja', 'Departemen & jabatan', 'Status kepegawaian'],
     },
     {
-        number: '02',
-        title: 'Rekrutmen',
-        description: 'Lowongan, kandidat, dan pipeline yang bisa diaudit.',
-        metric: '6 dibuka',
-        href: '#pipeline',
+        name: 'Rekrutmen',
+        title: 'Ikuti setiap kandidat.',
+        text: 'Lowongan, berkas lamaran, dan wawancara berada dalam satu perjalanan. Baca tahap terakhir sebelum menentukan tindak lanjut.',
+        items: [
+            'Lowongan & berkas CV',
+            'Screening hingga penerimaan',
+            'Jadwal & undangan wawancara',
+        ],
     },
     {
-        number: '03',
-        title: 'Wawancara',
-        description: 'Jadwal, pewawancara, catatan, dan undangan PDF.',
-        metric: '5 minggu ini',
-        href: '#riwayat',
+        name: 'Pelatihan',
+        title: 'Beri ruang bertumbuh.',
+        text: 'Rencanakan jadwal dan materi belajar, lalu bandingkan hasil pre-test serta post-test untuk membaca perkembangan peserta.',
+        items: ['Jadwal & materi PDF', 'Daftar peserta', 'Evaluasi pre-test & post-test'],
     },
     {
-        number: '04',
-        title: 'Akses',
-        description: 'Admin, HR staff, viewer. Diperiksa di server, bukan di tombol.',
-        metric: '3 peran',
-        href: '#status',
+        name: 'Hubungan kerja',
+        title: 'Jaga catatan kerja.',
+        text: 'Susun masa berlaku kontrak dan dokumen hubungan kerja. Riwayat yang jelas membantu HR menyiapkan tindak lanjut pada waktunya.',
+        items: ['Kontrak PKWT & PKWTT', 'Pengingat masa kontrak', 'Catatan pelanggaran & SP'],
+    },
+    {
+        name: 'Laporan',
+        title: 'Baca gambaran utuh.',
+        text: 'Rangkum perjalanan kandidat, pelatihan, dan administrasi pegawai untuk mendukung evaluasi tim HR.',
+        items: ['Rekap rekrutmen', 'Riwayat pelatihan', 'Ekspor Excel & PDF'],
     },
 ];
-
-const completed = [
-    'Laravel 13 + Inertia 3 + React 19',
-    'MySQL development dan test terpisah',
-    'Halaman awal dan quality gate',
-    '5 tes / 18 assertions',
-];
-
-const next = [
-    'Autentikasi dan role',
-    'CRUD pegawai dan lowongan',
-    'Pipeline kandidat (ATS)',
-    'Wawancara, PDF, dan CV privat',
+const workflow = [
+    {
+        title: 'Catat kebutuhannya.',
+        text: 'Mulai dari data pegawai, kebutuhan posisi, atau rencana pelatihan. Setiap proses memiliki berkasnya sendiri.',
+    },
+    {
+        title: 'Ikuti perjalanannya.',
+        text: 'Status dan riwayat menyimpan konteks. Ketahui apa yang sudah selesai dan apa yang perlu dikerjakan berikutnya.',
+    },
+    {
+        title: 'Siapkan tindak lanjut.',
+        text: 'Gunakan jadwal dan catatan sebagai pegangan saat mengatur wawancara, evaluasi, atau pembaruan kontrak.',
+    },
 ];
 
 export default function Welcome() {
+    const [selected, setSelected] = useState(1);
+    const current = modules[selected];
     return (
-        <>
-            <Head title="Selamat datang">
+        <div className="taste-page northstar-page">
+            <Head title="HR yang lebih tertata">
                 <meta
                     name="description"
-                    content="HRIS Lite — prototipe pengelolaan pegawai, rekrutmen, dan wawancara untuk portofolio independen."
+                    content="HRIS Lite menghubungkan informasi pegawai, perjalanan kandidat, dan administrasi HR. Kenali fitur dan cara kerjanya."
                 />
             </Head>
-
-            <a
-                href="#konten"
-                className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:bg-slate-900 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
-            >
+            <a href="#konten" className="taste-skip">
                 Lewati ke konten
             </a>
-
-            <header data-od-id="masthead" className="border-b border-slate-300">
-                <div className="mx-auto flex max-w-[1280px] items-baseline justify-between gap-4 px-6 py-5 sm:px-10">
-                    <a
-                        href="/"
-                        className="rounded-sm font-display text-[22px] leading-none tracking-tight text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slate-900"
-                    >
-                        HRIS Lite<span className="text-accent">.</span>
+            <div className="northstar-header">
+                <header className="taste-nav taste-wrap" data-od-id="masthead">
+                    <a href="/" className="taste-wordmark" aria-label="HRIS Lite, beranda">
+                        HRIS<span>Lite</span>
+                        <span className="taste-mark" aria-hidden="true">
+                            ↗
+                        </span>
                     </a>
-                    <div className="flex items-baseline gap-5 font-mono text-[10px] tracking-[0.18em] text-slate-500 uppercase">
-                        <span className="hidden sm:inline">Berkas 01 / Prototipe / 2026</span>
-                        <a
-                            href="#indeks"
-                            className="rounded-sm text-slate-900 underline decoration-slate-300 underline-offset-4 transition hover:decoration-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
-                        >
-                            Indeks ↓
+                    <nav aria-label="Navigasi utama">
+                        <a href="#fitur">Fitur</a>
+                        <a href="#cara-kerja">Cara kerja</a>
+                        <a href="#tampilan">Tampilan</a>
+                    </nav>
+                    <a href="#akses" className="taste-nav-access">
+                        Akses akun <ArrowUpRight size={16} aria-hidden="true" />
+                    </a>
+                </header>
+            </div>
+            <main id="konten">
+                <section className="taste-hero taste-wrap" data-od-id="hero">
+                    <h1>
+                        Kelola orangnya.
+                        <br />
+                        <span>Rapikan prosesnya.</span>
+                    </h1>
+                    <p>
+                        Informasi pegawai, rekrutmen, dan administrasi HR dalam satu ruang kerja.
+                        Ikuti setiap berkas, pahami setiap langkah.
+                    </p>
+                    <div className="northstar-actions">
+                        <a className="taste-button" href="#fitur">
+                            Jelajahi fitur <ArrowRight size={17} aria-hidden="true" />
+                        </a>
+                        <a className="northstar-secondary" href="#tampilan">
+                            Lihat tampilan <ArrowUpRight size={17} aria-hidden="true" />
                         </a>
                     </div>
-                </div>
-            </header>
-
-            <main id="konten">
-                <section data-od-id="hero" className="mx-auto max-w-[1280px] px-6 sm:px-10">
-                    <div className="grid border-b border-slate-300 py-14 lg:grid-cols-12 lg:gap-0 lg:py-20">
-                        <div className="lg:col-span-7 lg:pr-12 xl:pr-20">
-                            <p className="flex items-center gap-3 font-mono text-[10px] tracking-[0.22em] text-slate-500 uppercase">
-                                <span aria-hidden="true" className="size-1.5 bg-emerald-500" />
-                                Berkas 01 — Fondasi
-                            </p>
-
-                            <h1 className="mt-8 font-display text-[clamp(2.9rem,6vw,5.4rem)] leading-[0.92] tracking-[-0.045em] text-balance text-slate-900">
-                                Setiap orang punya <em className="text-accent italic">berkas</em>.
-                                <br />
-                                Setiap berkas punya alur.
-                            </h1>
-
-                            <p className="mt-8 max-w-xl text-[15px] leading-7 text-pretty text-slate-600">
-                                HRIS Lite menyatukan data pegawai, pipeline kandidat, dan jadwal
-                                wawancara dalam satu catatan yang bisa ditelusuri. Dibangun sebagai
-                                prototipe portofolio, bukan sistem production.
-                            </p>
-
-                            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-                                <a
-                                    href="#indeks"
-                                    className="group inline-flex items-center gap-3 border-b border-slate-900 pb-1.5 text-sm font-semibold text-slate-900 transition hover:border-slate-950 hover:text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slate-900 active:translate-y-px"
+                </section>{' '}
+                <section
+                    className="taste-bento taste-wrap"
+                    aria-label="Alur informasi HR"
+                    data-od-id="animated-bento"
+                >
+                    <InkOrbitFeatures
+                        theme="light"
+                        className="hris-bento taste-ink"
+                        brand="HRIS Lite"
+                        titleAs="h2"
+                        tag=""
+                        title={'Setiap berkas punya alur.'}
+                        collaboration={{
+                            title: 'Satu catatan, satu konteks',
+                            description:
+                                'Informasi kandidat dan catatan tim mengikuti perjalanan berkas, dari awal seleksi hingga evaluasi.',
+                        }}
+                        reports={{
+                            title: 'Rangkuman yang terhubung',
+                            description:
+                                'Status dan riwayat memberi gambaran proses tanpa perlu menyusun kembali setiap catatan.',
+                        }}
+                        integrations={{
+                            title: 'Dokumen mengikuti proses',
+                            description:
+                                'CV, materi pelatihan, dan kontrak berada dalam konteks pekerjaan yang membutuhkannya.',
+                            tools: ['CV', 'Materi', 'Kontrak', 'PDF'],
+                        }}
+                        insights={{
+                            title: 'Baca perkembangannya',
+                            description:
+                                'Contoh visual ringkasan aktivitas. Angka dan proyeksi pada diagram ini bersifat ilustratif.',
+                            values: [22, 26, 24, 31, 29, 36, 34, 41, 39, 47, 52, 58],
+                            forecastFrom: 8,
+                        }}
+                    />
+                    <p className="taste-caption">
+                        Ilustrasi alur informasi. Fitur aplikasi sedang disiapkan.
+                    </p>
+                </section>
+                <section id="fitur" className="taste-modules taste-wrap" data-od-id="features">
+                    <div className="taste-section-intro">
+                        <h2>
+                            Satu ruang.
+                            <br />
+                            Banyak urusan.
+                        </h2>
+                        <p>
+                            Dari mengenal orang hingga menjaga administrasi. Pilih kebutuhan HR
+                            untuk melihat cakupan yang sedang disiapkan.
+                        </p>
+                    </div>
+                    <div className="taste-module-layout">
+                        <div className="taste-module-choices" aria-label="Pilih kebutuhan HR">
+                            {modules.map((module, index) => (
+                                <button
+                                    key={module.name}
+                                    type="button"
+                                    aria-pressed={selected === index}
+                                    aria-controls="module-detail"
+                                    onClick={() => setSelected(index)}
+                                    className={selected === index ? 'is-active' : ''}
                                 >
-                                    Telusuri isi berkas
-                                    <ArrowDown
-                                        size={15}
-                                        aria-hidden="true"
-                                        className="transition group-hover:translate-y-0.5"
-                                    />
-                                </a>
-                                <a
-                                    href="#status"
-                                    className="rounded-sm text-sm text-slate-600 underline decoration-slate-300 underline-offset-4 transition hover:text-slate-900 hover:decoration-slate-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slate-900"
-                                >
-                                    Status pengembangan
+                                    {module.name}
+                                    <ArrowUpRight size={20} aria-hidden="true" />
+                                </button>
+                            ))}
+                        </div>
+                        <div
+                            id="module-detail"
+                            className="taste-module-detail"
+                            aria-live="polite"
+                            aria-atomic="true"
+                        >
+                            <div key={current.name} className="taste-detail-enter">
+                                <h3>{current.title}</h3>
+                                <p>{current.text}</p>
+                                <ul>
+                                    {current.items.map((item) => (
+                                        <li key={item}>
+                                            <Check size={17} aria-hidden="true" />
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <div className="northstar-module-preview" data-ui="module-preview">
+                                    <div className="northstar-preview-bar">
+                                        <span>HRIS Lite / {current.name}</span>
+                                        <span>Data contoh</span>
+                                    </div>
+                                    {selected === 1 ? (
+                                        <div className="northstar-pipeline">
+                                            {[
+                                                {
+                                                    name: 'Screening',
+                                                    person: 'Nadia Putri',
+                                                    role: 'People Operations',
+                                                    tone: 'review' as const,
+                                                },
+                                                {
+                                                    name: 'Interview',
+                                                    person: 'Raka Pradana',
+                                                    role: 'Frontend Developer',
+                                                    tone: 'progress' as const,
+                                                },
+                                                {
+                                                    name: 'Offering',
+                                                    person: 'Sari Wulandari',
+                                                    role: 'Finance Staff',
+                                                    tone: 'pending' as const,
+                                                },
+                                            ].map((item) => (
+                                                <div key={item.name}>
+                                                    <p className="northstar-column-name">
+                                                        {item.name}
+                                                    </p>
+                                                    <article>
+                                                        <span
+                                                            className="northstar-avatar"
+                                                            aria-hidden="true"
+                                                        >
+                                                            {item.person
+                                                                .split(' ')
+                                                                .map((n) => n[0])
+                                                                .join('')}
+                                                        </span>
+                                                        <h4>{item.person}</h4>
+                                                        <p>{item.role}</p>
+                                                        <StatusBadge variant={item.tone} />
+                                                    </article>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="northstar-records">
+                                            {(selected === 0
+                                                ? [
+                                                      [
+                                                          'Ayu Prameswari',
+                                                          'People Operations',
+                                                          'Aktif',
+                                                      ],
+                                                      ['Bima Saputra', 'Engineering', 'Aktif'],
+                                                      ['Citra Halim', 'Finance', 'Cuti'],
+                                                  ]
+                                                : selected === 2
+                                                  ? [
+                                                        [
+                                                            'Orientasi pegawai',
+                                                            '12 November · Ruang pelatihan',
+                                                            'Terjadwal',
+                                                        ],
+                                                        [
+                                                            'Komunikasi kerja',
+                                                            '18 November · Online',
+                                                            'Terjadwal',
+                                                        ],
+                                                        [
+                                                            'Evaluasi pelatihan',
+                                                            'Pre-test & post-test',
+                                                            'Disiapkan',
+                                                        ],
+                                                    ]
+                                                  : selected === 3
+                                                    ? [
+                                                          [
+                                                              'Kontrak kerja',
+                                                              'PKWT · Engineering',
+                                                              'Ditinjau',
+                                                          ],
+                                                          [
+                                                              'Pembaruan kontrak',
+                                                              'Berakhir 28 November',
+                                                              'Tindak lanjut',
+                                                          ],
+                                                          [
+                                                              'Dokumen hubungan kerja',
+                                                              'Arsip administrasi',
+                                                              'Tersimpan',
+                                                          ],
+                                                      ]
+                                                    : [
+                                                          [
+                                                              'Rekrutmen',
+                                                              'Rekap kandidat per tahap',
+                                                              'PDF',
+                                                          ],
+                                                          [
+                                                              'Pelatihan',
+                                                              'Peserta dan hasil evaluasi',
+                                                              'Excel',
+                                                          ],
+                                                          [
+                                                              'Administrasi pegawai',
+                                                              'Ringkasan periode berjalan',
+                                                              'PDF',
+                                                          ],
+                                                      ]
+                                            ).map(([name, detail, status]) => (
+                                                <div key={name}>
+                                                    <div>
+                                                        <strong>{name}</strong>
+                                                        <p>{detail}</p>
+                                                    </div>
+                                                    <span>{status}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <a href="#tampilan">
+                                    Lihat cuplikan lainnya{' '}
+                                    <ArrowRight size={17} aria-hidden="true" />
                                 </a>
                             </div>
-
-                            <p className="mt-10 font-mono text-[10px] tracking-[0.18em] text-slate-500 uppercase">
-                                Prototipe independen · Data fiktif · Bahasa Indonesia
-                            </p>
-                        </div>
-
-                        <div
-                            id="pipeline"
-                            className="mt-12 scroll-mt-8 lg:col-span-5 lg:mt-0 lg:border-l lg:border-slate-300 lg:pl-12"
-                        >
-                            <PipelinePlate />
                         </div>
                     </div>
+                    <noscript>
+                        <p>
+                            Aktifkan JavaScript untuk memilih cakupan fitur. HRIS Lite mencakup
+                            pegawai, rekrutmen, pelatihan, hubungan kerja, dan laporan.
+                        </p>
+                    </noscript>
                 </section>
-
-                <section
-                    id="indeks"
-                    data-od-id="index"
-                    className="mx-auto max-w-[1280px] scroll-mt-8 px-6 sm:px-10"
-                >
-                    <div className="flex items-baseline justify-between border-b border-slate-300 py-8">
-                        <p className="font-mono text-[10px] tracking-[0.22em] text-slate-500 uppercase">
-                            Indeks isi
-                        </p>
-                        <p className="font-mono text-[10px] tracking-[0.18em] text-slate-500 uppercase">
-                            04 bagian · angka contoh
-                        </p>
-                    </div>
-
-                    <ol className="divide-y divide-slate-300 border-b border-slate-300">
-                        {indexItems.map((item) => (
-                            <li key={item.number}>
-                                <a
-                                    href={item.href}
-                                    className="group grid grid-cols-[2.25rem_1fr] items-baseline gap-x-4 gap-y-2 py-6 transition-colors hover:bg-white focus-visible:bg-white focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-slate-900 active:translate-y-px sm:grid-cols-12 sm:gap-x-6 sm:px-2"
-                                >
-                                    <span className="font-display text-xl text-slate-500 tabular-nums sm:col-span-1">
-                                        {item.number}
-                                    </span>
-                                    <span className="font-display text-xl tracking-tight text-slate-900 transition group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4 sm:col-span-4">
-                                        {item.title}
-                                    </span>
-                                    <span className="col-span-2 text-sm leading-6 text-slate-600 sm:col-span-5">
-                                        {item.description}
-                                    </span>
-                                    <span className="col-span-2 flex items-center gap-2 font-mono text-[10px] tracking-[0.14em] text-slate-500 uppercase sm:col-span-2 sm:justify-end">
-                                        {item.metric}
-                                        <ArrowUpRight
-                                            size={12}
-                                            aria-hidden="true"
-                                            className="opacity-0 transition group-hover:opacity-100"
-                                        />
-                                    </span>
-                                </a>
-                            </li>
-                        ))}
-                    </ol>
-                </section>
-
-                <section
-                    id="spesimen"
-                    data-od-id="specimens"
-                    className="mx-auto max-w-[1280px] scroll-mt-8 px-6 sm:px-10"
-                >
-                    <div className="border-b border-slate-300 py-10">
-                        <p className="font-mono text-[10px] tracking-[0.22em] text-slate-500 uppercase">
-                            Spesimen antarmuka
-                        </p>
-                        <h2 className="mt-4 max-w-2xl font-display text-3xl tracking-tight text-balance text-slate-900 sm:text-4xl">
-                            Potongan dari sistem yang sedang dibangun.
+                <section id="cara-kerja" className="taste-workflow" data-od-id="workflow">
+                    <div className="taste-wrap taste-workflow-inner">
+                        <h2>
+                            Setiap langkah,
+                            <br />
+                            jelas arahnya.
                         </h2>
+                        <div className="taste-workflow-list">
+                            {workflow.map((step) => (
+                                <article key={step.title}>
+                                    <h3>{step.title}</h3>
+                                    <p>{step.text}</p>
+                                </article>
+                            ))}
+                        </div>
                     </div>
-
-                    <div className="grid gap-12 py-12 md:grid-cols-2 lg:grid-cols-12 lg:gap-10">
-                        <div id="tabel-pegawai" className="scroll-mt-8 md:col-span-2 lg:col-span-6">
+                </section>
+                <section
+                    id="tampilan"
+                    className="taste-preview taste-wrap"
+                    data-od-id="product-preview"
+                >
+                    <div className="taste-section-intro">
+                        <h2>
+                            Kenali ruang
+                            <br />
+                            kerjanya.
+                        </h2>
+                        <p>
+                            Tabel yang mudah dipindai, status yang mudah dikenali, dan riwayat yang
+                            bisa diikuti. Seluruh informasi berikut adalah data contoh fiktif.
+                        </p>
+                    </div>
+                    <div className="taste-preview-layout">
+                        <div className="taste-directory" data-ui="employee-directory">
                             <EmployeeTable />
                         </div>
-                        <div id="formulir" className="scroll-mt-8 lg:col-span-3">
-                            <EmployeeForm />
-                        </div>
-                        <div id="riwayat" className="scroll-mt-8 lg:col-span-3">
+                        <div className="taste-history" data-ui="candidate-timeline">
                             <ApplicationTimeline />
+                        </div>
+                        <div className="taste-status" data-ui="process-status">
+                            <h3>Setiap proses punya penanda.</h3>
+                            <p>Status untuk lamaran dan dokumen.</p>
+                            <StatusPalette />
+                        </div>
+                        <div className="taste-preview-note">
+                            <p>
+                                Sebuah nama di direktori.
+                                <br />
+                                Sebuah perjalanan di baliknya.
+                            </p>
+                            <a href="#cara-kerja">
+                                Pahami cara kerjanya <ArrowRight size={18} aria-hidden="true" />
+                            </a>
                         </div>
                     </div>
                 </section>
-
-                <section
-                    id="status"
-                    data-od-id="status"
-                    className="scroll-mt-8 border-y border-slate-300 bg-white"
-                >
-                    <div className="mx-auto max-w-[1280px] px-6 py-16 sm:px-10">
-                        <div className="grid gap-12 lg:grid-cols-12">
-                            <div className="lg:col-span-6">
-                                <p className="font-mono text-[10px] tracking-[0.22em] text-slate-500 uppercase">
-                                    Status berkas
-                                </p>
-                                <h2 className="mt-4 font-display text-4xl tracking-tight text-balance text-slate-900 sm:text-5xl">
-                                    Fondasi selesai.
-                                    <br />
-                                    Isi menyusul.
-                                </h2>
-                                <p className="mt-6 max-w-lg text-sm leading-7 text-slate-600">
-                                    Phase 1 menutup scaffold Laravel, database development dan test
-                                    yang terpisah, halaman awal, serta quality gate. Phase 2–5
-                                    mengisi autentikasi, role, data pegawai, ATS, wawancara, PDF,
-                                    dan CV privat.
-                                </p>
-                                <p className="mt-8 inline-block -rotate-2 border-2 border-emerald-600 px-4 py-2 font-mono text-[10px] tracking-[0.2em] text-emerald-700 uppercase">
-                                    Fase 01 · Selesai · 01 Nov 2026
-                                </p>
-                            </div>
-
-                            <div className="grid gap-8 sm:grid-cols-2 lg:col-span-6">
-                                <div>
-                                    <h3 className="border-b border-slate-900 pb-2 font-mono text-[10px] tracking-[0.18em] text-slate-900 uppercase">
-                                        Sudah ada
-                                    </h3>
-                                    <ul className="mt-4 space-y-3">
-                                        {completed.map((item) => (
-                                            <li
-                                                key={item}
-                                                className="flex gap-3 text-sm leading-6 text-slate-600"
-                                            >
-                                                <span
-                                                    aria-hidden="true"
-                                                    className="mt-2 size-1.5 shrink-0 bg-emerald-500"
-                                                />
-                                                {item}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                <div>
-                                    <h3 className="border-b border-slate-300 pb-2 font-mono text-[10px] tracking-[0.18em] text-slate-500 uppercase">
-                                        Berikutnya
-                                    </h3>
-                                    <ul className="mt-4 space-y-3">
-                                        {next.map((item) => (
-                                            <li
-                                                key={item}
-                                                className="flex gap-3 text-sm leading-6 text-slate-500"
-                                            >
-                                                <span
-                                                    aria-hidden="true"
-                                                    className="mt-2 size-1.5 shrink-0 border border-slate-400"
-                                                />
-                                                {item}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
+                <section id="akses" className="taste-access" data-od-id="access">
+                    <div className="taste-wrap taste-access-inner">
+                        <div>
+                            <h2>
+                                Mulai dengan
+                                <br />
+                                akses yang tepat.
+                            </h2>
+                            <p>
+                                Ruang kerja HRIS Lite ditujukan bagi tim yang memiliki akun dari
+                                pengelola. Akses masuk sedang disiapkan.
+                            </p>
                         </div>
+                        <details>
+                            <summary>
+                                Bagaimana mendapatkan akses?{' '}
+                                <ChevronDown size={20} aria-hidden="true" />
+                            </summary>
+                            <p>
+                                Akun akan diberikan oleh pengelola saat aplikasi siap digunakan.
+                                Pendaftaran mandiri belum tersedia. Anda tetap dapat menjelajahi
+                                cakupan fitur dan contoh tampilan di halaman ini.
+                            </p>
+                        </details>
                     </div>
                 </section>
             </main>
-
-            <footer data-od-id="colophon" className="mx-auto max-w-[1280px] px-6 sm:px-10">
-                <div className="grid gap-8 border-b border-slate-300 py-10 sm:grid-cols-2">
-                    <div>
-                        <p className="max-w-xs text-sm leading-6 text-slate-600">
-                            Prototipe portofolio independen. Tidak untuk production. Seluruh data
-                            demo fiktif.
-                        </p>
-                        <a
-                            href="#konten"
-                            className="mt-4 inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] text-slate-900 uppercase underline decoration-slate-300 underline-offset-4 transition hover:decoration-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
-                        >
-                            Kembali ke atas
-                            <ArrowUp size={12} aria-hidden="true" />
-                        </a>
-                    </div>
-                    <div className="font-mono text-[10px] leading-5 tracking-[0.16em] text-slate-500 uppercase sm:text-right">
-                        <p>Laravel 13 · Inertia 3 · React 19</p>
-                        <p>MySQL 8.4 · PHP 8.3.36</p>
-                        <p>2026</p>
-                    </div>
-                </div>
-
-                <div aria-hidden="true" className="overflow-hidden pt-8 pb-4">
-                    <p className="font-display text-[clamp(3.5rem,17vw,15rem)] leading-[0.75] tracking-[-0.06em] whitespace-nowrap text-slate-900">
-                        HRIS Lite
+            <footer className="taste-footer taste-wrap" data-od-id="footer">
+                <div className="taste-footer-top">
+                    <p>
+                        Informasi terhubung.
+                        <br />
+                        Tim bertumbuh.
                     </p>
+                    <a href="#konten">Kembali ke atas ↑</a>
+                </div>
+                <a href="/" className="taste-footer-name" aria-label="HRIS Lite, beranda">
+                    hris lite<span aria-hidden="true">↗</span>
+                </a>
+                <div className="taste-footer-bottom">
+                    <p>Pengelolaan sumber daya manusia</p>
+                    <p>Dirancang untuk pekerjaan HR sehari-hari.</p>
                 </div>
             </footer>
-        </>
+        </div>
     );
 }
