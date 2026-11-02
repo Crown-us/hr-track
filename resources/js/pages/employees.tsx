@@ -648,6 +648,14 @@ export default function Employees(props: EmployeeProps) {
                                 ))}
                             </dl>
                             <div className="ep-detail-actions">
+                                {['admin', 'hr_staff'].includes(props.auth.user.role) && (
+                                    <Link
+                                        className="ep-secondary"
+                                        href={`/attendance/employees/${employee.id}`}
+                                    >
+                                        Kalender kehadiran
+                                    </Link>
+                                )}
                                 {can.create && !employee.archived_at && (
                                     <Link
                                         className="ep-primary"

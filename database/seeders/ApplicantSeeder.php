@@ -13,11 +13,16 @@ class ApplicantSeeder extends Seeder
         $lastNames = ['Putri', 'Ramadhan', 'Saputra', 'Wijaya', 'Kusuma', 'Lestari', 'Hidayat', 'Setiawan', 'Astuti', 'Prabowo'];
 
         foreach ($firstNames as $index => $firstName) {
-            Applicant::create([
-                'full_name' => $firstName.' '.$lastNames[$index % count($lastNames)],
-                'email' => strtolower(str_replace(' ', '.', $firstName.$lastNames[$index % count($lastNames)]).'@example.test'),
-                'phone' => '081'.random_int(1000000, 9999999),
-            ]);
+            $lastName = $lastNames[$index % count($lastNames)];
+            $email = strtolower($firstName.$lastName).'@example.test';
+
+            Applicant::firstOrCreate(
+                ['email' => $email],
+                [
+                    'full_name' => $firstName.' '.$lastName,
+                    'phone' => '081'.str_pad((string) (1000000 + $index * 7919), 7, '0', STR_PAD_LEFT),
+                ]
+            );
         }
     }
 }

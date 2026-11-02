@@ -11,7 +11,7 @@ class PrivateAuthResponse
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
-        if ($request->is('accounts', 'accounts/*', 'me', 'team', 'team/*', 'reset-password', 'reset-password/*')) {
+        if ($request->is('attendance', 'attendance/*', 'leave', 'leave/*', 'accounts', 'accounts/*', 'me', 'team', 'team/*', 'reset-password', 'reset-password/*')) {
             $response->headers->set('Cache-Control', 'no-store, private');
             $response->headers->set('Referrer-Policy', 'no-referrer');
         }

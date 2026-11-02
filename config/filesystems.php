@@ -29,6 +29,7 @@ return [
     */
 
     'disks' => [
+        'leave_documents' => ['driver' => 'local', 'root' => storage_path('app/private/leave-documents'), 'serve' => false, 'visibility' => 'private', 'throw' => true],
         'discipline_documents' => ['driver' => 'local', 'root' => storage_path('app/private/discipline-documents'), 'serve' => false, 'visibility' => 'private', 'throw' => true],
         'contract_documents' => ['driver' => 'local', 'root' => storage_path('app/private/contract-documents'), 'serve' => false, 'visibility' => 'private', 'throw' => true],
         'training_materials' => ['driver' => 'local', 'root' => storage_path('app/private/training-materials'), 'serve' => false, 'visibility' => 'private', 'throw' => true],

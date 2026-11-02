@@ -1,56 +1,101 @@
-# Walkthrough Wawancara 3 Menit — HRIS Lite
+# Walkthrough Wawancara — HRIS Lite
 
-Dokumen ini panduan presentasi untuk wawancara magang. Semua data yang ditampilkan fiktif (domain `example.test`, nama dan perusahaan pura-pura). Aplikasi dijalankan lokal pada `http://127.0.0.1:8000` dengan database terpisah untuk development dan testing.
+Panduan presentasi singkat (3 menit) dan demo lanjutan (5–7 menit). Semua data yang ditampilkan fiktif: domain `example.test`, nama, perusahaan, dan berkas contoh. Aplikasi berjalan lokal di `http://127.0.0.1:8000` dengan database development terpisah dari database testing.
 
-## 0:00 — Konteks proyek
-- HRIS Lite adalah protopipe independen untuk demonstrasi portofolio, bukan sistem perusahaan asli.
-- Stack: Laravel 13 + Inertia 3 + React 19 + TypeScript + Tailwind 4 + Vite + MySQL.
+## Persiapan
+
+```powershell
+.\scripts\start-database.ps1
+php artisan migrate
+php artisan db:seed --force
+npm run build
+php artisan serve --host=127.0.0.1 --port=8000
+```
+
+Seeder demo hanya berjalan pada environment `local`/`testing`, idempotent, dan membuat data contoh lengkap. Akun demo:
+
+| Role | Email | Kata sandi |
+|---|---|---|
+| Admin | `admin@example.test` | `DemoHris123!` |
+| Staf HR | `hr@example.test` | `DemoHris123!` |
+| Pembaca | `viewer@example.test` | `DemoHris123!` |
+| Atasan | `atasan@example.test` | `DemoHris123!` |
+| Pegawai | `pegawai@example.test` | `DemoHris123!` |
+
+Kata sandi dapat diganti lewat `DEMO_PASSWORD` sebelum seeding. Seeding menyetel ulang kata sandi kelima akun demo. Akun ini hanya untuk local/testing, bukan production.
+
+## Alur 3 menit
+
+### 0:00 — Konteks
+
+- HRIS Lite adalah prototipe portofolio independen, bukan sistem perusahaan asli.
+- Stack: Laravel 13, Inertia 3, React 19, TypeScript, Tailwind 4, Vite, MySQL.
 - Bahasa antarmuka Indonesia; tanggal ditampilkan WIB, disimpan UTC.
-- Role: `admin`, `hr_staff`, `viewer`. Akses ditetapkan server-side melalui policy, tidak hanya disembunyikan dari UI.
+- Lima role: `admin`, `hr_staff`, `viewer`, `employee`, `supervisor`. Otorisasi ditegakkan server-side melalui gate/policy, bukan hanya menyembunyikan tombol.
 
-Buka halaman awal, jelaskan scope MVP: manajemen pegawai, lowongan, pelamar/lamaran, pipeline seleksi, interview, undangan PDF, dan CV privat.
+### 0:20 — Dashboard (`/hr`)
 
-## 0:20 — Dashboard (`/hr`)
-- Masuk sebagai `admin` atau `hr_staff`.
-- Tampilkan kartu ringkasan: jumlah pegawai aktif, lowongan terbuka, jumlah pelamar unik, jumlah lamaran per tahap seleksi.
-- Jelaskan angka berasal dari query database aktual (tidak angka palsu), soft-deleted tidak terhitung.
-- Klik pegawai terbaru atau lowongan terbaru untuk membuka detail.
+- Tunjukkan kartu pegawai, lowongan aktif, pelamar, tahap interview, dan **wawancara mendatang** yang diambil dari tabel `interviews`.
+- Tunjukkan pengingat PKWT 30 hari dan kontrak yang sudah berakhir.
+- Buka pipeline kandidat dan lamaran terbaru.
 
-## 0:45 — CRUD Pegawai (`/employees`)
-- Daftar pegawai: pencarian nama/nomor/email, filter departemen/status, sorting whitelist, paginasi 15.
-- Klik "Tambah Pegawai", isi formulir, simpan. Tunjukkan validasi server-side (nomor dan email unik, jabatan harus milik departemen yang sama).
-- Buka detail pegawai, lihat riwayat event (arsip/restore) dengan actor dan waktu.
-- Akses tab Arsip (hanya Admin): arsip dengan alasan 20–1000 karakter dan PDF pendukung maksimal 5 MiB, lalu pulihkan.
-- Jelaskan: Viewer hanya baca, tidak bisa arsip/restore.
+### 0:50 — Pegawai dan master data (`/employees`, `/departments`, `/positions`)
 
-## 1:15 — Lowongan dan Kandidat (`/vacancies`, `/applications`)
-- Buka `/vacancies`: daftar lowongan dengan pencarian, filter departemen/status, sorting, paginasi.
-- Buat lowongan baru (draft → dibuka), jelaskan tanggal buka/tutup dan status.
-- Buka `/applications` (Pipeline kandidat): board per tahap seleksi (Screening, Interview, Offering, Diterima, Ditolak) dan tabel daftar.
-- Catat lamaran baru: pilih profil pelamar atau buat profil baru, pilih lowongan yang sedang dibuka, isi tanggal dan catatan HR, unggah CV PDF opsional.
-- Jelaskan: satu profil dapat melamar banyak lowongan, tetapi pasangan profil/lowongan hanya sekali; duplikat ditolak database.
+- Cari/filter pegawai; buka detail dan riwayat audit.
+- Tunjukkan master departemen dan jabatan yang sudah bisa dikelola dari UI.
+- Jelaskan validasi: nomor/email unik, jabatan harus satu departemen, form lama ditolak lewat versi.
 
-## 1:40 — Transisi Status dan Audit (`/applications/{id}`)
-- Buka detail lamaran. Lihat timeline riwayat tahap dengan actor, waktu, dan catatan.
-- Ubah tahap secara manual: Screening → Interview → Offering → Diterima/Ditolak.
-- Coba loncat tahap (misal Screening langsung Diterima) — ditolak validasi server.
-- Coba ubah dengan formulir lama (version tidak cocok) — ditolak 409.
-- Jelaskan: riwayat append-only, actor diambil dari session (bukan payload), transaksi database untuk status + history agar tidak ada riwayat yang pecah setengah jalan.
+### 1:20 — Rekrutmen (`/vacancies`, `/applications`)
 
-## 2:10 — Interview, PDF undangan, dan CV (`/interviews`, CV)
-- Buka `/interviews`: daftar jadwal dengan tab Mendatang/Semua/Dibatalkan.
-- Jadwalkan interview untuk lamaran tahap Interview: waktu WIB (15–480 menit), lokasi atau tautan HTTPS, pewawancara.
-- Coba bentrok waktu pewawancara yang sama — ditolak; slot bersebelahan diperbolehkan.
-- Unduh undangan PDF dari kartu agenda. Tunjukkan berkas PDF privat (attachment, nosniff, no catatan internal, tidak dikirim email otomatis).
-- Buka detail lamaran, unggah versi CV baru. Tunjukkan validasi PDF maksimal 5 MiB, file disimpan disk privat, unduh hanya Admin/Staf HR dengan pemeriksaan kepemilikan.
+- Buat/tunjukkan lowongan draft dan published; jelaskan periode WIB.
+- Buka board pipeline: Screening → Interview → Offering → Diterima/Ditolak.
+- Tunjukkan detail lamaran: timeline riwayat, aktor, catatan, dan CV privat.
+- Jelaskan satu profil boleh melamar banyak lowongan, tetapi pasangan profil/lowongan unik.
 
-## 2:40 — Role, Tes, dan Batasan
-- Masuk sebagai `viewer`: tampilkan bahwa tombol tambah/edit/arsip tidak muncul dan mutasi ditolak server (403).
-- Masuk sebagai `admin`: seluruh aksi CRUD dan arsip tersedia.
-- Jalankan `php artisan test` — tunjukkan 75 tes / 1004 assertions lolos, mencakup guest redirect, role enforcement, validasi CRUD, transisi status, riwayat, akses dokumen privat, dan PDF.
-- Batasan yang jujur: belum ada manajemen master departemen/jabatan via UI (hanya seeder), belum edit/hapus profil pelamar via UI, belum email otomatis ke inbox (mailer log), belum dark mode, belum payroll/absensi, belum e-sign. Ini sengaja di luar scope MVP 5–7 hari.
+### 1:50 — Interview, PDF, dan CV (`/interviews`)
+
+- Buka agenda interview; tunjukkan tab mendatang/semua/dibatalkan.
+- Unduh undangan PDF; jelaskan berkas privat, tanpa catatan internal, dan tidak dikirim email otomatis.
+- Tunjukkan validasi bentrok jadwal dan pembatalan yang menyimpan riwayat.
+
+### 2:20 — Modul hubungan kerja
+
+Pilih satu atau dua sesuai waktu:
+
+- **Kontrak** (`/contracts`): PKWT/PKWTT, pengingat 30 hari, koreksi beralasan, PDF privat.
+- **Pelatihan** (`/trainings`): peserta, kehadiran, pre/post-test, ringkasan selisih poin.
+- **Pelanggaran/SP** (`/discipline`): SP1–3/konseling, tindak lanjut, audit.
+- **Laporan** (`/reports`): pratinjau dan ekspor XLSX/PDF untuk rekrutmen, pelatihan, kontrak, dan SP.
+
+### 2:40 — Role, keamanan, dan tes
+
+- Masuk sebagai `viewer`: tombol mutasi tidak muncul dan request mutasi ditolak 403.
+- Masuk sebagai `employee`/`supervisor`: portal `/me` dan `/team` hanya menampilkan data dasar; modul HR tetap ditolak.
+- Jalankan `php artisan test`: **125 tes / 1.811 assertions**, mencakup guest redirect, role enforcement, validasi, transisi status, audit, dokumen privat, PDF, dan rollback file.
+- Sebutkan batasan jujur: mailer lokal masih log, belum ada CAPTCHA/antivirus, belum ada payroll/absensi/cuti, belum ada 2FA/verifikasi email akun internal, dan UAT tim HR masih diperlukan.
+
+## Demo lanjutan 5–7 menit
+
+1. **Offering dan konversi** (`/applications/{id}/offering`): revisi penawaran, respons dengan bukti PDF, konversi kandidat diterima menjadi pegawai tanpa menimpa profil pelamar.
+2. **Manajemen akun** (`/accounts`): undangan sekali pakai, role/status, reset password, struktur atasan, dan audit.
+3. **Portal pegawai** (`/me`) dan **tim atasan** (`/team`): pembatasan data dasar dan penolakan akses lintas tim.
+4. **Pelatihan**: nilai 0 tetap valid, post-test memerlukan pre-test dan kehadiran, nilai dapat dikoreksi setelah sesi selesai.
+5. **Pelanggaran/SP**: koreksi wajib alasan dan versi; pembatalan administratif tidak menghapus audit.
+6. **Laporan**: filter maksimal 366 hari, batas ekspor 1.000 baris XLSX/200 baris PDF, tanpa data kontak/kasus privat.
+7. **Karier publik** (`/karier`): form tanpa akun, verifikasi email per lamaran, dan pipeline HR yang menunggu verifikasi.
+
+## Batasan yang perlu disebutkan
+
+- Tidak ada kredensial production bawaan; akun demo hanya dibuat di local/testing.
+- Email verifikasi/notifikasi memakai mailer `log`; inbox nyata memerlukan SMTP dan worker antrean.
+- Belum ada antivirus/sanitasi PDF; lampiran diperlakukan sebagai dokumen tidak tepercaya.
+- Profil pelamar belum bisa diedit/dihapus dari UI; lowongan ditutup, bukan dihapus.
+- Belum ada payroll, absensi, cuti/izin, e-sign, template surat resmi, atau 2FA.
+- Verifikasi browser dan UAT HR untuk modul baru masih perlu dilakukan sebelum klaim produksi.
 
 ## Catatan untuk pewawancara
-- Tidak ada kredensial bawaan; admin pertama dibuat via `php artisan hr:create-admin`, akun lain via `php artisan hr:invite`.
-- Semua file rahasia (`.env`, `.env.testing`, `.local/`, `.tools/`) diabaikan Git dan tidak di-commit.
-- Detail teknis lengkap: `docs/PLAN.md`, `docs/ERD.md`, `docs/PROGRESS.md`.
+
+- Detail teknis: [PLAN.md](PLAN.md), [ERD.md](ERD.md), [PROGRESS.md](PROGRESS.md).
+- Checklist rekrutmen: [RECRUITMENT-UAT.md](RECRUITMENT-UAT.md).
+- Daftar halaman screenshot: [SCREENSHOTS.md](SCREENSHOTS.md).
+- File rahasia `.env`, `.env.testing`, `.local/`, dan `.tools/` diabaikan Git.

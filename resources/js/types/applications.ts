@@ -24,6 +24,16 @@ export type RecruitmentSummary = {
     counts: Record<string, number>;
     recent: ApplicationRow[];
 };
+export type InterviewSummary = {
+    count: number;
+    next: {
+        id: number;
+        name: string;
+        job_title: string;
+        interviewer: string;
+        starts_at: string;
+    }[];
+};
 export type ApplicationProps = {
     auth: { user: HrUser };
     flash: { success: string | null };

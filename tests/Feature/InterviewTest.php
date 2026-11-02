@@ -62,6 +62,7 @@ class InterviewTest extends TestCase
         $interview = Interview::firstOrFail();
         $this->assertSame('02:00', $interview->starts_at->format('H:i'));
         $this->view('pdf.interview-invitation', ['interview' => $interview->load(['application.applicant', 'application.vacancy', 'interviewer'])])->assertSee('09:00')->assertDontSee('Catatan rahasia');
+        $this->get('/hr')->assertInertia(fn (Assert $p) => $p->where('interviewSummary.count', 1)->where('interviewSummary.next.0.id', $interview->id)->where('interviewSummary.next.0.name', 'Pelamar Fiktif'));
         $response = $this->get('/interviews/'.$interview->id.'/invitation')->assertOk()->assertHeader('Content-Type', 'application/pdf');
         $this->assertStringStartsWith('%PDF-', $response->getContent());
         $this->actingAs(User::factory()->create(['role' => 'viewer']))->withoutVite()->get('/interviews')->assertInertia(fn (Assert $p) => $p->missing('interviews.data.0.notes')->missing('interviews.data.0.meeting_url'));

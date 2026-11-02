@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react';
 import HrShell, { type HrUser } from '../components/hr-shell';
 import HrDashboard from '../components/hr-dashboard';
-import type { RecruitmentSummary } from '../types/applications';
+import type { InterviewSummary, RecruitmentSummary } from '../types/applications';
 import RecruitmentTabs from '../components/recruitment-tabs';
 import type { VacancyRecord } from '../types/vacancies';
 import type { EmployeeRecord } from '../types/employees';
@@ -51,6 +51,7 @@ export default function HrPreview({
     vacancySummary,
     recruitmentSummary,
     contractSummary,
+    interviewSummary,
 }: {
     auth?: { user: HrUser | null };
     initialView?: View;
@@ -58,6 +59,7 @@ export default function HrPreview({
     vacancySummary?: { count: number; recent: VacancyRecord[] };
     recruitmentSummary?: RecruitmentSummary;
     contractSummary?: ContractSummary;
+    interviewSummary?: InterviewSummary;
 }) {
     const user = auth?.user;
     const [view, setView] = useState<View>(initialView);
@@ -197,6 +199,7 @@ export default function HrPreview({
                 vacancies={vacancySummary}
                 recruitment={recruitmentSummary}
                 contracts={contractSummary}
+                interviews={interviewSummary}
             />
         );
     }

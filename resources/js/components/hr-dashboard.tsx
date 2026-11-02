@@ -5,7 +5,7 @@ import { StatusBadge } from './ui/status-badge';
 import { applicationTone, applicationDate } from './application-format';
 import type { EmployeeRecord } from '../types/employees';
 import type { VacancyRecord } from '../types/vacancies';
-import type { RecruitmentSummary } from '../types/applications';
+import type { InterviewSummary, RecruitmentSummary } from '../types/applications';
 import type { ContractSummary } from '../types/contracts';
 import '../css/employees.css';
 import '../css/contracts.css';
@@ -16,14 +16,22 @@ export default function HrDashboard({
     vacancies,
     recruitment,
     contracts,
+    interviews,
 }: {
     user: HrUser;
     employees?: { count: number; recent: EmployeeRecord[] };
     vacancies?: { count: number; recent: VacancyRecord[] };
     recruitment: RecruitmentSummary;
     contracts?: ContractSummary;
+    interviews?: InterviewSummary;
 }) {
     const canManage = user.role === 'admin' || user.role === 'hr_staff';
+    const interviewTime = (value: string) =>
+        new Intl.DateTimeFormat('id-ID', {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+            timeZone: 'Asia/Jakarta',
+        }).format(new Date(value));
     const stages = [
         ['screening', 'Screening'],
         ['interview', 'Interview'],
@@ -68,6 +76,35 @@ export default function HrDashboard({
                         </div>
                     ))}
                 </section>
+                {interviews && (
+                    <section className="hr-panel" aria-label="Wawancara mendatang">
+                        <div className="hr-panel-title">
+                            <h2>Wawancara mendatang</h2>
+                            <Link href="/interviews">
+                                {interviews.count} terjadwal <ArrowRight size={14} />
+                            </Link>
+                        </div>
+                        {interviews.next.length ? (
+                            interviews.next.map((item) => (
+                                <Link key={item.id} className="hr-vacancy-row" href="/interviews">
+                                    <span>
+                                        <strong>{item.name}</strong>
+                                        <small>
+                                            {item.job_title} · {interviewTime(item.starts_at)} WIB
+                                        </small>
+                                    </span>
+                                    <span>{item.interviewer}</span>
+                                    <ArrowRight size={14} />
+                                </Link>
+                            ))
+                        ) : (
+                            <p className="hr-empty">
+                                Belum ada jadwal wawancara mendatang. Buat dari Rekrutmen → Jadwal
+                                interview.
+                            </p>
+                        )}
+                    </section>
+                )}
                 {contracts && (
                     <section className="hr-panel ct-alert" aria-label="Pengingat kontrak">
                         <div className="hr-panel-title">

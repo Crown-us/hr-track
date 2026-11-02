@@ -5,6 +5,8 @@ use App\Http\Controllers\AccountPasswordController;
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationEmailVerificationController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AttendanceScheduleController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DepartmentController;
@@ -13,12 +15,14 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeePortalController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InvitationRegistrationController;
+use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\RecruitmentOfferController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\VacancyController;
 use App\Models\Employee;
+use App\Models\Interview;
 use App\Models\Vacancy;
 use App\Services\ApplicationWorkflow;
 use App\Services\ContractRecords;
@@ -59,6 +63,22 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/attendance/schedules', [AttendanceScheduleController::class, 'create'])->name('attendance.schedules');
+    Route::post('/attendance/schedules/preview', [AttendanceScheduleController::class, 'preview'])->name('attendance.schedules.preview');
+    Route::post('/attendance/schedules', [AttendanceScheduleController::class, 'store'])->name('attendance.schedules.store');
+    Route::get('/attendance/employees/{employee}', [AttendanceController::class, 'show'])->withTrashed()->name('attendance.employee');
+    Route::post('/attendance/employees/{employee}/days', [AttendanceController::class, 'store'])->withTrashed()->name('attendance.store');
+    Route::get('/leave', [LeaveController::class, 'index'])->name('leave.index');
+    Route::get('/leave/create', [LeaveController::class, 'create'])->name('leave.create');
+    Route::post('/leave', [LeaveController::class, 'store'])->name('leave.store');
+    Route::get('/leave/settings', [LeaveController::class, 'settings'])->name('leave.settings');
+    Route::post('/leave/settings/balances', [LeaveController::class, 'balance'])->name('leave.balance');
+    Route::post('/leave/settings/holidays', [LeaveController::class, 'holiday'])->name('leave.holiday');
+    Route::post('/leave/settings/holidays/{holiday}/remove', [LeaveController::class, 'removeHoliday'])->whereNumber('holiday')->name('leave.holiday.remove');
+    Route::get('/leave/{leave}', [LeaveController::class, 'show'])->whereNumber('leave')->name('leave.show');
+    Route::post('/leave/{leave}/action', [LeaveController::class, 'action'])->whereNumber('leave')->name('leave.action');
+    Route::get('/leave/{leave}/document', [LeaveController::class, 'document'])->whereNumber('leave')->name('leave.document');
     Route::get('/me', [EmployeePortalController::class, 'me'])->name('portal.me');
     Route::get('/team', [EmployeePortalController::class, 'team'])->name('portal.team');
     Route::get('/team/{employee}', [EmployeePortalController::class, 'member'])->name('portal.member');
@@ -115,6 +135,18 @@ Route::middleware(['auth', 'can:access-hr'])->group(function () {
         'vacancySummary' => ['count' => Vacancy::open()->count(), 'recent' => Vacancy::open()->with('department')->latest('id')->limit(4)->get()->map(fn ($vacancy) => $vacancy->forDisplay())],
         'recruitmentSummary' => app(ApplicationWorkflow::class)->summary(),
         'contractSummary' => app(ContractRecords::class)->summary(),
+        'interviewSummary' => [
+            'count' => Interview::whereNull('cancelled_at')->where('starts_at', '>=', now())->count(),
+            'next' => Interview::with(['application.applicant', 'application.vacancy', 'interviewer'])
+                ->whereNull('cancelled_at')->where('starts_at', '>=', now())->orderBy('starts_at')->limit(5)->get()
+                ->map(fn (Interview $interview) => [
+                    'id' => $interview->id,
+                    'name' => $interview->application?->applicant?->full_name ?? 'Pelamar',
+                    'job_title' => $interview->application?->vacancy?->job_title ?? 'Lowongan',
+                    'interviewer' => $interview->interviewer?->name ?? 'Pewawancara',
+                    'starts_at' => $interview->starts_at->toIso8601String(),
+                ]),
+        ],
     ]))->name('hr');
     Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
     Route::get('/interviews', [InterviewController::class, 'index'])->name('interviews.index');

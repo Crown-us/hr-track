@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react';
 import {
     ArrowLeft,
     BriefcaseBusiness,
+    CalendarDays,
     FileCheck2,
     GraduationCap,
     LayoutDashboard,
@@ -25,7 +26,7 @@ export default function HrShell({
     children,
 }: {
     title: string;
-    active: HrView | 'training' | 'contracts' | 'reports' | 'accounts';
+    active: HrView | 'training' | 'contracts' | 'reports' | 'accounts' | 'leave' | 'attendance';
     user?: HrUser | null;
     onNavigate?: (view: HrView) => void;
     children: ReactNode;
@@ -124,6 +125,28 @@ export default function HrShell({
                         </>
                     )}
                     <p>Pengembangan tim</p>
+                    {user && ['admin', 'hr_staff'].includes(user.role) && !onNavigate && (
+                        <Link
+                            href="/attendance"
+                            className={active === 'attendance' ? 'active' : ''}
+                            aria-current={active === 'attendance' ? 'page' : undefined}
+                            onClick={() => setSidebar(false)}
+                        >
+                            <CalendarDays size={17} />
+                            Absensi
+                        </Link>
+                    )}
+                    {user && ['admin', 'hr_staff'].includes(user.role) && !onNavigate && (
+                        <Link
+                            href="/leave"
+                            className={active === 'leave' ? 'active' : ''}
+                            aria-current={active === 'leave' ? 'page' : undefined}
+                            onClick={() => setSidebar(false)}
+                        >
+                            <CalendarDays size={17} />
+                            Cuti & izin
+                        </Link>
+                    )}
                     {user?.role === 'admin' && !onNavigate && (
                         <Link
                             href="/accounts"

@@ -1,0 +1,216 @@
+.sc-page {
+    min-width: 0;
+}
+.sc-page .hr-table-scroll {
+    contain: layout paint;
+}
+.sc-page h2 {
+    font-size: 16px;
+    font-weight: 550;
+    margin-bottom: 18px;
+}
+.sc-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 24px;
+    align-items: start;
+    margin-bottom: 24px;
+}
+.sc-page .tr-field {
+    margin-bottom: 18px;
+}
+.sc-page .tr-caption {
+    font-size: 12px;
+    line-height: 1.8;
+    margin: 16px 0;
+}
+.sc-section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+}
+.sc-section-heading > span {
+    color: #59616c;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.sc-people-actions {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin: 16px 0;
+}
+.sc-text-button {
+    font: inherit;
+    font-size: 12px;
+    color: #293f86;
+    border: 0;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.sc-person {
+    display: flex;
+    gap: 12px;
+    padding: 14px 0;
+    align-items: start;
+    border-top: 1px solid #e6e8eb;
+    font-size: 13px;
+}
+.sc-person input {
+    margin-top: 3px;
+    flex: none;
+}
+.sc-person strong {
+    font-weight: 500;
+    display: block;
+}
+.sc-person small {
+    display: block;
+    font-size: 11px;
+    color: #59616c;
+    margin-top: 7px;
+    line-height: 1.6;
+}
+.sc-person > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.sc-people-list {
+    max-height: 390px;
+    overflow-y: auto;
+}
+.sc-selection {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-top: 1px solid #e6e8eb;
+    padding-top: 16px;
+}
+.sc-selection button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f4f6f8;
+    border: 1px solid #dce2e9;
+    padding: 6px 9px;
+    border-radius: 5px;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    max-width: 100%;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+.sc-selection svg {
+    flex: none;
+}
+.sc-weekdays {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    margin-bottom: 22px;
+}
+.sc-weekdays legend {
+    margin-bottom: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.sc-weekdays label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+}
+.sc-check {
+    display: flex;
+    align-items: start;
+    gap: 10px;
+    font-size: 12px;
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+.sc-check input {
+    flex: none;
+    margin-top: 5px;
+}
+.sc-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    border-block: 1px solid #e6e8eb;
+    padding: 20px 0;
+}
+.sc-summary span {
+    display: block;
+    font-size: 12px;
+    color: #59616c;
+}
+.sc-summary strong {
+    display: block;
+    font-size: 27px;
+    font-weight: 500;
+    margin-top: 12px;
+    font-variant-numeric: tabular-nums;
+}
+.sc-result {
+    display: inline-block;
+    padding: 5px 8px;
+    border-radius: 16px;
+    font-size: 12px;
+}
+.sc-create {
+    background: #ecfaf3;
+    color: #167348;
+}
+.sc-skip {
+    background: #f1f3f5;
+    color: #59616c;
+}
+.sc-pagination {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    font-size: 12px;
+}
+.sc-commit {
+    border-top: 1px solid #e6e8eb;
+    margin-top: 24px;
+    padding-top: 20px;
+}
+.sc-commit > p {
+    font-size: 12px;
+    line-height: 1.8;
+    color: #59616c;
+    margin-bottom: 18px;
+}
+.sc-warning {
+    background: #fff8ec;
+    color: #7a5617 !important;
+    padding: 12px 16px;
+    border-radius: 5px;
+}
+.sc-page button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+@media (max-width: 1000px) {
+    .sc-layout {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 600px) {
+    .sc-summary {
+        gap: 12px;
+    }
+    .sc-section-heading {
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+        gap: 0;
+    }
+}

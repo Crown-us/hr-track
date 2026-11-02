@@ -14,13 +14,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            EmployeeMasterSeeder::class,
-            EmployeeSeeder::class,
-            VacancySeeder::class,
-            ApplicantSeeder::class,
-            ApplicationSeeder::class,
-            InterviewSeeder::class,
-        ]);
+        $this->call(EmployeeMasterSeeder::class);
+
+        if (! app()->environment(['local', 'testing'])) {
+            $this->command?->warn('DemoSeeder dilewati: data contoh hanya dijalankan pada environment local/testing.');
+
+            return;
+        }
+
+        $this->call(DemoSeeder::class);
     }
 }
