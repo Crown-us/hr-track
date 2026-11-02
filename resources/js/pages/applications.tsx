@@ -382,6 +382,14 @@ function Directory(p: ApplicationProps) {
 
 function StatusForm({ a, stages }: { a: ApplicationRow; stages: Stage[] }) {
     const f = useForm({ status: '', note: '', version: a.version });
+    if (a.source === 'public' && !a.email_verified_at) {
+        return (
+            <section className="ep-card">
+                <h2>Tindak lanjut</h2>
+                <p>Menunggu pelamar memverifikasi email sebelum tahap dapat diubah.</p>
+            </section>
+        );
+    }
     return (
         <section className="ep-card">
             <div className="ep-section-heading">
@@ -453,7 +461,10 @@ function Documents({
         <section className="ep-card">
             <div className="ep-section-heading">
                 <h2>CV pelamar</h2>
-                <p>Versi dokumen tersimpan pada profil pelamar dan dapat dipakai lintas lamaran.</p>
+                <p>
+                    CV pengajuan publik ditampilkan pada lamaran terkait. Versi yang diunggah tim HR
+                    dapat dipakai lintas lamaran.
+                </p>
             </div>
             {documents.length ? (
                 documents.map((d, i) => (
@@ -592,6 +603,26 @@ export default function Applications(p: ApplicationProps) {
                                 </dl>
                                 {p.canManage && (
                                     <>
+                                        {a.source === 'public' && (
+                                            <div className="ep-alert">
+                                                <strong>
+                                                    Pengajuan publik ·{' '}
+                                                    {a.email_verified_at
+                                                        ? 'email terverifikasi'
+                                                        : 'menunggu verifikasi email'}
+                                                </strong>
+                                                <p>
+                                                    Nama yang diajukan: {a.submitted_name ?? a.name}
+                                                    <br />
+                                                    Kontak yang diajukan: {a.submitted_phone ?? '—'}
+                                                </p>
+                                                <p>
+                                                    {a.email_verified_at
+                                                        ? 'Akses email telah dikonfirmasi. Tetap periksa identitas dan CV; profil terdaftar tidak diubah otomatis.'
+                                                        : 'Tahap seleksi baru dapat dilanjutkan setelah pelamar memverifikasi email. Profil terdaftar tidak diubah otomatis.'}
+                                                </p>
+                                            </div>
+                                        )}
                                         <div className="ap-private-note">
                                             <h3>Catatan HR</h3>
                                             <p>{a.notes || 'Belum ada catatan.'}</p>
@@ -627,7 +658,27 @@ export default function Applications(p: ApplicationProps) {
                         <div>
                             {p.canManage ? (
                                 <>
-                                    <StatusForm a={a} stages={p.nextStages ?? []} />
+                                    {a.status === 'interview' && (
+                                        <p className="ep-alert">
+                                            <Link
+                                                href={`/interviews/create?application_id=${a.id}`}
+                                            >
+                                                Jadwalkan interview untuk pelamar ini →
+                                            </Link>
+                                        </p>
+                                    )}
+                                    {(a.status === 'offering' ||
+                                        a.status === 'accepted' ||
+                                        a.status === 'rejected') && (
+                                        <p className="ep-alert">
+                                            <Link href={`/applications/${a.id}/offering`}>
+                                                Penawaran, respons & data pegawai →
+                                            </Link>
+                                        </p>
+                                    )}
+                                    {a.status !== 'offering' && (
+                                        <StatusForm a={a} stages={p.nextStages ?? []} />
+                                    )}
                                     <Documents a={a} documents={p.documents} />
                                 </>
                             ) : (
@@ -643,8 +694,8 @@ export default function Applications(p: ApplicationProps) {
                     </div>
                 )}
                 <p className="ep-bottom-note">
-                    Data pelamar dan lamaran tersimpan di sistem. Penjadwalan interview belum
-                    tersedia.
+                    Data pelamar dan lamaran tersimpan di sistem. Jadwal dan undangan tersedia pada
+                    tab Jadwal interview.
                 </p>
             </main>
         </HrShell>

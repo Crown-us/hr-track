@@ -107,7 +107,7 @@ export default function Lab() {
                     </div>
 
                     <p className="mt-4 text-[11px] leading-5 text-slate-500">
-                        Contoh tampilan. Angka pada diagram fiktif, bukan data nyata.
+                        Ringkasan aktivitas dan perkembangan proses.
                     </p>
                 </section>
 

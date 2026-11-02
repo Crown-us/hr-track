@@ -127,7 +127,7 @@ const D_FEATURES: InkFeatures = {
     },
     reports: {
         title: 'Ringkasan laporan',
-        description: 'Ilustrasi ringkasan yang menyatukan catatan dan status proses.',
+        description: 'Ringkasan yang menyatukan catatan dan status proses.',
     },
     integrations: {
         title: 'Dokumen terhubung',
@@ -136,8 +136,7 @@ const D_FEATURES: InkFeatures = {
     },
     insights: {
         title: 'Perkembangan aktivitas',
-        description:
-            'Ilustrasi perkembangan aktivitas dari data contoh, bukan prediksi bisnis nyata.',
+        description: 'Lihat perkembangan aktivitas dan perubahan status dari waktu ke waktu.',
         values: [22, 26, 24, 31, 29, 36, 34, 41, 39, 47, 52, 58],
         forecastFrom: 8,
     },

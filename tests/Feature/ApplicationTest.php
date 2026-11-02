@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Applicant;
 use App\Models\Application;
 use App\Models\Department;
+use App\Models\Position;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Services\ApplicationWorkflow;
@@ -109,10 +110,16 @@ class ApplicationTest extends TestCase
         $this->post($url, ['status' => 'interview', 'version' => 1, 'note' => 'Wawancara disiapkan'])->assertRedirect();
         $this->post($url, ['status' => 'rejected', 'version' => 1])->assertSessionHasErrors('version');
         $this->post($url, ['status' => 'offering', 'version' => 2])->assertRedirect();
-        $this->post($url, ['status' => 'accepted', 'version' => 3])->assertRedirect();
-        $this->post($url, ['status' => 'rejected', 'version' => 4])->assertSessionHasErrors('status');
+        $this->post($url, ['status' => 'accepted', 'version' => 3])->assertSessionHasErrors('status');
+        $department = Department::firstOrFail();
+        $position = Position::create(['department_id' => $department->id, 'name' => 'Staf Uji']);
+        $offerUrl = '/applications/'.$app->id.'/offering';
+        $this->post($offerUrl, ['version' => 3, 'department_id' => $department->id, 'position_id' => $position->id, 'employment_status' => 'contract', 'response_deadline' => now('Asia/Jakarta')->addDays(3)->toDateString(), 'join_date' => now('Asia/Jakarta')->addDays(7)->toDateString()])->assertSessionHasNoErrors();
+        Storage::fake('employee_records');
+        $this->post($offerUrl.'/response', ['version' => 4, 'response' => 'accepted', 'response_date' => now('Asia/Jakarta')->toDateString(), 'response_note' => 'Kandidat menerima penawaran uji.', 'evidence' => $this->pdf()])->assertSessionHasNoErrors();
+        $this->post($url, ['status' => 'rejected', 'version' => 5])->assertSessionHasErrors('status');
         $this->assertDatabaseCount('application_status_histories', 4);
-        $this->assertDatabaseHas('applications', ['id' => $app->id, 'status' => 'accepted', 'version' => 4]);
+        $this->assertDatabaseHas('applications', ['id' => $app->id, 'status' => 'accepted', 'version' => 5]);
     }
 
     public function test_viewer_and_guest_cannot_mutate_or_see_notes_or_documents(): void

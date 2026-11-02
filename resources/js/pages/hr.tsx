@@ -200,9 +200,7 @@ export default function HrPreview({
         <HrShell title={titles[view]} active={view} user={user} onNavigate={changeView}>
             <div className="hr-preview-banner" id="preview-note">
                 <span className="hr-preview-dot" />
-                {user
-                    ? 'Kandidat dan wawancara masih menggunakan data contoh fiktif'
-                    : 'Pratinjau desain · seluruh data fiktif'}
+                {user ? 'Ringkasan kandidat dan wawancara' : 'Pratinjau ruang kerja HR'}
                 <span className="hr-banner-note">
                     {user
                         ? 'Pegawai dan lowongan tersimpan di database'
@@ -596,7 +594,7 @@ export default function HrPreview({
                 }}
             >
                 <div className="hr-dialog-heading">
-                    <span>Detail kandidat · data fiktif</span>
+                    <span>Detail kandidat</span>
                     <button
                         className="hr-icon"
                         aria-label="Tutup detail"
@@ -643,7 +641,7 @@ export default function HrPreview({
                             ]}
                         />
                         <p className="hr-dialog-note">
-                            Riwayat ilustratif untuk pratinjau desain. Aksi ubah status, CV, dan
+                            Riwayat kandidat dalam pratinjau ruang kerja. Aksi ubah status, CV, dan
                             penyimpanan tersedia setelah backend diimplementasikan.
                         </p>
                     </div>

@@ -31,6 +31,15 @@ return [
 
     'connections' => [
 
+        'recruitment' => [
+            'driver' => 'database',
+            'connection' => null,
+            'table' => 'jobs',
+            'queue' => 'recruitment-mail',
+            'retry_after' => 90,
+            'after_commit' => false,
+        ],
+
         'sync' => [
             'driver' => 'sync',
         ],

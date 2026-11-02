@@ -54,8 +54,8 @@ function VacancyForm({ vacancy, departments, types, statuses, today }: VacancyPr
                 <p>Siapkan kebutuhan posisi dan periode rekrutmen.</p>
             </div>
             <div className="ep-alert">
-                Lowongan ini dikelola di ruang HR. Status Dibuka belum menerbitkan lowongan ke
-                halaman karier publik.
+                Status Dibuka menampilkan lowongan di halaman karier publik selama periode
+                penerimaan. Gunakan Draft untuk menyiapkan isi sebelum ditayangkan.
             </div>
             {form.errors.version && (
                 <p className="ep-error" role="alert">
@@ -442,10 +442,17 @@ export default function Vacancies(props: VacancyProps) {
                             <p>{vacancy.requirements}</p>
                         </div>
                         <p className="ep-alert">
-                            Dikelola internal oleh tim HR. Belum ditampilkan pada halaman karier
-                            publik. Untuk menghentikan lowongan, ubah status menjadi Ditutup;
+                            Lowongan berstatus Dibuka tampil di halaman karier publik selama periode
+                            penerimaan. Untuk menghentikan penayangan, ubah status menjadi Ditutup;
                             catatan tetap tersimpan.
                         </p>
+                        {vacancy.state_label === 'Dibuka' && (
+                            <p>
+                                <Link className="hr-text-button" href={`/karier/${vacancy.id}`}>
+                                    Lihat halaman publik →
+                                </Link>
+                            </p>
+                        )}
                         {canManage && (
                             <div className="ep-detail-actions">
                                 <Link className="ep-primary" href={`/vacancies/${vacancy.id}/edit`}>

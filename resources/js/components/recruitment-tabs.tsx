@@ -1,6 +1,10 @@
 import { Link } from '@inertiajs/react';
 
-export default function RecruitmentTabs({ active }: { active: 'vacancies' | 'pipeline' }) {
+export default function RecruitmentTabs({
+    active,
+}: {
+    active: 'vacancies' | 'pipeline' | 'interviews';
+}) {
     return (
         <nav className="hr-recruitment-tabs" aria-label="Menu rekrutmen">
             <Link href="/vacancies" aria-current={active === 'vacancies' ? 'page' : undefined}>
@@ -8,6 +12,9 @@ export default function RecruitmentTabs({ active }: { active: 'vacancies' | 'pip
             </Link>
             <Link href="/applications" aria-current={active === 'pipeline' ? 'page' : undefined}>
                 Pipeline kandidat
+            </Link>
+            <Link href="/interviews" aria-current={active === 'interviews' ? 'page' : undefined}>
+                Jadwal interview
             </Link>
         </nav>
     );

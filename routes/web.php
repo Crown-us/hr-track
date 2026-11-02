@@ -1,8 +1,12 @@
 <?php
 
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\ApplicationEmailVerificationController;
+use App\Http\Controllers\CareerController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InvitationRegistrationController;
+use App\Http\Controllers\RecruitmentOfferController;
 use App\Http\Controllers\VacancyController;
 use App\Models\Employee;
 use App\Models\Vacancy;
@@ -12,8 +16,19 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    return Inertia::render('welcome', ['careerVacancies' => Vacancy::open()->with('department')->latest('id')->limit(3)->get()->map(fn ($v) => CareerController::job($v))]);
 })->name('home');
+
+Route::get('/karier', [CareerController::class, 'index'])->name('careers.index');
+Route::get('/karier/terima-kasih', [CareerController::class, 'thanks'])->name('careers.thanks');
+Route::get('/karier/email-terverifikasi', fn () => Inertia::render('careers', ['mode' => 'verified']))->name('careers.verified');
+Route::get('/karier/verifikasi/kirim-ulang', fn () => Inertia::render('careers', ['mode' => 'resend']))->name('careers.resend.form');
+Route::post('/karier/verifikasi/kirim-ulang', [ApplicationEmailVerificationController::class, 'resend'])->middleware('throttle:email-resend')->name('careers.resend');
+Route::get('/karier/verifikasi/{application}/{hash}', [ApplicationEmailVerificationController::class, 'show'])->middleware(['signed', 'throttle:30,1,email-view'])->name('careers.verify');
+Route::post('/karier/verifikasi/{application}/{hash}', [ApplicationEmailVerificationController::class, 'store'])->middleware(['signed', 'throttle:6,1,email-confirm'])->name('careers.verify.store');
+Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('careers.show');
+Route::get('/karier/{vacancy}/lamar', [CareerController::class, 'form'])->name('careers.apply');
+Route::post('/karier/{vacancy}/lamar', [CareerController::class, 'store'])->middleware('throttle:public-application')->name('careers.store');
 
 Route::get('/lab', function () {
     return Inertia::render('lab');
@@ -38,8 +53,19 @@ Route::middleware(['auth', 'can:access-hr'])->group(function () {
         'recruitmentSummary' => app(ApplicationWorkflow::class)->summary(),
     ]))->name('hr');
     Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
+    Route::get('/interviews', [InterviewController::class, 'index'])->name('interviews.index');
+    Route::get('/interviews/create', [InterviewController::class, 'create'])->name('interviews.create');
+    Route::post('/interviews', [InterviewController::class, 'store'])->name('interviews.store');
+    Route::post('/interviews/{interview}/cancel', [InterviewController::class, 'cancel'])->name('interviews.cancel');
+    Route::get('/interviews/{interview}/invitation', [InterviewController::class, 'invitation'])->name('interviews.invitation');
     Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
     Route::get('/applications/create', [ApplicationController::class, 'create'])->name('applications.create');
+    Route::get('/applications/{application}/offering', [RecruitmentOfferController::class, 'show'])->name('offering.show');
+    Route::post('/applications/{application}/offering', [RecruitmentOfferController::class, 'save'])->name('offering.save');
+    Route::post('/applications/{application}/offering/response', [RecruitmentOfferController::class, 'respond'])->name('offering.response');
+    Route::post('/applications/{application}/offering/employee', [RecruitmentOfferController::class, 'convert'])->name('offering.convert');
+    Route::get('/applications/{application}/offering/summary', [RecruitmentOfferController::class, 'summary'])->name('offering.summary');
+    Route::get('/applications/{application}/offering/evidence', [RecruitmentOfferController::class, 'evidence'])->name('offering.evidence');
     Route::post('/applications', [ApplicationController::class, 'store'])->name('applications.store');
     Route::get('/applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
     Route::post('/applications/{application}/status', [ApplicationController::class, 'transition'])->name('applications.status');

@@ -180,8 +180,8 @@ export default function HrDashboard({
                     </section>
                 </div>
                 <p className="ep-bottom-note">
-                    Angka di halaman ini berasal dari database. Penjadwalan interview dan undangan
-                    belum tersedia.
+                    Angka di halaman ini berasal dari database. Buka Rekrutmen → Jadwal interview
+                    untuk agenda dan undangan.
                 </p>
             </main>
         </HrShell>

@@ -7,6 +7,8 @@ use App\Models\Applicant;
 use App\Models\ApplicantDocument;
 use App\Models\Application;
 use App\Models\ApplicationStatusHistory;
+use App\Models\Interview;
+use App\Models\RecruitmentOffer;
 use App\Models\User;
 use App\Models\Vacancy;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -61,13 +63,21 @@ class ApplicationWorkflow
                 throw ValidationException::withMessages(['version' => 'Tahap sudah berubah. Muat ulang detail sebelum melanjutkan.']);
             }
             $next = ApplicationStatus::from($data['status']);
+            if ($record->source === 'public' && ! $record->email_verified_at) {
+                throw ValidationException::withMessages(['status' => 'Email lamaran publik harus diverifikasi sebelum tahap diubah.']);
+            }
             if (! in_array($next, $record->status->next(), true)) {
                 throw ValidationException::withMessages(['status' => 'Perpindahan tahap tidak diizinkan. Diterima/Ditolak merupakan tahap akhir.']);
+            }
+            $offer = RecruitmentOffer::where('application_id', $record->id)->lockForUpdate()->first();
+            if (($next === ApplicationStatus::Accepted && $offer?->status !== 'accepted') || ($next === ApplicationStatus::Rejected && $offer?->status === 'pending')) {
+                throw ValidationException::withMessages(['status' => 'Catat respons dan bukti penawaran melalui halaman Offering sebelum keputusan akhir.']);
             }
             $this->history($record, $actor, $record->status, $next, $data['note'] ?? null);
             $record->status = $next;
             $record->version++;
             $record->save();
+            Interview::where('application_id', $record->id)->whereNull('cancelled_at')->where('ends_at', '>', now())->update(['cancelled_at' => now(), 'cancelled_by' => $actor->id, 'cancel_reason' => 'Otomatis: lamaran keluar dari tahap Interview.', 'version' => DB::raw('version + 1')]);
         });
     }
 

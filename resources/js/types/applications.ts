@@ -12,6 +12,10 @@ export type ApplicationRow = {
     application_date: string;
     notes?: string | null;
     phone?: string | null;
+    source?: 'internal' | 'public';
+    email_verified_at?: string | null;
+    submitted_name?: string | null;
+    submitted_phone?: string | null;
 };
 export type Stage = { value: string; label: string };
 export type RecruitmentSummary = {

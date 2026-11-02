@@ -12,6 +12,12 @@
 
 ## Status dan batas pekerjaan
 
+Preferensi teks pengguna: gunakan bahasa Indonesia biasa dan mudah dipahami pada aplikasi/PDF. Jangan menyisipkan label fiktif/demonstrasi/prototipe atau disclaimer berulang; pengguna akan menyiapkan disclaimer terpisah. Nama dokumen tetap menjelaskan fungsinya, misalnya ringkasan penawaran atau undangan interview. Status fitur yang belum tersedia dan cara pengiriman dokumen tetap dijelaskan sesuai perilaku sebenarnya.
+
+Pembaruan Offering: penawaran/revisi dengan audit, ringkasan PDF internal, pencatatan respons dengan bukti privat dan konversi kandidat diterima menjadi pegawai tersedia. Lihat [OFFERING-PLAN.md](OFFERING-PLAN.md). Belum surat resmi perusahaan, e-sign, payroll, pengiriman penawaran otomatis atau pengaitan kandidat ke pegawai lama secara otomatis.
+
+Pembaruan terbaru: verifikasi email per lamaran publik, email bukti penerimaan melalui antrean dan blok perubahan tahap sebelum verifikasi tersedia. Mailer lokal log; inbox nyata memerlukan SMTP dan worker. Detail di [EMAIL-VERIFICATION-PLAN.md](EMAIL-VERIFICATION-PLAN.md). Pernyataan belum tersedia pada catatan fase sebelumnya bersifat historis.
+
 Tanggal inspeksi: 1 November 2026 (Asia/Jakarta). Phase 0 dan fondasi Phase 1 sudah dijalankan setelah persetujuan pengguna. Laravel/Inertia/React, lockfile, MySQL development/test, halaman awal dan pengujian fondasi tersedia. Detail bukti dan keputusan ada di [PROGRESS.md](PROGRESS.md). Fitur bisnis Phase 2–7 belum diimplementasikan.
 
 Pembaruan 2 November: subset autentikasi Phase 2 tersedia: Fortify login/logout, aktivasi via undangan, role dan gate halaman `/hr`. Data bisnis masih contoh. Detail scope dan batasnya di [AUTH-PLAN.md](AUTH-PLAN.md); belum menandai seluruh Phase 2 selesai karena migration domain/policies CRUD belum dikerjakan.
@@ -22,7 +28,11 @@ Pembaruan lowongan: subset Phase4 lowongan internal tambah/baca/edit/status, pen
 
 Pembaruan ATS: input profil baru/terdaftar, lamaran, CV privat berversi, pipeline database dan transisi/riwayat tersedia. Dashboard sudah memakai angka aktual. Batas hemat scope: belum edit/hapus profil, jadwal interview/undangan atau portal publik; lihat [APPLICATION-PLAN.md](APPLICATION-PLAN.md). Phase4/5 belum ditandai selesai seluruhnya.
 
+Pembaruan karier publik: landing memiliki navigasi Lowongan, Masuk HR, CTA dan tiga lowongan aktif terbaru. `/karier` menyediakan daftar/detail/filter serta form tanpa akun dengan CV wajib, persetujuan, CSRF, honeypot dan rate limit. Lamaran masuk Screening; identitas publik belum terverifikasi, tidak menimpa profil lama, dan CV dibatasi per lamaran. Jadwal interview/PDF juga tersedia; batas lama di catatan tahap sebelumnya bersifat historis. Belum mencakup email, verifikasi email, antivirus atau edit/hapus profil. Lihat [CAREERS-PLAN.md](CAREERS-PLAN.md).
+
 ## Phase 0 — Bukti lingkungan
+
+Verifikasi rekrutmen: alur lintas endpoint dari pembuatan lowongan sampai kedua keputusan akhir memiliki tes integrasi tersendiri. Panduan uji pengguna dan batas fitur ada di [RECRUITMENT-UAT.md](RECRUITMENT-UAT.md); pelaksanaan UAT oleh HR masih diperlukan.
 
 | Pemeriksaan | Hasil aktual |
 | --- | --- |
@@ -185,3 +195,5 @@ CV hanya PDF maksimal 5 MiB (5120 KiB), MIME/content diperiksa server, filename 
 - Soft delete mempertahankan unique values dan history, bukan fitur pemulihan atau retention otomatis. CV tidak otomatis dipindai antivirus; hanya data demo lokal, bukan sistem production siap operasi.
 - Konflik interview memerlukan serialisasi write per interviewer agar validasi paralel tidak lolos; uji integrasi MySQL, bukan hanya validasi form.
 
+
+Pembaruan interview: penjadwalan, pembatalan, deteksi bentrok, pembatalan otomatis saat keluar tahap Interview dan PDF undangan privat tersedia. Lihat INTERVIEW-PLAN.md. Email/kalender eksternal dan edit langsung jadwal belum tersedia.

@@ -75,8 +75,8 @@ class ApplicationController
         Gate::authorize('view', $application);
         $private = $request->user()->can('update', $application);
         $histories = ApplicationStatusHistory::with('actor:id,name')->where('application_id', $application->id)->orderBy('id')->get()->map(fn ($history) => [
-            'id' => $history->id, 'label' => ApplicationStatus::from($history->new_status)->label(), 'actor' => $history->actor->name, 'created_at' => $history->created_at->toIso8601String(), ...($private ? ['note' => $history->note] : [])]);
-        $documents = $private ? ApplicantDocument::where('applicant_id', $application->applicant_id)->orderByDesc('id')->get()->map(fn ($doc) => ['id' => $doc->id, 'size_bytes' => $doc->size_bytes, 'created_at' => $doc->created_at->toIso8601String()]) : [];
+            'id' => $history->id, 'label' => ApplicationStatus::from($history->new_status)->label(), 'actor' => $history->actor?->name ?? 'Pelamar (publik)', 'created_at' => $history->created_at->toIso8601String(), ...($private ? ['note' => $history->note] : [])]);
+        $documents = $private ? ApplicantDocument::where('applicant_id', $application->applicant_id)->where(fn ($q) => $q->whereNull('application_id')->orWhere('application_id', $application->id))->orderByDesc('id')->get()->map(fn ($doc) => ['id' => $doc->id, 'size_bytes' => $doc->size_bytes, 'created_at' => $doc->created_at->toIso8601String()]) : [];
 
         return Inertia::render('applications', [...$this->base($request), 'mode' => 'show', 'application' => $application->load(['applicant', 'vacancy'])->forDisplay($private), 'histories' => $histories, 'documents' => $documents,
             'nextStages' => array_map(fn ($status) => ['value' => $status->value, 'label' => $status->label()], $application->status->next())]);
@@ -104,6 +104,7 @@ class ApplicationController
     {
         Gate::authorize('update', $application);
         abort_unless($document->applicant_id === $application->applicant_id, 404);
+        abort_if($document->application_id !== null && $document->application_id !== $application->id, 404);
         $disk = Storage::disk('applicant_documents');
         abort_unless($disk->exists($document->path), 404);
 

@@ -18,6 +18,7 @@ class FortifyServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        RateLimiter::for('email-resend', fn (Request $request) => Limit::perHour(3)->by('email-resend:'.$request->ip()));
         Fortify::loginView(fn () => Inertia::render('auth', ['mode' => 'login', 'invitation' => null]));
         Fortify::confirmPasswordView(fn () => Inertia::render('auth', ['mode' => 'confirm', 'invitation' => null]));
 
@@ -49,6 +50,7 @@ class FortifyServiceProvider extends ServiceProvider
         ]);
         RateLimiter::for('signup', fn (Request $request) => Limit::perMinute(10)->by('signup:'.$request->ip())
             ->response(fn () => back()->withErrors(['token' => 'Terlalu banyak percobaan. Tunggu satu menit lalu coba lagi.'])));
+        RateLimiter::for('public-application', fn (Request $request) => Limit::perHour(3)->by('public-application:'.$request->ip())->response(fn () => back()->withErrors(['submission' => 'Batas pengiriman tercapai. Coba kembali dalam satu jam atau hubungi tim HR melalui kanal resmi perusahaan.'])));
         Gate::define('access-hr', fn (User $user) => in_array($user->role, ['admin', 'hr_staff', 'viewer'], true));
     }
 }

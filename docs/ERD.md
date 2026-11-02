@@ -1,5 +1,9 @@
 # HRIS Lite — ERD dan rancangan migration
 
+Pembaruan Offering: migration000008 menyediakan recruitment_offers (application_id unique, department/position FK gabungan, employment_status, join_date, response_deadline, terms nullable, status pending/accepted/declined/withdrawn, response_date/response_note/evidence_path/evidence_size nullable, timestamps UTC). recruitment_offer_events append-only: recruitment_offer_id, actor_id FK RESTRICT, action, changes JSON snapshot, created_at UTC. Employees menambah applicant_id dan source_application_id nullable+unique+FK RESTRICT, mencegah duplikasi konversi termasuk arsip. Tanggal berupa date WIB, file respons privat. Application.version mengunci revisi/respons; konversi memakai lock aplikasi/profil dan unique DB. Rollback migration ditolak bila ada penawaran/hasil konversi untuk menjaga audit.
+
+Pembaruan verifikasi lamaran publik: migration000007 menambah applications.email_verified_at dan verification_sent_at nullable (UTC). Verifikasi per lamaran, tanpa perubahan profil pelamar atau user internal; HR tidak dapat mengubah tahap lamaran publik sebelum verified. Pekerjaan email terenkripsi memakai tabel jobs Laravel pada koneksi database aplikasi yang sama agar ikut transaksi. Lihat EMAIL-VERIFICATION-PLAN.md.
+
 Status: usulan Phase 1, belum migration executable. Baca [PLAN.md](PLAN.md) untuk business rules dan scope.
 
 Pembaruan ATS: migration000004 menyediakan applicants, applications (version integer), application_status_histories (note nullable) dan applicant_documents. Path CV privat disimpan di DB; disk/MIME/nama unduh ditetapkan server secara tetap, bukan kolom disk/original_name/mime_type pada rancangan awal. Unique email dan pasangan profil/lowongan, FK RESTRICT, timestamps UTC. Jadwal interview dan arsip domain ini belum tersedia.
@@ -94,6 +98,11 @@ erDiagram
         bigint applicant_id FK
         bigint vacancy_id FK
         date application_date
+        varchar source "internal or public"
+        timestamp email_verified_at "nullable, per application"
+        timestamp verification_sent_at "nullable, resend cooldown"
+        varchar submitted_name "nullable, unverified public submission"
+        varchar submitted_phone "nullable, unverified public submission"
         text notes "nullable"
         varchar status
         timestamp created_at
@@ -103,7 +112,7 @@ erDiagram
     application_status_histories {
         bigint id PK
         bigint application_id FK
-        bigint actor_id FK
+        bigint actor_id FK "nullable for public submission"
         varchar old_status "nullable only on creation"
         varchar new_status
         timestamp created_at
@@ -124,7 +133,8 @@ erDiagram
     applicant_documents {
         bigint id PK
         bigint applicant_id FK
-        bigint uploaded_by FK
+        bigint uploaded_by FK "nullable for public submission"
+        bigint application_id FK "nullable for internal shared CV"
         varchar disk
         varchar path UK
         varchar original_name
@@ -144,8 +154,9 @@ erDiagram
 - `vacancies.status`: draft/published/closed, default draft. `applications.status`: screening/interview/offering/accepted/rejected, default screening. Gunakan PHP backed enums dan CHECK database untuk daftar nilai serta rentang tanggal di MySQL yang mendukung enforced CHECK.
 - `positions`: unique (department_id, name) dan unique (id, department_id). `employees` mempunyai FK department_id serta FK gabungan (position_id, department_id) ke positions(id, department_id), sehingga jabatan departemen lain ditolak database juga.
 - `applications`: unique (applicant_id, vacancy_id), termasuk ketika diarsip. Tidak ada reapply/reopen pada MVP. `application_date` dan notes milik aplikasi, bukan identitas kandidat.
-- `application_status_histories`: append-only; tanpa updated_at atau soft delete. Creation history old_status null; setiap transisi mencatat actor session dan waktu. Kardinalitas minimal satu history dijamin service transaction, bukan FK saja.
-- `applicant_documents`: satu row per versi CV, file UUID unik, disk privat yang ditetapkan server. UI menampilkan versi terbaru dan daftar versi hanya kepada admin/HR. Path/original_name tidak pernah menjadi path input unduh.
+- `application_status_histories`: append-only; tanpa updated_at atau soft delete. Creation history old_status null; pengajuan publik actor_id null, setiap transisi HR mencatat actor session dan waktu. Kardinalitas minimal satu history dijamin service transaction, bukan FK saja.
+- `applicant_documents`: satu row per versi CV, file UUID unik, disk privat yang ditetapkan server. CV publik mempunyai application_id dan uploaded_by null; akses dibatasi ke lamaran itu. CV internal dengan application_id null dapat dibagikan lintas lamaran profil. UI menampilkan versi terbaru dan daftar versi hanya kepada admin/HR. Path/original_name tidak pernah menjadi path input unduh.
+- Pengajuan publik menyimpan nama/telepon belum terverifikasi pada applications, tanpa menimpa profil yang sudah ada. Migration000006 menolak rollback jika masih ada data publik/actor null agar audit tidak hilang.
 - FK menggunakan RESTRICT pada hard delete; master departemen/jabatan tidak dihapus jika direferensikan. Tidak ada cascade hard delete audit atau file. Penghapusan employee/vacancy/applicant berarti soft delete; kandidat diarsip beserta aplikasi dan pembatalan interview mendatang secara transaksional. Lowongan arsip menolak aplikasi baru namun history tetap terbaca.
 - Wawancara dihapus secara logis lewat cancelled_at; jangan hilangkan rekam jejak jadwal. Listing aktif mengecualikan cancelled_at dan induk arsip. Blok bentrok jadwal dengan transaction + lock user interviewer, lalu cek overlap starts_at < proposed_end dan ends_at > proposed_start.
 - Unique email/nomor pegawai tidak dilepas saat soft delete; validasi menjelaskan bahwa nilai telah dipakai. Restore dan hard delete bukan scope UI MVP.
@@ -184,3 +195,5 @@ Down migration berjalan dalam urutan terbalik. Setiap migration mempunyai nama t
 3 akun role demo, 5 departemen, 10 jabatan, 30 pegawai, 6 lowongan berbagai status, 24 kandidat, 30 aplikasi dengan seluruh tahapan pipeline, dan 8 interview (termasuk riwayat/pembatalan). Seeder membuat history yang konsisten melalui workflow domain; interview mendatang hanya untuk tahap interview. CV fixture berupa PDF sintetis tanpa data nyata. Password berasal dari env development; README mendokumentasikan email demo dan cara menentukan password lokal.
 
 Tidak ada tabel kontrak pada MVP. Dashboard tidak menampilkan preview kontrak sampai schema dan scope kontrak disetujui terpisah.
+
+Pembaruan interview: migration000005 menambah interviews sesuai rancangan ditambah created_by, cancelled_by, cancel_reason dan version integer. Waktu UTC ditampilkan WIB. Pembatalan mempertahankan row; belum ada hard delete atau edit langsung.

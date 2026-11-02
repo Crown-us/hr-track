@@ -1,12 +1,18 @@
 # HRIS Lite
 
+Panduan pengujian alur rekrutmen dan checklist pengguna HR: [RECRUITMENT-UAT.md](docs/RECRUITMENT-UAT.md).
+
+Offering → pegawai tersedia melalui detail lamaran → **Penawaran, respons & data pegawai**. Admin/Staf HR mencatat penempatan/tanggal/ketentuan, merevisi sebelum respons, mengunduh ringkasan PDF internal, lalu mencatat respons dengan bukti PDF privat wajib. Menerima→Diterima; menolak/ditarik HR→Ditolak. Keputusan Diterima tidak dapat melewati penawaran yang diterima. Respons bertanggal sebelum revisi terakhir atau penerimaan melewati batas ditolak; revisi penawaran dahulu bila perlu memperpanjang batas. Ringkasan bukan surat resmi perusahaan atau kontrak.
+
+Konversi memerlukan lamaran dan penawaran diterima serta konfirmasi identitas. Nama/telepon terisi dari profil dan dapat dikoreksi HR; nomor pegawai/email kerja wajib diisi. Penempatan/status/tanggal mengikuti penawaran. Satu profil hanya dapat menjadi satu pegawai, termasuk bila pegawai sudah diarsipkan; tidak membuat akun login atau menimpa profil pelamar. Penawaran/audit/bukti hanya untuk Admin/Staf HR. Lamaran lama yang sudah Diterima tanpa catatan penawaran tidak otomatis dikonversi atau dibuatkan bukti mundur; tinjau dan gunakan direktori pegawai secara manual. Lihat [OFFERING-PLAN.md](docs/OFFERING-PLAN.md).
+
 Aplikasi HRIS mandiri yang sedang disiapkan untuk kebutuhan magang. Antarmuka berbahasa Indonesia; data pada pratinjau bersifat fiktif. Fitur operasional diimplementasikan bertahap.
 
 ## Status — fondasi dan autentikasi
 
 Fondasi Laravel 13 + Inertia 3 + React 19 + TypeScript + Tailwind 4 + Vite tersedia, dengan halaman awal bergaya berkas/editorial dan spesimen antarmuka berlabel data contoh. MySQL development/test terpisah; PHPUnit, Pint, ESLint dan Prettier dikonfigurasi. Versi persis dikunci di composer.lock dan package-lock.json.
 
-Login/logout Fortify, aktivasi akun, pegawai dan lowongan internal tersedia. Pegawai dapat ditambah/diedit/diarsipkan/dipulihkan sesuai role. Pelamar/lamaran, pipeline, riwayat tahap dan CV privat sudah tersimpan di database. Jadwal interview, undangan PDF dan karier publik belum tersedia. Tidak ada kredensial bawaan. Lihat [rencana](docs/PLAN.md), [ERD](docs/ERD.md), dan [progress](docs/PROGRESS.md).
+Login/logout Fortify, aktivasi akun, pegawai dan lowongan tersedia. Pegawai dapat ditambah/diedit/diarsipkan/dipulihkan sesuai role. Pelamar/lamaran, pipeline, riwayat tahap dan CV privat tersimpan di database. Jadwal interview, undangan PDF dan portal karier dengan form lamaran tanpa akun tersedia. Tidak ada kredensial bawaan. Lihat [rencana](docs/PLAN.md), [ERD](docs/ERD.md), dan [progress](docs/PROGRESS.md).
 
 ## Prasyarat
 
@@ -63,7 +69,7 @@ npm run build
 php artisan serve --host=127.0.0.1 --port=8000
 ```
 
-APP_DEBUG default false. Aktifkan hanya sementara di .env untuk debugging lokal, bukan pada lingkungan publik. MAIL_MAILER=log; tidak ada pengiriman email otomatis.
+APP_DEBUG default false. Aktifkan hanya sementara di .env untuk debugging lokal, bukan pada lingkungan publik. MAIL_MAILER=log untuk pengembangan; notifikasi otomatis pelamar ditulis ke log setelah worker antrean memprosesnya, bukan ke inbox nyata.
 
 ## Pemeriksaan
 
@@ -116,17 +122,23 @@ Admin membuka tab Arsip untuk melihat detail dan memulihkan pegawai dengan alasa
 
 Menu Rekrutmen membuka `/vacancies` dengan tab Lowongan dan Pipeline kandidat. Admin/Staf HR dapat menambah, melihat, mengedit dan mengubah status draft/dibuka/ditutup; Viewer hanya membaca. Form memuat departemen, jenis kerja, lokasi, deskripsi/persyaratan dan tanggal buka/tutup. Pencarian judul/lokasi, filter departemen/status, sorting whitelist dan pagination15 tersedia. Form lama ditolak melalui version+row lock.
 
-Status Dibuka dihitung aktif pada dashboard hanya dalam rentang tanggal buka/tutup menurut tanggal WIB (kedua batas inklusif). Sebelum tanggal buka tampil Terjadwal; setelah tanggal tutup tampil Berakhir. Menutup lowongan tidak menghapus catatan. Belum ada endpoint hapus lowongan atau karier/form lamaran publik. Pipeline di tab sebelah memakai lamaran tersimpan. Detail di [VACANCY-PLAN.md](docs/VACANCY-PLAN.md).
+Status Dibuka dihitung aktif pada dashboard dan ditampilkan ke publik hanya dalam rentang tanggal buka/tutup menurut tanggal WIB (kedua batas inklusif). Sebelum tanggal buka tampil Terjadwal; setelah tanggal tutup tampil Berakhir. Menutup lowongan menyembunyikannya dari karier tanpa menghapus catatan. Belum ada endpoint hapus lowongan. Pipeline di tab sebelah memakai lamaran tersimpan. Detail di [VACANCY-PLAN.md](docs/VACANCY-PLAN.md).
 
 ## Pelamar dan lamaran
 
 Buka Rekrutmen → Pipeline kandidat (`/applications`). Admin/Staf HR dapat mencatat profil baru atau memilih Pelamar terdaftar melalui pencarian (20 hasil). Email profil unik dan dinormalisasi lowercase; identitas lama tidak ditimpa ketika membuat lamaran lain. Satu profil dapat melamar ke beberapa lowongan; pasangan profil/lowongan tidak boleh duplikat. Lowongan harus sedang menerima lamaran dan tanggal lamaran berada dalam periodenya, tidak di masa depan.
 
-CV PDF opsional saat input dan dapat ditambahkan dari detail sebagai versi baru. Maksimal5MiB, ekstensi/MIME/header PDF diperiksa; disk applicant_documents privat serve=false. Semua versi milik profil dan dibagikan antar lamarannya. Unduh attachment/nosniff hanya bagi Admin/Staf HR, dengan pemeriksaan kepemilikan dokumen. Viewer tidak menerima CV, telepon, catatan HR atau catatan privat riwayat. Belum ada antivirus/sanitasi PDF.
+CV PDF opsional saat input internal dan dapat ditambahkan dari detail sebagai versi baru. Maksimal5MiB, ekstensi/MIME/header PDF diperiksa; disk applicant_documents privat serve=false. CV unggahan HR dibagikan antar lamaran profil; CV publik dibatasi ke lamaran terkait. Unduh attachment/nosniff hanya bagi Admin/Staf HR, dengan pemeriksaan kepemilikan profil dan lamaran. Viewer tidak menerima CV, telepon, catatan HR atau catatan privat riwayat. Belum ada antivirus/sanitasi PDF.
 
 Lamaran dimulai Screening. Transisi manual: Screening→Interview/Ditolak, Interview→Offering/Ditolak, Offering→Diterima/Ditolak. Diterima/Ditolak terminal, tanpa reopen. Riwayat menyimpan actor session, waktu UTC (tampilan WIB) dan catatan opsional. Row lock+version menolak perubahan dari formulir lama. File dibersihkan jika transaksi DB gagal.
 
-Board/daftar memiliki search/filter dan pagination15. Jumlah tahap mencakup seluruh hasil filter; kartu board hanya halaman aktif. Dashboard memakai angka dan aktivitas aktual, tanpa jadwal interview fiktif. Belum ada edit/hapus profil, penghapusan dokumen, jadwal/undangan interview atau portal publik. Scope di [APPLICATION-PLAN.md](docs/APPLICATION-PLAN.md).
+Board/daftar memiliki search/filter dan pagination15. Jumlah tahap mencakup seluruh hasil filter; kartu board hanya halaman aktif. Dashboard memakai angka dan aktivitas aktual, tanpa jadwal interview fiktif. Belum ada edit/hapus profil atau penghapusan dokumen. Scope di [APPLICATION-PLAN.md](docs/APPLICATION-PLAN.md).
+
+Portal `/karier` menyediakan pencarian, filter, detail dan form lamaran tanpa akun. Landing menampilkan maksimal tiga lowongan aktif. Form mewajibkan CV PDF dan persetujuan penggunaan data, memakai CSRF, honeypot dan batas tiga pengiriman per jam/IP (termasuk permintaan tidak valid). Lamaran baru masuk Screening dan menunggu verifikasi email sebelum HR dapat mengubah tahap; duplikat mendapat respons generik tanpa membocorkan profil. Identitas pengajuan disimpan terpisah tanpa menimpa profil lama. Verifikasi mailbox tidak membuktikan identitas atau kebenaran CV. Belum CAPTCHA atau pemindaian antivirus. Lihat [CAREERS-PLAN.md](docs/CAREERS-PLAN.md).
+
+Verifikasi pelamar menggunakan Laravel Notifications dan temporary signed URL 24 jam. GET membuka konfirmasi; POST dengan CSRF menandai email terverifikasi per lamaran dan mengantrekan bukti penerimaan. Bukti bukan keputusan lolos seleksi. `/karier/verifikasi/kirim-ulang` memberi respons generik, batas tiga permintaan/jam/IP, cooldown10menit per lamaran dan maksimal lima lamaran pending per permintaan. Lamaran publik lama yang belum memiliki penanda verifikasi perlu memakai kirim ulang sebelum tahap dapat diubah.
+
+Jalankan worker dengan `php artisan queue:work recruitment --queue=recruitment-mail --tries=3 --timeout=60`. Koneksi antrean recruitment sengaja memakai database aplikasi yang sama: insert pekerjaan terenkripsi, lamaran dan file metadata satu transaksi; rollback membersihkan CV. Konfigurasi lokal aktif memakai mailer log, sehingga belum mengirim ke inbox. Untuk SMTP perusahaan, isi konfigurasi MAIL_* privat, alamat pengirim dan APP_URL yang benar (HTTPS di production), lalu restart worker. Jangan commit kredensial atau membagikan log yang memuat tautan verifikasi. Periksa failed_jobs bila pengiriman gagal; retry dapat menyebabkan email terkirim ulang. Panduan di [EMAIL-VERIFICATION-PLAN.md](docs/EMAIL-VERIFICATION-PLAN.md).
 
 ## Login dan pendaftaran akun internal
 
@@ -148,4 +160,13 @@ php artisan hr:invite staf@example.test --role=hr_staff
 
 Role yang diperbolehkan: `admin`, `hr_staff`, `viewer`. Salurkan tautan yang dihasilkan secara privat kepada penerima. Tidak ada email otomatis. Sesuaikan `APP_URL` dengan alamat aplikasi agar tautan mengarah ke host yang benar. Akses terminal/server setara dengan wewenang operator; UI pengelolaan undangan belum tersedia.
 
-Login dibatasi 5 request per menit per kombinasi email/IP dan 20 per IP; aktivasi 10 per IP. Password baru minimal 12 karakter dengan huruf besar/kecil dan angka, maksimal 72 byte sesuai bcrypt. Session diregenerasi saat masuk, dibatalkan saat keluar; CSRF tetap aktif. Untuk production wajib HTTPS, APP_DEBUG=false, APP_ENV=production dan SESSION_SECURE_COOKIE=true; cookie secure juga default aktif pada APP_ENV production. Reset password, verifikasi email dan 2FA belum diaktifkan; bantuan akun masih melalui operator.
+Login dibatasi 5 request per menit per kombinasi email/IP dan 20 per IP; aktivasi 10 per IP. Password baru minimal 12 karakter dengan huruf besar/kecil dan angka, maksimal 72 byte sesuai bcrypt. Session diregenerasi saat masuk, dibatalkan saat keluar; CSRF tetap aktif. Untuk production wajib HTTPS, APP_DEBUG=false, APP_ENV=production dan SESSION_SECURE_COOKIE=true; cookie secure juga default aktif pada APP_ENV production. Reset password, verifikasi email akun internal dan 2FA belum diaktifkan; bantuan akun masih melalui operator. Verifikasi email lamaran publik merupakan alur terpisah.
+
+
+## Jadwal interview dan undangan
+
+Buka Rekrutmen → Jadwal interview (`/interviews`), atau tombol Jadwalkan interview pada detail lamaran di tahap Interview. Admin/Staf HR memilih waktu WIB, durasi15–480menit, pewawancara dan lokasi/tautan HTTPS. Waktu disimpan UTC. Bentrok pewawancara maupun pelamar (termasuk lintas lamaran) ditolak; slot bersebelahan diperbolehkan.
+
+Agenda memiliki tab Mendatang/Semua riwayat/Dibatalkan dan pagination15. Pembatalan memerlukan alasan dan menyimpan pelaku/waktu/versi. Untuk menjadwalkan ulang, batalkan jadwal lama lalu buat jadwal baru. Keluar tahap Interview otomatis membatalkan jadwal belum selesai. Viewer hanya melihat agenda dasar, tanpa lokasi/tautan/catatan/PDF.
+
+Unduh undangan PDF dari kartu agenda. PDF memuat jadwal dan petunjuk konfirmasi ke HR, tanpa catatan internal, resource remote atau eksekusi PHP/JS dari HTML. Tidak ada pengiriman undangan otomatis. Jadwal batal tidak dapat menghasilkan undangan baru. Scope di docs/INTERVIEW-PLAN.md.

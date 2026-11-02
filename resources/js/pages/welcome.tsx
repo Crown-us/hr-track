@@ -1,6 +1,9 @@
 import { Head } from '@inertiajs/react';
+import { PublicHeader } from '../components/public-header';
 import { ArrowRight, ArrowUpRight, ChevronDown, Check } from 'lucide-react';
 import { useState } from 'react';
+import { CareerJobs, type PublicJob } from '../components/career-jobs';
+import '../css/careers.css';
 import { ApplicationTimeline, EmployeeTable } from '../components/specimens';
 import InkOrbitFeatures from '../components/ui/ink-orbit-features';
 import { StatusBadge, StatusPalette } from '../components/ui/status-badge';
@@ -56,7 +59,7 @@ const workflow = [
     },
 ];
 
-export default function Welcome() {
+export default function Welcome({ careerVacancies = [] }: { careerVacancies?: PublicJob[] }) {
     const [selected, setSelected] = useState(1);
     const current = modules[selected];
     return (
@@ -70,24 +73,7 @@ export default function Welcome() {
             <a href="#konten" className="taste-skip">
                 Lewati ke konten
             </a>
-            <div className="northstar-header">
-                <header className="taste-nav taste-wrap" data-od-id="masthead">
-                    <a href="/" className="taste-wordmark" aria-label="HRIS Lite, beranda">
-                        HRIS<span>Lite</span>
-                        <span className="taste-mark" aria-hidden="true">
-                            ↗
-                        </span>
-                    </a>
-                    <nav aria-label="Navigasi utama">
-                        <a href="#fitur">Fitur</a>
-                        <a href="#cara-kerja">Cara kerja</a>
-                        <a href="#tampilan">Tampilan</a>
-                    </nav>
-                    <a href="/login" className="taste-nav-access">
-                        Akses akun <ArrowUpRight size={16} aria-hidden="true" />
-                    </a>
-                </header>
-            </div>
+            <PublicHeader />
             <main id="konten">
                 <section className="taste-hero taste-wrap" data-od-id="hero">
                     <h1>
@@ -103,8 +89,8 @@ export default function Welcome() {
                         <a className="taste-button" href="#fitur">
                             Jelajahi fitur <ArrowRight size={17} aria-hidden="true" />
                         </a>
-                        <a className="northstar-secondary" href="#tampilan">
-                            Lihat tampilan <ArrowUpRight size={17} aria-hidden="true" />
+                        <a className="northstar-secondary" href="/karier">
+                            Lihat lowongan <ArrowUpRight size={17} aria-hidden="true" />
                         </a>
                     </div>
                 </section>{' '}
@@ -139,14 +125,34 @@ export default function Welcome() {
                         insights={{
                             title: 'Baca perkembangannya',
                             description:
-                                'Contoh visual ringkasan aktivitas. Angka dan proyeksi pada diagram ini bersifat ilustratif.',
+                                'Lihat perkembangan aktivitas dan perubahan status dari waktu ke waktu.',
                             values: [22, 26, 24, 31, 29, 36, 34, 41, 39, 47, 52, 58],
                             forecastFrom: 8,
                         }}
                     />
                     <p className="taste-caption">
-                        Ilustrasi alur informasi. Fitur aplikasi sedang disiapkan.
+                        Berkas, catatan, dan status terhubung dalam satu alur.
                     </p>
+                </section>
+                <section id="lowongan" className="career-latest taste-wrap">
+                    <div className="career-latest-heading">
+                        <div>
+                            <h2>Langkah baru dimulai di sini.</h2>
+                            <p>
+                                Jelajahi lowongan yang sedang dibuka dan temukan posisi yang sesuai.
+                            </p>
+                        </div>
+                        <a href="/karier">
+                            Lihat semua lowongan <ArrowRight size={17} />
+                        </a>
+                    </div>
+                    <CareerJobs jobs={careerVacancies} />
+                    {!careerVacancies.length && (
+                        <div className="career-empty">
+                            <h3>Belum ada lowongan yang dibuka.</h3>
+                            <p>Kunjungi kembali untuk melihat kesempatan berikutnya.</p>
+                        </div>
+                    )}
                 </section>
                 <section id="fitur" className="taste-modules taste-wrap" data-od-id="features">
                     <div className="taste-section-intro">
@@ -362,7 +368,7 @@ export default function Welcome() {
                         </h2>
                         <p>
                             Tabel yang mudah dipindai, status yang mudah dikenali, dan riwayat yang
-                            bisa diikuti. Seluruh informasi berikut adalah data contoh fiktif.
+                            bisa diikuti. Lihat bagaimana informasi disusun dalam satu ruang kerja.
                         </p>
                     </div>
                     <div className="taste-preview-layout">

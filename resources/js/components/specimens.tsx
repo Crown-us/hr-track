@@ -104,7 +104,7 @@ export function PipelinePlate() {
             </div>
 
             <figcaption className="mt-6 text-[11px] leading-5 text-slate-500">
-                Gbr. 01 — Contoh pipeline. Data fiktif, bukan data nyata.
+                Alur kandidat dari seleksi berkas hingga keputusan akhir.
             </figcaption>
         </figure>
     );
@@ -154,7 +154,7 @@ export function EmployeeTable() {
             </table>
 
             <figcaption className="mt-4 text-[11px] leading-5 text-slate-500">
-                Contoh tampilan. Data fiktif.
+                Ringkasan data dan status dalam satu tampilan.
             </figcaption>
         </figure>
     );
@@ -221,7 +221,7 @@ export function EmployeeForm() {
             </div>
 
             <figcaption className="mt-4 text-[11px] leading-5 text-slate-500">
-                Contoh tampilan. Data fiktif.
+                Ikuti setiap tahap dan pembaruan status.
             </figcaption>
         </figure>
     );
@@ -240,7 +240,7 @@ export function ApplicationTimeline() {
             </div>
 
             <figcaption className="mt-4 text-[11px] leading-5 text-slate-500">
-                Contoh tampilan. Data fiktif.
+                Informasi tersusun agar mudah diperiksa.
             </figcaption>
         </figure>
     );
