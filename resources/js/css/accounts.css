@@ -1,0 +1,47 @@
+.ac-page h1,
+.ac-page h2,
+.ac-page td {
+    overflow-wrap: anywhere;
+}
+.ac-page .ep-card {
+    margin-bottom: 24px;
+}
+.ac-page .hr-table-scroll {
+    contain: layout paint;
+}
+.ac-page .ep-card h2 {
+    font-size: 16px;
+    font-weight: 550;
+}
+.ac-invite {
+    max-width: 800px;
+    margin: 32px 0;
+}
+.ac-link p {
+    font-size: 13px;
+    color: #59616c;
+    line-height: 1.8;
+    margin: 12px 0;
+}
+.ac-link input {
+    display: block;
+    width: 100%;
+    border: 1px solid #d6dce4;
+    border-radius: 5px;
+    padding: 10px 12px;
+    font: inherit;
+    font-size: 13px;
+}
+.ac-link button {
+    margin-top: 14px;
+}
+.ac-link small {
+    display: block;
+    margin-top: 10px;
+}
+.ac-confirm {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 13px;
+}

@@ -25,7 +25,7 @@ export default function HrShell({
     children,
 }: {
     title: string;
-    active: HrView | 'training';
+    active: HrView | 'training' | 'contracts' | 'reports' | 'accounts';
     user?: HrUser | null;
     onNavigate?: (view: HrView) => void;
     children: ReactNode;
@@ -124,6 +124,17 @@ export default function HrShell({
                         </>
                     )}
                     <p>Pengembangan tim</p>
+                    {user?.role === 'admin' && !onNavigate && (
+                        <Link
+                            href="/accounts"
+                            className={active === 'accounts' ? 'active' : ''}
+                            aria-current={active === 'accounts' ? 'page' : undefined}
+                            onClick={() => setSidebar(false)}
+                        >
+                            <Users size={17} />
+                            Kelola akun
+                        </Link>
+                    )}
                     {user && !onNavigate ? (
                         <Link
                             href="/trainings"
@@ -140,14 +151,40 @@ export default function HrShell({
                             Pelatihan<small>Segera</small>
                         </button>
                     )}
-                    <button disabled>
-                        <FileCheck2 size={17} />
-                        Hubungan kerja<small>Segera</small>
-                    </button>
-                    <button disabled>
-                        <List size={17} />
-                        Laporan<small>Segera</small>
-                    </button>
+                    {user && !onNavigate ? (
+                        <Link
+                            href="/contracts"
+                            className={active === 'contracts' ? 'active' : ''}
+                            aria-current={active === 'contracts' ? 'page' : undefined}
+                            onClick={() => setSidebar(false)}
+                        >
+                            <FileCheck2 size={17} />
+                            Hubungan kerja
+                        </Link>
+                    ) : (
+                        <button disabled>
+                            <FileCheck2 size={17} />
+                            Hubungan kerja<small>Segera</small>
+                        </button>
+                    )}
+                    {user && !onNavigate ? (
+                        ['admin', 'hr_staff'].includes(user.role) && (
+                            <Link
+                                href="/reports"
+                                className={active === 'reports' ? 'active' : ''}
+                                aria-current={active === 'reports' ? 'page' : undefined}
+                                onClick={() => setSidebar(false)}
+                            >
+                                <List size={17} />
+                                Laporan
+                            </Link>
+                        )
+                    ) : (
+                        <button disabled>
+                            <List size={17} />
+                            Laporan<small>Segera</small>
+                        </button>
+                    )}
                 </nav>
                 <div className="hr-sidebar-bottom">
                     <Link href="/">

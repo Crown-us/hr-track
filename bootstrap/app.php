@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\PrivateAuthResponse;
 use Illuminate\Foundation\Application;
@@ -14,9 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [PrivateAuthResponse::class, HandleInertiaRequests::class]);
+        $middleware->web(append: [EnsureAccountActive::class, PrivateAuthResponse::class, HandleInertiaRequests::class]);
         $middleware->redirectGuestsTo('/login');
-        $middleware->redirectUsersTo('/hr');
+        $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->home() ?? '/hr');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->dontFlash(['password', 'password_confirmation', 'current_password', 'token']);

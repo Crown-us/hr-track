@@ -4,18 +4,20 @@ import { useState, type FormEvent } from 'react';
 import '../css/auth.css';
 
 type Props = {
-    mode: 'login' | 'register' | 'confirm';
+    mode: 'login' | 'register' | 'confirm' | 'reset';
     invitation: { email: string; token: string } | null;
     invalidInvitation?: boolean;
 };
 
 export default function Auth({ mode, invitation, invalidInvitation = false }: Props) {
     const signup = mode === 'register';
+    const reset = mode === 'reset';
+    const activeReset = reset && invitation !== null;
     const confirm = mode === 'confirm';
     const activeSignup = signup && invitation !== null;
     const [visible, setVisible] = useState(false);
     const form = useForm({
-        email: '',
+        email: invitation?.email ?? '',
         password: '',
         password_confirmation: '',
         name: '',
@@ -24,19 +26,40 @@ export default function Auth({ mode, invitation, invalidInvitation = false }: Pr
     });
     const submit = (event: FormEvent) => {
         event.preventDefault();
-        form.post(signup ? '/register' : confirm ? '/user/confirm-password' : '/login', {
-            onFinish: () => form.reset('password', 'password_confirmation'),
-        });
+        form.post(
+            reset
+                ? '/reset-password'
+                : signup
+                  ? '/register'
+                  : confirm
+                    ? '/user/confirm-password'
+                    : '/login',
+            {
+                onFinish: () => form.reset('password', 'password_confirmation'),
+            },
+        );
     };
-    const title = signup
-        ? 'Buat akun Anda.'
-        : confirm
-          ? 'Konfirmasi akses.'
-          : 'Masuk ke ruang kerja.';
+    const title = reset
+        ? 'Atur kata sandi baru.'
+        : signup
+          ? 'Buat akun Anda.'
+          : confirm
+            ? 'Konfirmasi akses.'
+            : 'Masuk ke ruang kerja.';
 
     return (
         <div className="auth-page">
-            <Head title={signup ? 'Aktivasi akun' : confirm ? 'Konfirmasi kata sandi' : 'Masuk'}>
+            <Head
+                title={
+                    reset
+                        ? 'Pemulihan kata sandi'
+                        : signup
+                          ? 'Aktivasi akun'
+                          : confirm
+                            ? 'Konfirmasi kata sandi'
+                            : 'Masuk'
+                }
+            >
                 <meta name="robots" content="noindex, nofollow" />
                 <meta name="referrer" content="no-referrer" />
             </Head>
@@ -101,19 +124,23 @@ export default function Auth({ mode, invitation, invalidInvitation = false }: Pr
                     </div>
                     <h1 id="auth-title">{title}</h1>
                     <p className="auth-subtitle">
-                        {signup
-                            ? 'Aktifkan akses melalui undangan dari pengelola.'
-                            : confirm
-                              ? 'Masukkan kembali kata sandi untuk melanjutkan.'
-                              : 'Gunakan akun yang diberikan oleh pengelola tim.'}
+                        {reset
+                            ? 'Gunakan kata sandi baru, minimal 12 karakter dengan huruf besar/kecil dan angka.'
+                            : signup
+                              ? 'Aktifkan akses melalui undangan dari pengelola.'
+                              : confirm
+                                ? 'Masukkan kembali kata sandi untuk melanjutkan.'
+                                : 'Gunakan akun yang diberikan oleh pengelola tim.'}
                     </p>
-                    {signup && !activeSignup ? (
+                    {(signup || reset) && !(activeSignup || activeReset) ? (
                         <div className="auth-invite-info">
                             <KeyRound size={25} strokeWidth={1.5} aria-hidden="true" />
                             <h2>
-                                {invalidInvitation
-                                    ? 'Undangan tidak tersedia.'
-                                    : 'Punya undangan dari tim?'}
+                                {reset
+                                    ? 'Tautan pemulihan tidak tersedia.'
+                                    : invalidInvitation
+                                      ? 'Undangan tidak tersedia.'
+                                      : 'Punya undangan dari tim?'}
                             </h2>
                             <p>
                                 {invalidInvitation
@@ -166,8 +193,12 @@ export default function Auth({ mode, invitation, invalidInvitation = false }: Pr
                                         autoFocus={!signup}
                                         required
                                         maxLength={255}
-                                        readOnly={activeSignup}
-                                        value={activeSignup ? invitation.email : form.data.email}
+                                        readOnly={activeSignup || activeReset}
+                                        value={
+                                            activeSignup || activeReset
+                                                ? invitation.email
+                                                : form.data.email
+                                        }
                                         placeholder="nama@perusahaan.com"
                                         onChange={(e) => form.setData('email', e.target.value)}
                                         aria-invalid={!!form.errors.email}
@@ -189,7 +220,9 @@ export default function Auth({ mode, invitation, invalidInvitation = false }: Pr
                                         id="password"
                                         name="password"
                                         type={visible ? 'text' : 'password'}
-                                        autoComplete={signup ? 'new-password' : 'current-password'}
+                                        autoComplete={
+                                            signup || reset ? 'new-password' : 'current-password'
+                                        }
                                         required
                                         minLength={signup ? 12 : undefined}
                                         maxLength={72}
@@ -231,7 +264,7 @@ export default function Auth({ mode, invitation, invalidInvitation = false }: Pr
                                     {form.errors.password}
                                 </p>
                             </div>
-                            {activeSignup && (
+                            {(activeSignup || activeReset) && (
                                 <div className="auth-field">
                                     <label htmlFor="password_confirmation">Ulangi kata sandi</label>
                                     <input
@@ -248,7 +281,7 @@ export default function Auth({ mode, invitation, invalidInvitation = false }: Pr
                                     />
                                 </div>
                             )}
-                            {!signup && !confirm && (
+                            {!signup && !confirm && !reset && (
                                 <label className="auth-remember">
                                     <input
                                         type="checkbox"
@@ -265,11 +298,13 @@ export default function Auth({ mode, invitation, invalidInvitation = false }: Pr
                             >
                                 {form.processing
                                     ? 'Memproses…'
-                                    : signup
-                                      ? 'Aktifkan akun'
-                                      : confirm
-                                        ? 'Konfirmasi'
-                                        : 'Masuk'}
+                                    : reset
+                                      ? 'Simpan kata sandi'
+                                      : signup
+                                        ? 'Aktifkan akun'
+                                        : confirm
+                                          ? 'Konfirmasi'
+                                          : 'Masuk'}
                                 <ArrowRight size={17} aria-hidden="true" />
                             </button>
                             <p className="auth-help">

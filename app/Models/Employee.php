@@ -26,6 +26,11 @@ class Employee extends Model
         return $this->belongsTo(Department::class);
     }
 
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'manager_employee_id')->withTrashed();
+    }
+
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class);

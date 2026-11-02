@@ -6,18 +6,22 @@ import { applicationTone, applicationDate } from './application-format';
 import type { EmployeeRecord } from '../types/employees';
 import type { VacancyRecord } from '../types/vacancies';
 import type { RecruitmentSummary } from '../types/applications';
+import type { ContractSummary } from '../types/contracts';
 import '../css/employees.css';
+import '../css/contracts.css';
 
 export default function HrDashboard({
     user,
     employees,
     vacancies,
     recruitment,
+    contracts,
 }: {
     user: HrUser;
     employees?: { count: number; recent: EmployeeRecord[] };
     vacancies?: { count: number; recent: VacancyRecord[] };
     recruitment: RecruitmentSummary;
+    contracts?: ContractSummary;
 }) {
     const canManage = user.role === 'admin' || user.role === 'hr_staff';
     const stages = [
@@ -64,6 +68,50 @@ export default function HrDashboard({
                         </div>
                     ))}
                 </section>
+                {contracts && (
+                    <section className="hr-panel ct-alert" aria-label="Pengingat kontrak">
+                        <div className="hr-panel-title">
+                            <h2>Kontrak perlu ditinjau</h2>
+                            <Link href="/contracts?attention=due">
+                                {contracts.due_count} berakhir dalam 30 hari{' '}
+                                <ArrowRight size={14} />
+                            </Link>
+                        </div>
+                        {contracts.expired_count > 0 && (
+                            <p className="hr-footnote">
+                                <Link
+                                    className="ct-alert-count"
+                                    href="/contracts?attention=expired"
+                                >
+                                    {contracts.expired_count} kontrak sudah berakhir · Tinjau
+                                    catatan
+                                </Link>
+                            </p>
+                        )}
+                        {contracts.recent.length ? (
+                            contracts.recent.map((c) => (
+                                <Link
+                                    key={c.id}
+                                    className="hr-vacancy-row"
+                                    href={`/contracts/${c.id}`}
+                                >
+                                    <span>
+                                        <strong>{c.employee_name}</strong>
+                                        <small>{c.contract_number} · PKWT</small>
+                                    </span>
+                                    <StatusBadge variant="pending">
+                                        Berakhir {applicationDate(c.ends_on!)}
+                                    </StatusBadge>
+                                    <ArrowRight size={14} />
+                                </Link>
+                            ))
+                        ) : (
+                            <p className="hr-empty">
+                                Tidak ada PKWT pegawai aktif yang berakhir dalam 30 hari ke depan.
+                            </p>
+                        )}
+                    </section>
+                )}
                 <div className="hr-overview-grid">
                     <section className="hr-panel">
                         <div className="hr-panel-title">

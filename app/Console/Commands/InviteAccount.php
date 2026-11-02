@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Services\AccountAdministration;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -28,13 +28,9 @@ class InviteAccount extends Command
             return self::FAILURE;
         }
 
-        $token = Str::random(64);
-        DB::table('account_invitations')->updateOrInsert(['email' => $email], [
-            'role' => $role, 'token_hash' => hash('sha256', $token), 'expires_at' => now()->addHours(48),
-            'used_at' => null, 'created_at' => now(), 'updated_at' => now(),
-        ]);
+        $url = app(AccountAdministration::class)->invite(['email' => $email, 'role' => $role]);
         $this->warn('Tautan rahasia, berlaku 48 jam. Undangan lama untuk email ini dibatalkan. Tidak ada email yang dikirim.');
-        $this->line(url('/register').'?token='.$token);
+        $this->line($url);
 
         return self::SUCCESS;
     }

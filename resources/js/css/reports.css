@@ -1,0 +1,82 @@
+.rp-filters {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.4fr) 1fr 1fr minmax(150px, 1fr) auto;
+    gap: 16px;
+    align-items: start;
+    margin-bottom: 24px;
+}
+.rp-filters button {
+    margin-top: 26px;
+}
+.rp-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 22px 20px;
+    border-bottom: 1px solid #e6e8eb;
+}
+.rp-heading h2 {
+    font-size: 16px;
+    font-weight: 550;
+}
+.rp-heading p {
+    font-size: 12px;
+    color: #59616c;
+    line-height: 1.8;
+    margin-top: 8px;
+}
+.rp-heading small {
+    font-size: 11px;
+    color: #6b7280;
+    display: block;
+    margin-top: 6px;
+}
+.rp-downloads {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.rp-count {
+    font-size: 12px;
+    color: #59616c;
+    padding: 18px 20px;
+}
+.rp-page td {
+    overflow-wrap: anywhere;
+    max-width: 260px;
+}
+.rp-disabled {
+    font-size: 12px;
+    color: #6b7280;
+}
+.rp-page .rp-note {
+    margin: 20px 0;
+    max-width: 900px;
+}
+.rp-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 12px;
+}
+@media (max-width: 1100px) {
+    .rp-filters {
+        grid-template-columns: 1fr 1fr;
+    }
+    .rp-filters button {
+        margin-top: 0;
+        justify-self: start;
+    }
+    .rp-heading {
+        flex-direction: column;
+    }
+}
+@media (max-width: 550px) {
+    .rp-filters {
+        grid-template-columns: 1fr;
+    }
+    .rp-links {
+        gap: 14px;
+    }
+}

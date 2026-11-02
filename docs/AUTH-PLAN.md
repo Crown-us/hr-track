@@ -1,5 +1,7 @@
 # Login dan aktivasi akun — 2 November 2026
 
+Pembaruan tahap1–2: UI Admin untuk undangan/role/status/link pegawai/reset dan struktur atasan serta portal Pegawai/Atasan tersedia. Sesi dicabut melalui auth_version dan remember token saat akses/password berubah. Role sekarang5; CLI legacy tetap3role. Detail terbaru di [ACCOUNT-MANAGEMENT-PLAN.md](ACCOUNT-MANAGEMENT-PLAN.md); rincian scope awal di bawah bersifat historis.
+
 Scope disetujui: login dan signup terlebih dahulu, Laravel Fortify + MySQL, desain mengikuti ruang HR yang sudah ada.
 
 1. Tulis tes login/logout, akses guest, pembatasan login, undangan kedaluwarsa/sekali pakai dan penolakan role dari payload.

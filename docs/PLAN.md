@@ -1,5 +1,11 @@
 # HRIS Lite Implementation Plan
 
+Pembaruan akun tahap1–2: Kelola akun Admin (`/accounts`), undangan/link pegawai, role/status/reset, struktur atasan (`/accounts/reporting`), portal Pegawai/Atasan (`/me`, `/team`) dan pencabutan sesi tersedia. Role sekarang5, seluruh endpoint HR tetap menolak Pegawai/Atasan. Scope/batas di [ACCOUNT-MANAGEMENT-PLAN.md](ACCOUNT-MANAGEMENT-PLAN.md). Cuti/izin dan absensi masih tahap berikutnya; tidak mengimplementasikan seluruh fase sekaligus.
+
+Pembaruan pelanggaran/SP dan laporan: `/discipline` tersedia di Hubungan kerja → Pelanggaran & SP khusus Admin/Staf HR, dengan PDF wajib saat pencatatan SP, koreksi beralasan, tindak lanjut dan pembatalan administratif tanpa hapus. `/reports` menyediakan rekap rekrutmen, evaluasi pelatihan, kontrak, serta pelanggaran/SP/konseling dengan filter periode/status dan ekspor XLSX/PDF. Lihat [DISCIPLINE-PLAN.md](DISCIPLINE-PLAN.md) dan [REPORT-PLAN.md](REPORT-PLAN.md). Absensi/cuti belum dimulai sesuai pilihan pengguna; UAT tim HR, panduan handover dan konfigurasi operasional tetap berikutnya.
+
+Pembaruan kontrak: `/contracts` (sidebar Hubungan kerja) menyediakan PKWT/PKWTT, koreksi beralasan/versi, pembatalan administratif tanpa hapus, berkas PDF privat berversi, dan pengingat 30 hari/kontrak lewat waktu di dashboard. Lihat [CONTRACT-PLAN.md](CONTRACT-PLAN.md). Belum template hukum, e-sign, pengingat email, PHK, pelanggaran/SP atau ekspor laporan.
+
 > Untuk pelaksana: gunakan superpowers:executing-plans untuk implementasi per tugas di checkout ini. Jangan implementasikan seluruh fase sekaligus.
 
 **Goal:** Prototipe HRIS berbahasa Indonesia untuk demonstrasi portofolio wawancara magang, dengan alur pegawai dan rekrutmen yang benar-benar bekerja.

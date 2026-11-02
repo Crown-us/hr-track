@@ -14,6 +14,20 @@ use Illuminate\Notifications\Notifiable;
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
+    public const ROLES = ['admin' => 'Admin', 'hr_staff' => 'Staf HR', 'viewer' => 'Pembaca', 'employee' => 'Pegawai', 'supervisor' => 'Atasan'];
+
+    protected $attributes = ['is_active' => true, 'version' => 1, 'auth_version' => 1];
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class)->withTrashed();
+    }
+
+    public function home(): string
+    {
+        return in_array($this->role, ['employee', 'supervisor'], true) ? '/me' : '/hr';
+    }
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
@@ -25,6 +39,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'is_active' => 'boolean', 'version' => 'integer', 'auth_version' => 'integer',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];

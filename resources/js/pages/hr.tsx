@@ -5,6 +5,7 @@ import type { RecruitmentSummary } from '../types/applications';
 import RecruitmentTabs from '../components/recruitment-tabs';
 import type { VacancyRecord } from '../types/vacancies';
 import type { EmployeeRecord } from '../types/employees';
+import type { ContractSummary } from '../types/contracts';
 import { useRef, useState } from 'react';
 import {
     ArrowRight,
@@ -49,12 +50,14 @@ export default function HrPreview({
     employeeSummary,
     vacancySummary,
     recruitmentSummary,
+    contractSummary,
 }: {
     auth?: { user: HrUser | null };
     initialView?: View;
     employeeSummary?: { count: number; recent: EmployeeRecord[] };
     vacancySummary?: { count: number; recent: VacancyRecord[] };
     recruitmentSummary?: RecruitmentSummary;
+    contractSummary?: ContractSummary;
 }) {
     const user = auth?.user;
     const [view, setView] = useState<View>(initialView);
@@ -193,6 +196,7 @@ export default function HrPreview({
                 employees={employeeSummary}
                 vacancies={vacancySummary}
                 recruitment={recruitmentSummary}
+                contracts={contractSummary}
             />
         );
     }

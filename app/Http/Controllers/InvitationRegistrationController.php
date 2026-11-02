@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Rules\PasswordBytes;
+use App\Services\AccountAdministration;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -50,29 +49,11 @@ class InvitationRegistrationController
             'password.numbers' => 'Sertakan minimal satu angka.',
         ])->validate();
 
-        $user = DB::transaction(function () use ($data) {
-            $invitation = DB::table('account_invitations')->where('token_hash', hash('sha256', $data['token']))
-                ->lockForUpdate()->first();
-            if (! $invitation || $invitation->used_at || now()->gte($invitation->expires_at)
-                || ! in_array($invitation->role, ['admin', 'hr_staff', 'viewer'], true)
-                || User::where('email', $invitation->email)->exists()) {
-                throw ValidationException::withMessages(['token' => 'Undangan tidak valid, sudah digunakan, atau kedaluwarsa. Minta undangan baru kepada pengelola.']);
-            }
-
-            $user = new User;
-            $user->name = $data['name'];
-            $user->email = $invitation->email;
-            $user->password = $data['password'];
-            $user->role = $invitation->role;
-            $user->save();
-            DB::table('account_invitations')->where('id', $invitation->id)->update(['used_at' => now(), 'updated_at' => now()]);
-
-            return $user;
-        });
+        $user = app(AccountAdministration::class)->activate($data);
 
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect('/hr');
+        return redirect($user->home());
     }
 }

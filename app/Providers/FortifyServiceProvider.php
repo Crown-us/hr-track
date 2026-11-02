@@ -2,22 +2,31 @@
 
 namespace App\Providers;
 
+use App\Http\Responses\RoleLoginResponse;
 use App\Models\User;
 use App\Rules\PasswordBytes;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        $this->app->singleton(LoginResponse::class, RoleLoginResponse::class);
+        Event::listen(Login::class, function ($event) {
+            session()->put('account_auth_version', $event->user->auth_version);
+        });
+        Gate::define('manage-accounts', fn (User $user) => $user->is_active && $user->role === 'admin');
         RateLimiter::for('email-resend', fn (Request $request) => Limit::perHour(3)->by('email-resend:'.$request->ip()));
         Fortify::loginView(fn () => Inertia::render('auth', ['mode' => 'login', 'invitation' => null]));
         Fortify::confirmPasswordView(fn () => Inertia::render('auth', ['mode' => 'confirm', 'invitation' => null]));
@@ -30,7 +39,7 @@ class FortifyServiceProvider extends ServiceProvider
             ]);
             $user = User::where('email', Str::lower(trim((string) $request->input('email'))))->first();
 
-            if ($user && Hash::check((string) $request->input('password'), $user->password)) {
+            if ($user && Hash::check((string) $request->input('password'), $user->password) && $user->is_active) {
                 return $user;
             }
 

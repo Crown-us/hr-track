@@ -1,0 +1,52 @@
+.ds-page .hr-page-heading h1,
+.ds-page .tr-copy,
+.ds-page h2 {
+    overflow-wrap: anywhere;
+}
+.ds-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) 1fr 1fr auto;
+    gap: 24px;
+    margin-bottom: 24px;
+    align-items: center;
+}
+.ds-summary a {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-weight: 550;
+    font-size: 14px;
+    margin-top: 8px;
+    overflow-wrap: anywhere;
+}
+.ds-summary p {
+    margin-top: 8px;
+    font-size: 14px;
+}
+.ds-summary > :last-child {
+    justify-self: start;
+}
+.ds-confirm {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    line-height: 1.8;
+}
+.ds-confirm input {
+    margin-top: 4px;
+}
+.ds-page .tr-list-filters {
+    max-width: none;
+    flex-wrap: wrap;
+}
+@media (max-width: 900px) {
+    .ds-summary {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+@media (max-width: 500px) {
+    .ds-summary {
+        grid-template-columns: 1fr;
+    }
+}

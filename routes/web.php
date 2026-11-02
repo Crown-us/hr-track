@@ -1,20 +1,27 @@
 <?php
 
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AccountPasswordController;
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationEmailVerificationController;
 use App\Http\Controllers\CareerController;
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\DisciplineController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmployeePortalController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InvitationRegistrationController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\RecruitmentOfferController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\VacancyController;
 use App\Models\Employee;
 use App\Models\Vacancy;
 use App\Services\ApplicationWorkflow;
+use App\Services\ContractRecords;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -45,11 +52,51 @@ Route::get('/preview/hr', function () {
 })->name('preview.hr');
 
 Route::middleware('guest')->group(function () {
+    Route::get('/reset-password/{token}', [AccountPasswordController::class, 'show'])->middleware('throttle:20,1')->name('account-password.form');
+    Route::post('/reset-password', [AccountPasswordController::class, 'store'])->middleware('throttle:6,1')->name('account-password.store');
     Route::get('/register', [InvitationRegistrationController::class, 'create'])->name('register');
     Route::post('/register', [InvitationRegistrationController::class, 'store'])->middleware('throttle:signup')->name('register.store');
 });
 
+Route::middleware('auth')->group(function () {
+    Route::get('/me', [EmployeePortalController::class, 'me'])->name('portal.me');
+    Route::get('/team', [EmployeePortalController::class, 'team'])->name('portal.team');
+    Route::get('/team/{employee}', [EmployeePortalController::class, 'member'])->name('portal.member');
+});
+
+Route::middleware(['auth', 'can:manage-accounts'])->group(function () {
+    Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.index');
+    Route::get('/accounts/reporting', [AccountController::class, 'reporting'])->name('accounts.reporting');
+    Route::get('/accounts/reporting/{employee}', [AccountController::class, 'reportingEdit'])->name('accounts.reporting.edit');
+    Route::post('/accounts/reporting', [AccountController::class, 'reportingSave'])->name('accounts.reporting.save');
+    Route::post('/accounts/invitations', [AccountController::class, 'invite'])->name('accounts.invite');
+    Route::post('/accounts/invitations/{invitation}/revoke', [AccountController::class, 'revoke'])->name('accounts.revoke');
+    Route::get('/accounts/{account}', [AccountController::class, 'show'])->whereNumber('account')->name('accounts.show');
+    Route::put('/accounts/{account}', [AccountController::class, 'update'])->whereNumber('account')->name('accounts.update');
+    Route::post('/accounts/{account}/reset-link', [AccountController::class, 'resetLink'])->whereNumber('account')->name('accounts.reset-link');
+});
+
 Route::middleware(['auth', 'can:access-hr'])->group(function () {
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+    Route::get('/discipline', [DisciplineController::class, 'index'])->name('discipline.index');
+    Route::get('/discipline/create', [DisciplineController::class, 'create'])->name('discipline.create');
+    Route::post('/discipline', [DisciplineController::class, 'store'])->name('discipline.store');
+    Route::get('/discipline/{case}', [DisciplineController::class, 'show'])->name('discipline.show');
+    Route::get('/discipline/{case}/edit', [DisciplineController::class, 'edit'])->name('discipline.edit');
+    Route::put('/discipline/{case}', [DisciplineController::class, 'update'])->name('discipline.update');
+    Route::post('/discipline/{case}/status', [DisciplineController::class, 'status'])->name('discipline.status');
+    Route::post('/discipline/{case}/documents', [DisciplineController::class, 'upload'])->name('discipline.upload');
+    Route::get('/discipline/{case}/documents/{document}', [DisciplineController::class, 'download'])->name('discipline.document');
+    Route::get('/contracts', [ContractController::class, 'index'])->name('contracts.index');
+    Route::get('/contracts/create', [ContractController::class, 'create'])->name('contracts.create');
+    Route::post('/contracts', [ContractController::class, 'store'])->name('contracts.store');
+    Route::get('/contracts/{contract}', [ContractController::class, 'show'])->name('contracts.show');
+    Route::get('/contracts/{contract}/edit', [ContractController::class, 'edit'])->name('contracts.edit');
+    Route::put('/contracts/{contract}', [ContractController::class, 'update'])->name('contracts.update');
+    Route::post('/contracts/{contract}/void', [ContractController::class, 'void'])->name('contracts.void');
+    Route::post('/contracts/{contract}/documents', [ContractController::class, 'upload'])->name('contracts.upload');
+    Route::get('/contracts/{contract}/documents/{document}', [ContractController::class, 'download'])->name('contracts.document');
     Route::get('/trainings', [TrainingController::class, 'index'])->name('trainings.index');
     Route::get('/trainings/create', [TrainingController::class, 'create'])->name('trainings.create');
     Route::post('/trainings', [TrainingController::class, 'store'])->name('trainings.store');
@@ -67,6 +114,7 @@ Route::middleware(['auth', 'can:access-hr'])->group(function () {
         'employeeSummary' => ['count' => Employee::count(), 'recent' => Employee::with(['department', 'position'])->latest('id')->limit(4)->get()->map(fn ($employee) => $employee->forDisplay())],
         'vacancySummary' => ['count' => Vacancy::open()->count(), 'recent' => Vacancy::open()->with('department')->latest('id')->limit(4)->get()->map(fn ($vacancy) => $vacancy->forDisplay())],
         'recruitmentSummary' => app(ApplicationWorkflow::class)->summary(),
+        'contractSummary' => app(ContractRecords::class)->summary(),
     ]))->name('hr');
     Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
     Route::get('/interviews', [InterviewController::class, 'index'])->name('interviews.index');
