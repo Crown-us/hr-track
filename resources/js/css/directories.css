@@ -1,0 +1,38 @@
+.ep-main label.ep-field {
+    display: block;
+}
+.ep-main label.ep-field > span {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.ep-main > .ep-form {
+    max-width: 680px;
+    margin-inline: auto;
+}
+.ep-main .ep-form-footer {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+.ep-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.ep-filter-bar > form {
+    margin: 0;
+    min-width: 220px;
+    max-width: none;
+    flex: 1;
+}
+.ep-filter-bar > div {
+    min-width: 150px;
+    flex: 1;
+}
+.ep-filter-bar input {
+    width: 100%;
+}

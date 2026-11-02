@@ -26,7 +26,13 @@ export type VacancyProps = {
     departments: { id: number; name: string }[];
     types: { value: string; label: string }[];
     statuses: { value: string; label: string }[];
-    filters?: { q?: string; department_id?: string; status?: string; sort?: string };
+    filters?: {
+        q?: string;
+        department_id?: string;
+        employment_type?: string;
+        status?: string;
+        sort?: string;
+    };
     vacancies?: {
         data: VacancyRecord[];
         total: number;

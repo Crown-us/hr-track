@@ -25,7 +25,7 @@ export default function HrShell({
     children,
 }: {
     title: string;
-    active: HrView;
+    active: HrView | 'training';
     user?: HrUser | null;
     onNavigate?: (view: HrView) => void;
     children: ReactNode;
@@ -106,11 +106,40 @@ export default function HrShell({
                             </Link>
                         ),
                     )}
+                    {user && !onNavigate && (
+                        <>
+                            <p>Data pendukung</p>
+                            <Link href="/applicants" onClick={() => setSidebar(false)}>
+                                <Users size={17} />
+                                Profil pelamar
+                            </Link>
+                            <Link href="/departments" onClick={() => setSidebar(false)}>
+                                <List size={17} />
+                                Departemen
+                            </Link>
+                            <Link href="/positions" onClick={() => setSidebar(false)}>
+                                <BriefcaseBusiness size={17} />
+                                Jabatan
+                            </Link>
+                        </>
+                    )}
                     <p>Pengembangan tim</p>
-                    <button disabled>
-                        <GraduationCap size={17} />
-                        Pelatihan<small>Segera</small>
-                    </button>
+                    {user && !onNavigate ? (
+                        <Link
+                            href="/trainings"
+                            className={active === 'training' ? 'active' : ''}
+                            aria-current={active === 'training' ? 'page' : undefined}
+                            onClick={() => setSidebar(false)}
+                        >
+                            <GraduationCap size={17} />
+                            Pelatihan
+                        </Link>
+                    ) : (
+                        <button disabled>
+                            <GraduationCap size={17} />
+                            Pelatihan<small>Segera</small>
+                        </button>
+                    )}
                     <button disabled>
                         <FileCheck2 size={17} />
                         Hubungan kerja<small>Segera</small>

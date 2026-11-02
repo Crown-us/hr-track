@@ -1,9 +1,10 @@
 import { Link, router, useForm } from '@inertiajs/react';
-import { useState, type FormEvent } from 'react';
-import { ArrowLeft, ArrowRight, Plus, Search } from 'lucide-react';
+import { type FormEvent } from 'react';
+import { ArrowLeft, ArrowRight, Plus } from 'lucide-react';
 import HrShell from '../components/hr-shell';
 import RecruitmentTabs from '../components/recruitment-tabs';
 import { StatusBadge, type StatusVariant } from '../components/ui/status-badge';
+import FilterBar from '../components/ui/filter-bar';
 import type { VacancyProps, VacancyRecord } from '../types/vacancies';
 import '../css/employees.css';
 import '../css/vacancies.css';
@@ -202,67 +203,61 @@ function VacancyForm({ vacancy, departments, types, statuses, today }: VacancyPr
     );
 }
 
-function Directory({ vacancies, filters = {}, departments, statuses, canManage }: VacancyProps) {
-    const [q, setQ] = useState(filters.q ?? '');
-    const update = (data: Record<string, string>) =>
-        router.get(
-            '/vacancies',
-            { ...filters, q, ...data, page: 1 },
-            { preserveState: false, preserveScroll: true },
-        );
+type FilterPatch = {
+    q?: string;
+    department_id?: string | null;
+    employment_type?: string | null;
+    status?: string | null;
+    sort?: string | null;
+};
+
+function Directory({
+    vacancies,
+    filters = {},
+    departments,
+    types,
+    statuses,
+    canManage,
+}: VacancyProps) {
+    const update = (patch: FilterPatch) => {
+        const next: Record<string, string | null> = {
+            ...(filters ?? {}),
+            page: '1',
+        } as Record<string, string | null>;
+        if (patch.q !== undefined) next.q = patch.q ?? null;
+        if (patch.department_id !== undefined) next.department_id = patch.department_id;
+        if (patch.employment_type !== undefined) next.employment_type = patch.employment_type;
+        if (patch.status !== undefined) next.status = patch.status;
+        if (patch.sort !== undefined) next.sort = patch.sort;
+        Object.keys(next).forEach((k) => next[k] == null && delete next[k]);
+        router.get('/vacancies', next, { preserveState: false, preserveScroll: true });
+    };
     return (
         <>
-            <div className="ep-filters">
-                <form
-                    className="ep-search"
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        update({ q });
-                    }}
-                >
-                    <Search size={16} />
-                    <input
-                        aria-label="Cari lowongan"
-                        placeholder="Cari judul atau lokasi…"
-                        value={q}
-                        onChange={(e) => setQ(e.target.value)}
-                    />
-                    <button type="submit">Cari</button>
-                </form>
-                <select
-                    aria-label="Filter departemen"
-                    value={filters.department_id ?? ''}
-                    onChange={(e) => update({ department_id: e.target.value })}
-                >
-                    <option value="">Semua departemen</option>
-                    {departments.map((item) => (
-                        <option key={item.id} value={item.id}>
-                            {item.name}
-                        </option>
-                    ))}
-                </select>
-                <select
-                    aria-label="Filter status lowongan"
-                    value={filters.status ?? ''}
-                    onChange={(e) => update({ status: e.target.value })}
-                >
-                    <option value="">Semua status</option>
-                    {statuses.map((item) => (
-                        <option key={item.value} value={item.value}>
-                            {item.label}
-                        </option>
-                    ))}
-                </select>
-                <select
-                    aria-label="Urutan lowongan"
-                    value={filters.sort ?? 'latest'}
-                    onChange={(e) => update({ sort: e.target.value })}
-                >
-                    <option value="latest">Terbaru</option>
-                    <option value="title">Judul A–Z</option>
-                    <option value="closing">Tanggal tutup terdekat</option>
-                </select>
-            </div>
+            <FilterBar
+                q={filters.q ?? ''}
+                departmentId={filters.department_id ?? null}
+                employmentType={filters.employment_type ?? null}
+                status={filters.status ?? null}
+                sort={filters.sort ?? 'latest'}
+                departments={departments}
+                types={types}
+                statuses={statuses}
+                sortOptions={[
+                    { value: 'latest', label: 'Terbaru' },
+                    { value: 'title', label: 'Judul A–Z' },
+                    { value: 'closing', label: 'Tanggal tutup terdekat' },
+                ]}
+                onChange={(patch) =>
+                    update({
+                        q: patch.q,
+                        department_id: patch.departmentId,
+                        employment_type: patch.employmentType,
+                        status: patch.status,
+                        sort: patch.sort,
+                    })
+                }
+            />
             <section className="hr-panel">
                 <div className="hr-table-scroll">
                     <table>

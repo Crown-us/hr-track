@@ -29,6 +29,7 @@ return [
     */
 
     'disks' => [
+        'training_materials' => ['driver' => 'local', 'root' => storage_path('app/private/training-materials'), 'serve' => false, 'visibility' => 'private', 'throw' => true],
 
         'applicant_documents' => ['driver' => 'local', 'root' => storage_path('app/private/applicant-documents'), 'serve' => false, 'visibility' => 'private', 'throw' => true],
 

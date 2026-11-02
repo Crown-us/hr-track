@@ -12,6 +12,8 @@
 
 ## Status dan batas pekerjaan
 
+Pembaruan Pelatihan: jadwal/pemateri/materi PDF privat berversi, peserta pegawai, kehadiran, pre/post-test dan ringkasan selisih poin tersedia di `/trainings`. Menu sidebar aktif. Batas dan hak akses ada di [TRAINING-PLAN.md](TRAINING-PLAN.md). Belum sertifikat, email, impor/ekspor atau penghapusan peserta; kontrak/pelanggaran/laporan tetap fase berikutnya.
+
 Preferensi teks pengguna: gunakan bahasa Indonesia biasa dan mudah dipahami pada aplikasi/PDF. Jangan menyisipkan label fiktif/demonstrasi/prototipe atau disclaimer berulang; pengguna akan menyiapkan disclaimer terpisah. Nama dokumen tetap menjelaskan fungsinya, misalnya ringkasan penawaran atau undangan interview. Status fitur yang belum tersedia dan cara pengiriman dokumen tetap dijelaskan sesuai perilaku sebenarnya.
 
 Pembaruan Offering: penawaran/revisi dengan audit, ringkasan PDF internal, pencatatan respons dengan bukti privat dan konversi kandidat diterima menjadi pegawai tersedia. Lihat [OFFERING-PLAN.md](OFFERING-PLAN.md). Belum surat resmi perusahaan, e-sign, payroll, pengiriman penawaran otomatis atau pengaitan kandidat ke pegawai lama secara otomatis.

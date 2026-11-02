@@ -21,7 +21,7 @@ class VacancyController
     {
         Gate::authorize('viewAny', Vacancy::class);
         $filters = $request->validate(['q' => ['nullable', 'string', 'max:100'], 'department_id' => ['nullable', 'integer', 'exists:departments,id'],
-            'status' => ['nullable', Rule::enum(VacancyStatus::class)], 'sort' => ['nullable', Rule::in(['latest', 'title', 'closing'])], 'page' => ['sometimes', 'integer', 'min:1']]);
+            'status' => ['nullable', Rule::enum(VacancyStatus::class)], 'employment_type' => ['nullable', Rule::enum(EmploymentType::class)], 'sort' => ['nullable', Rule::in(['latest', 'title', 'closing'])], 'page' => ['sometimes', 'integer', 'min:1']]);
         $query = Vacancy::with('department');
         if ($q = trim($filters['q'] ?? '')) {
             $query->where(fn ($query) => $query->where('job_title', 'like', '%'.$q.'%')->orWhere('location', 'like', '%'.$q.'%'));
@@ -31,6 +31,9 @@ class VacancyController
         }
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
+        }
+        if (! empty($filters['employment_type'])) {
+            $query->where('employment_type', $filters['employment_type']);
         }
         [$column, $direction] = match ($filters['sort'] ?? 'latest') {
             'title' => ['job_title', 'asc'], 'closing' => ['closing_date', 'asc'], default => ['created_at', 'desc']

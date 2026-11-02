@@ -14,6 +14,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Akun demo dan data domain ditambahkan pada Phase 2.
+        $this->call([
+            EmployeeMasterSeeder::class,
+            EmployeeSeeder::class,
+            VacancySeeder::class,
+            ApplicantSeeder::class,
+            ApplicationSeeder::class,
+            InterviewSeeder::class,
+        ]);
     }
 }

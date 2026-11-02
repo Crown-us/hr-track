@@ -1,5 +1,9 @@
 # HRIS Lite
 
+Modul **Pelatihan** tersedia di `/trainings`: jadwal dan pemateri, materi PDF privat berversi, peserta dari pegawai aktif, kehadiran dan pre-test/post-test0–100. Admin/Staf HR mengelola; Viewer hanya membaca jadwal serta jumlah peserta. Ringkasan memakai pasangan nilai lengkap dan menampilkan peningkatan dalam poin, bukan persentase efektivitas. Skor kosong tidak dianggap0. Post-test dicatat setelah sesi berakhir dan peserta hadir. Nilai tetap dapat dikoreksi setelah pelatihan selesai; perubahan selalu diaudit. Riwayat peserta tetap tersimpan jika pegawai kemudian diarsipkan.
+
+Pelatihan dibatalkan dengan alasan tanpa menghapus data. Sesi yang pernah memiliki nilai tidak bisa digeser waktunya, termasuk setelah nilai dikosongkan. Upload PDF maksimal5MiB pada disk training_materials privat; versi lama tetap tersedia untuk Admin/Staf HR. Belum sertifikat, notifikasi email pelatihan, impor massal, penghapusan peserta atau ekspor laporan. Lihat [TRAINING-PLAN.md](docs/TRAINING-PLAN.md).
+
 Panduan pengujian alur rekrutmen dan checklist pengguna HR: [RECRUITMENT-UAT.md](docs/RECRUITMENT-UAT.md).
 
 Offering → pegawai tersedia melalui detail lamaran → **Penawaran, respons & data pegawai**. Admin/Staf HR mencatat penempatan/tanggal/ketentuan, merevisi sebelum respons, mengunduh ringkasan PDF internal, lalu mencatat respons dengan bukti PDF privat wajib. Menerima→Diterima; menolak/ditarik HR→Ditolak. Keputusan Diterima tidak dapat melewati penawaran yang diterima. Respons bertanggal sebelum revisi terakhir atau penerimaan melewati batas ditolak; revisi penawaran dahulu bila perlu memperpanjang batas. Ringkasan bukan surat resmi perusahaan atau kontrak.
@@ -12,7 +16,7 @@ Aplikasi HRIS mandiri yang sedang disiapkan untuk kebutuhan magang. Antarmuka be
 
 Fondasi Laravel 13 + Inertia 3 + React 19 + TypeScript + Tailwind 4 + Vite tersedia, dengan halaman awal bergaya berkas/editorial dan spesimen antarmuka berlabel data contoh. MySQL development/test terpisah; PHPUnit, Pint, ESLint dan Prettier dikonfigurasi. Versi persis dikunci di composer.lock dan package-lock.json.
 
-Login/logout Fortify, aktivasi akun, pegawai dan lowongan tersedia. Pegawai dapat ditambah/diedit/diarsipkan/dipulihkan sesuai role. Pelamar/lamaran, pipeline, riwayat tahap dan CV privat tersimpan di database. Jadwal interview, undangan PDF dan portal karier dengan form lamaran tanpa akun tersedia. Tidak ada kredensial bawaan. Lihat [rencana](docs/PLAN.md), [ERD](docs/ERD.md), dan [progress](docs/PROGRESS.md).
+Login/logout Fortify, aktivasi akun, master departemen dan jabatan, pegawai dan lowongan tersedia. Pegawai dapat ditambah/diedit/diarsipkan/dipulihkan sesuai role. Profil pelamar (halaman `/applicants`), lamaran, pipeline, riwayat tahap dan CV privat tersimpan di database. Jadwal interview, undangan PDF dan portal karier dengan form lamaran tanpa akun tersedia. Tidak ada kredensial bawaan. Lihat [rencana](docs/PLAN.md), [ERD](docs/ERD.md), dan [progress](docs/PROGRESS.md).
 
 ## Prasyarat
 
@@ -139,8 +143,6 @@ Portal `/karier` menyediakan pencarian, filter, detail dan form lamaran tanpa ak
 Verifikasi pelamar menggunakan Laravel Notifications dan temporary signed URL 24 jam. GET membuka konfirmasi; POST dengan CSRF menandai email terverifikasi per lamaran dan mengantrekan bukti penerimaan. Bukti bukan keputusan lolos seleksi. `/karier/verifikasi/kirim-ulang` memberi respons generik, batas tiga permintaan/jam/IP, cooldown10menit per lamaran dan maksimal lima lamaran pending per permintaan. Lamaran publik lama yang belum memiliki penanda verifikasi perlu memakai kirim ulang sebelum tahap dapat diubah.
 
 Jalankan worker dengan `php artisan queue:work recruitment --queue=recruitment-mail --tries=3 --timeout=60`. Koneksi antrean recruitment sengaja memakai database aplikasi yang sama: insert pekerjaan terenkripsi, lamaran dan file metadata satu transaksi; rollback membersihkan CV. Konfigurasi lokal aktif memakai mailer log, sehingga belum mengirim ke inbox. Untuk SMTP perusahaan, isi konfigurasi MAIL_* privat, alamat pengirim dan APP_URL yang benar (HTTPS di production), lalu restart worker. Jangan commit kredensial atau membagikan log yang memuat tautan verifikasi. Periksa failed_jobs bila pengiriman gagal; retry dapat menyebabkan email terkirim ulang. Panduan di [EMAIL-VERIFICATION-PLAN.md](docs/EMAIL-VERIFICATION-PLAN.md).
-
-## Login dan pendaftaran akun internal
 
 ## Login dan pendaftaran akun internal
 

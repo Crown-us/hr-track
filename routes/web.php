@@ -1,12 +1,16 @@
 <?php
 
+use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationEmailVerificationController;
 use App\Http\Controllers\CareerController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InvitationRegistrationController;
+use App\Http\Controllers\PositionController;
 use App\Http\Controllers\RecruitmentOfferController;
+use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\VacancyController;
 use App\Models\Employee;
 use App\Models\Vacancy;
@@ -46,6 +50,18 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', 'can:access-hr'])->group(function () {
+    Route::get('/trainings', [TrainingController::class, 'index'])->name('trainings.index');
+    Route::get('/trainings/create', [TrainingController::class, 'create'])->name('trainings.create');
+    Route::post('/trainings', [TrainingController::class, 'store'])->name('trainings.store');
+    Route::get('/trainings/{training}', [TrainingController::class, 'show'])->name('trainings.show');
+    Route::get('/trainings/{training}/edit', [TrainingController::class, 'edit'])->name('trainings.edit');
+    Route::put('/trainings/{training}', [TrainingController::class, 'update'])->name('trainings.update');
+    Route::post('/trainings/{training}/status', [TrainingController::class, 'status'])->name('trainings.status');
+    Route::post('/trainings/{training}/participants', [TrainingController::class, 'enroll'])->name('trainings.enroll');
+    Route::get('/trainings/{training}/participants/{participant}/edit', [TrainingController::class, 'evaluation'])->name('trainings.evaluation');
+    Route::put('/trainings/{training}/participants/{participant}', [TrainingController::class, 'evaluate'])->name('trainings.evaluate');
+    Route::post('/trainings/{training}/materials', [TrainingController::class, 'upload'])->name('trainings.upload');
+    Route::get('/trainings/{training}/materials/{material}', [TrainingController::class, 'download'])->name('trainings.material');
     Route::get('/hr', fn (Request $request) => $request->query('view') === 'recruitment' ? redirect('/applications') : Inertia::render('hr', [
         'initialView' => $request->query('view') === 'recruitment' ? 'recruitment' : 'dashboard',
         'employeeSummary' => ['count' => Employee::count(), 'recent' => Employee::with(['department', 'position'])->latest('id')->limit(4)->get()->map(fn ($employee) => $employee->forDisplay())],
@@ -86,4 +102,21 @@ Route::middleware(['auth', 'can:access-hr'])->group(function () {
     Route::post('/employees/{employee}/archive', [EmployeeController::class, 'archive'])->name('employees.archive');
     Route::post('/employees/{employee}/restore', [EmployeeController::class, 'restore'])->withTrashed()->name('employees.restore');
     Route::get('/employees/{employee}/events/{event}/document', [EmployeeController::class, 'document'])->withTrashed()->name('employees.document');
+
+    Route::get('/departments', [DepartmentController::class, 'index'])->name('departments.index');
+    Route::get('/departments/create', [DepartmentController::class, 'create'])->name('departments.create');
+    Route::post('/departments', [DepartmentController::class, 'store'])->name('departments.store');
+    Route::get('/departments/{department}/edit', [DepartmentController::class, 'edit'])->name('departments.edit');
+    Route::put('/departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
+
+    Route::get('/positions', [PositionController::class, 'index'])->name('positions.index');
+    Route::get('/positions/create', [PositionController::class, 'create'])->name('positions.create');
+    Route::post('/positions', [PositionController::class, 'store'])->name('positions.store');
+    Route::get('/positions/{position}/edit', [PositionController::class, 'edit'])->name('positions.edit');
+    Route::put('/positions/{position}', [PositionController::class, 'update'])->name('positions.update');
+
+    Route::get('/applicants', [ApplicantController::class, 'index'])->name('applicants.index');
+    Route::get('/applicants/create', [ApplicantController::class, 'create'])->name('applicants.create');
+    Route::post('/applicants', [ApplicantController::class, 'store'])->name('applicants.store');
+    Route::get('/applicants/{applicant}', [ApplicantController::class, 'show'])->name('applicants.show');
 });
