@@ -1,0 +1,48 @@
+.vc-wide {
+    grid-column: 1/-1;
+}
+.vc-detail {
+    max-width: 900px;
+}
+.vc-detail-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eceef1;
+}
+.vc-detail h2 {
+    font-size: 21px;
+    font-weight: 550;
+    letter-spacing: -0.4px;
+}
+.vc-detail-head p {
+    color: #7c8592;
+    font-size: 12px;
+    margin-top: 7px;
+}
+.vc-copy h3 {
+    font-size: 14px;
+    font-weight: 550;
+    margin: 27px 0 10px;
+}
+.vc-copy p {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.9;
+    font-size: 13px;
+    color: #566171;
+}
+.vc-copy {
+    margin-bottom: 28px;
+}
+@media (max-width: 700px) {
+    .vc-detail-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .vc-detail h2 {
+        font-size: 19px;
+    }
+}

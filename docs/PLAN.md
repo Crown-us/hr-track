@@ -14,6 +14,14 @@
 
 Tanggal inspeksi: 1 November 2026 (Asia/Jakarta). Phase 0 dan fondasi Phase 1 sudah dijalankan setelah persetujuan pengguna. Laravel/Inertia/React, lockfile, MySQL development/test, halaman awal dan pengujian fondasi tersedia. Detail bukti dan keputusan ada di [PROGRESS.md](PROGRESS.md). Fitur bisnis Phase 2–7 belum diimplementasikan.
 
+Pembaruan 2 November: subset autentikasi Phase 2 tersedia: Fortify login/logout, aktivasi via undangan, role dan gate halaman `/hr`. Data bisnis masih contoh. Detail scope dan batasnya di [AUTH-PLAN.md](AUTH-PLAN.md); belum menandai seluruh Phase 2 selesai karena migration domain/policies CRUD belum dikerjakan.
+
+Pembaruan pegawai: subset Phase3 CRU, arsip terkendali, restore, audit dan file pendukung privat tersedia; lihat [EMPLOYEE-PLAN.md](EMPLOYEE-PLAN.md). Direktori/dashboard pegawai memakai database; rekrutmen tetap contoh. Ketentuan baru pengguna menambahkan restore Admin dan bukti PDF wajib saat arsip, mengesampingkan batas restore awal di ERD.
+
+Pembaruan lowongan: subset Phase4 lowongan internal tambah/baca/edit/status, pencarian/filter/pagination dan count dashboard aktual tersedia. Lihat [VACANCY-PLAN.md](VACANCY-PLAN.md). Pipeline kandidat, lamaran/CV, arsip lowongan dan halaman karier publik belum diimplementasikan; Phase4 belum dianggap selesai.
+
+Pembaruan ATS: input profil baru/terdaftar, lamaran, CV privat berversi, pipeline database dan transisi/riwayat tersedia. Dashboard sudah memakai angka aktual. Batas hemat scope: belum edit/hapus profil, jadwal interview/undangan atau portal publik; lihat [APPLICATION-PLAN.md](APPLICATION-PLAN.md). Phase4/5 belum ditandai selesai seluruhnya.
+
 ## Phase 0 — Bukti lingkungan
 
 | Pemeriksaan | Hasil aktual |

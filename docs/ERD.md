@@ -2,6 +2,14 @@
 
 Status: usulan Phase 1, belum migration executable. Baca [PLAN.md](PLAN.md) untuk business rules dan scope.
 
+Pembaruan ATS: migration000004 menyediakan applicants, applications (version integer), application_status_histories (note nullable) dan applicant_documents. Path CV privat disimpan di DB; disk/MIME/nama unduh ditetapkan server secara tetap, bukan kolom disk/original_name/mime_type pada rancangan awal. Unique email dan pasangan profil/lowongan, FK RESTRICT, timestamps UTC. Jadwal interview dan arsip domain ini belum tersedia.
+
+Pembaruan lowongan: migration000003 menyediakan vacancies dengan version integer serta CHECK tanggal/status/jenis kerja. Lowongan internal sudah dapat tambah/baca/edit/status; belum ada hapus/arsip lowongan di UI, halaman karier atau tabel kandidat/aplikasi. Daftar aktif memakai tanggal WIB, penyimpanan timestamp tetap UTC.
+
+Pembaruan pegawai 2 November: departments, positions dan employees sudah executable pada migration000002. Employees menambah version unsigned integer untuk konflik formulir. Employee_events menyimpan employee_id FK, actor_id FK, action, reason nullable, changes JSON nullable, document_path unik nullable, document_size nullable dan created_at UTC. FK hard delete RESTRICT; file disk privat. Arsip/restore melalui UI Admin sekarang tersedia sesuai permintaan terbaru; rancangan awal yang menunda restore dikesampingkan untuk pegawai. Domain rekrutmen di bawah masih rancangan.
+
+Pembaruan autentikasi: migration `2026_11_02_000001` menambah `users.role` (default viewer) dan tabel `account_invitations`: id, email unik, role, token_hash unik, expires_at, used_at nullable, timestamps UTC. Tabel domain di bawah masih rancangan. Token undangan mentah hanya disampaikan ke penerima; database menyimpan hash SHA-256, bukan token.
+
 ```mermaid
 erDiagram
     departments ||--o{ positions : memiliki

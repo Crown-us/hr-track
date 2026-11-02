@@ -83,7 +83,7 @@ export default function Welcome() {
                         <a href="#cara-kerja">Cara kerja</a>
                         <a href="#tampilan">Tampilan</a>
                     </nav>
-                    <a href="#akses" className="taste-nav-access">
+                    <a href="/login" className="taste-nav-access">
                         Akses akun <ArrowUpRight size={16} aria-hidden="true" />
                     </a>
                 </header>
@@ -399,7 +399,7 @@ export default function Welcome() {
                             </h2>
                             <p>
                                 Ruang kerja HRIS Lite ditujukan bagi tim yang memiliki akun dari
-                                pengelola. Akses masuk sedang disiapkan.
+                                pengelola. Masuk untuk membuka ruang kerja tim Anda.
                             </p>
                         </div>
                         <details>
@@ -408,9 +408,11 @@ export default function Welcome() {
                                 <ChevronDown size={20} aria-hidden="true" />
                             </summary>
                             <p>
-                                Akun akan diberikan oleh pengelola saat aplikasi siap digunakan.
-                                Pendaftaran mandiri belum tersedia. Anda tetap dapat menjelajahi
-                                cakupan fitur dan contoh tampilan di halaman ini.
+                                Hubungi pengelola untuk mendapatkan tautan undangan. Buka tautan
+                                tersebut untuk mengaktifkan akun dan membuat kata sandi Anda.
+                            </p>
+                            <p>
+                                <a href="/login">Masuk ke akun →</a>
                             </p>
                         </details>
                     </div>

@@ -30,6 +30,16 @@ return [
 
     'disks' => [
 
+        'applicant_documents' => ['driver' => 'local', 'root' => storage_path('app/private/applicant-documents'), 'serve' => false, 'visibility' => 'private', 'throw' => true],
+
+        'employee_records' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/employee-records'),
+            'serve' => false,
+            'visibility' => 'private',
+            'throw' => true,
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),

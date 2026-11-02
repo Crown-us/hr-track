@@ -85,3 +85,7 @@ Pilihan pengguna: Space Grotesk untuk headline, heading section, wordmark, judul
 ## Tipografi aktif — pendekatan Apple, 2 November 2026
 
 Satu keluarga netral menggantikan pairing sebelumnya. Native -apple-system/BlinkMacSystemFont pada Apple; Inter lokal pada platform lain, fallback Segoe UI. SF Pro tidak diunduh atau didistribusikan karena lisensi unduhannya membatasi konten website umum (developer.apple.com/fonts, License 2B). Headline semibold600, tracking -0.045em desktop/-0.04em mobile; body regular400. Body hero20px desktop/17px mobile, spacing hero100px desktop/54px mobile. Font Inter beserta OFL disimpan public/fonts, font-display swap. Komponen bento/timeline/badge tetap.
+
+## Ruang kerja HR — pratinjau desain
+
+Sidebar putih/abu netral 224px desktop, aktif abu ringan, ikon outline satu set. Ringkasan angka tanpa ikon dekoratif; agenda dan antrian tinjauan lebih utama dari grafik. Board lima tahap menggunakan satu frame horizontal, tanpa scrollbar vertikal per kolom. Font native Apple/Inter; badge pastel dan ProcessTimeline dipakai ulang. Mobile: navigasi drawer tersembunyi dari urutan keyboard saat ditutup; tabel/board scroll dalam frame. Route preview hanya local/testing; data fiktif bertanggal contoh2 November2026. Tidak dianggap fitur HR operasional sampai login/policy/database terpasang.
