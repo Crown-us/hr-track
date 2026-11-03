@@ -20,6 +20,15 @@ class AttendanceDay extends Model
             $result[$field] = $this->$field?->setTimezone('Asia/Jakarta')->format('Y-m-d\TH:i');
         }
 
-        return [...$result, 'voided' => $this->voided_at !== null, 'source' => 'Dicatat HR'];
+        $sources = [];
+        foreach (['clock_in', 'clock_out'] as $field) {
+            $result[$field.'_source'] = $this->$field ? ($this->{$field.'_source'} ?? 'hr') : null;
+            if ($result[$field.'_source']) {
+                $sources[] = $result[$field.'_source'];
+            }
+        }
+        $sources = array_unique($sources);
+
+        return [...$result, 'voided' => $this->voided_at !== null, 'source' => count($sources) > 1 ? 'Web pegawai / koreksi HR' : (in_array('web', $sources, true) ? 'Web pegawai' : 'Dicatat HR')];
     }
 }

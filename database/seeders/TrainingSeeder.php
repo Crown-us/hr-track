@@ -22,7 +22,7 @@ class TrainingSeeder extends Seeder
             ->get();
 
         if (! $actor || $employees->isEmpty()) {
-            $this->command?->warn('Pelatihan demo dilewati: butuh akun HR dan pegawai aktif.');
+            $this->command?->warn('Pelatihan contoh dilewati: butuh akun HR dan pegawai aktif.');
 
             return;
         }
@@ -35,7 +35,7 @@ class TrainingSeeder extends Seeder
                 'starts_at' => Carbon::now('UTC')->subDays(12)->setTime(2, 0),
                 'ends_at' => Carbon::now('UTC')->subDays(12)->setTime(5, 0),
                 'status' => 'completed',
-                'notes' => 'Pelatihan demo yang sudah selesai dengan evaluasi peserta.',
+                'notes' => 'Pelatihan yang sudah selesai dengan evaluasi peserta.',
                 'created_by' => $actor->id,
             ]
         );
@@ -48,7 +48,7 @@ class TrainingSeeder extends Seeder
                 'starts_at' => Carbon::now('UTC')->addDays(7)->setTime(2, 0),
                 'ends_at' => Carbon::now('UTC')->addDays(7)->setTime(5, 0),
                 'status' => 'scheduled',
-                'notes' => 'Pelatihan demo yang akan datang.',
+                'notes' => 'Pelatihan yang akan datang.',
                 'created_by' => $actor->id,
             ]
         );
@@ -96,7 +96,7 @@ class TrainingSeeder extends Seeder
                 'attendance' => $attendance,
                 'pre_test' => $preTest,
                 'post_test' => $postTest,
-                'notes' => $attendance === 'attended' ? 'Peserta demo mengikuti seluruh sesi.' : null,
+                'notes' => $attendance === 'attended' ? 'Mengikuti seluruh sesi.' : null,
             ]
         );
     }

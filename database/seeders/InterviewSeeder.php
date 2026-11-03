@@ -39,7 +39,7 @@ class InterviewSeeder extends Seeder
                 'location' => $index % 2
                     ? 'Ruang Rapat Lantai 3'
                     : 'https://meet.example.test/hr-interview-'.str_pad((string) ($index + 1), 4, '0', STR_PAD_LEFT),
-                'notes' => 'Jadwal interview demo untuk posisi '.$application->vacancy->job_title.'.',
+                'notes' => 'Wawancara untuk posisi '.$application->vacancy->job_title.'.',
             ]);
         }
     }

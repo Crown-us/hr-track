@@ -18,9 +18,9 @@ class DemoAccountSeeder extends Seeder
         $password = (string) env('DEMO_PASSWORD', 'DemoHris123!');
 
         foreach ([
-            ['Admin Demo', 'admin@example.test', 'admin'],
-            ['Staf HR Demo', 'hr@example.test', 'hr_staff'],
-            ['Pembaca Demo', 'viewer@example.test', 'viewer'],
+            ['Ayu Prameswari', 'admin@example.test', 'admin'],
+            ['Bima Saputra', 'hr@example.test', 'hr_staff'],
+            ['Citra Lestari', 'viewer@example.test', 'viewer'],
         ] as [$name, $email, $role]) {
             $this->account($name, $email, $role, null, $password);
         }
@@ -32,25 +32,53 @@ class DemoAccountSeeder extends Seeder
             ->orderBy('id')
             ->get();
 
-        if ($available->count() < 3) {
-            $this->command?->warn('Akun Pegawai/Atasan dilewati: butuh minimal tiga pegawai aktif yang belum terhubung ke akun.');
+        $supervisor = $this->preferred('EMP1000', $available);
+        $member = $this->preferred('EMP1001', $available, $supervisor?->id);
+
+        if (! $supervisor || ! $member) {
+            $this->command?->warn('Akun Pegawai/Atasan dilewati: butuh minimal dua pegawai aktif yang belum terhubung ke akun.');
 
             return;
         }
 
-        $supervisor = $available[0];
-        $member = $available[1];
+        $this->account($supervisor->full_name, 'atasan@example.test', 'supervisor', $supervisor->id, $password);
+        $this->account($member->full_name, 'pegawai@example.test', 'employee', $member->id, $password);
 
-        $this->account('Atasan Demo', 'atasan@example.test', 'supervisor', $supervisor->id, $password);
-        $this->account('Pegawai Demo', 'pegawai@example.test', 'employee', $member->id, $password);
+        Employee::whereKey($member->id)->update(['manager_employee_id' => $supervisor->id]);
 
-        foreach ($available->slice(2, 2) as $person) {
+        $team = Employee::where('employment_status', '!=', 'inactive')
+            ->whereNull('deleted_at')
+            ->whereNotIn('id', [$supervisor->id, $member->id])
+            ->orderBy('id')
+            ->take(4)
+            ->get();
+
+        foreach ($team as $person) {
             Employee::whereKey($person->id)->update(['manager_employee_id' => $supervisor->id]);
         }
 
         $this->command?->info('Akun demo lokal: admin@example.test, hr@example.test, viewer@example.test, atasan@example.test, pegawai@example.test.');
         $this->command?->info('Kata sandi akun demo disetel ulang saat seeding.');
         $this->command?->warn('Akun demo hanya untuk local/testing. Jangan gunakan kredensial ini di production.');
+    }
+
+    private function preferred(string $number, $available, ?int $exclude = null): ?Employee
+    {
+        $query = Employee::where('employee_number', $number)
+            ->where('employment_status', '!=', 'inactive')
+            ->whereNull('deleted_at');
+
+        if ($exclude !== null) {
+            $query->whereKeyNot($exclude);
+        }
+
+        $employee = $query->first();
+
+        if ($employee && ! User::where('employee_id', $employee->id)->whereNotIn('email', ['atasan@example.test', 'pegawai@example.test'])->exists()) {
+            return $employee;
+        }
+
+        return $available->first(fn (Employee $candidate) => $candidate->id !== $exclude);
     }
 
     private function account(string $name, string $email, string $role, ?int $employeeId, string $password): User

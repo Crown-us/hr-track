@@ -18,7 +18,7 @@ class OfferSeeder extends Seeder
         $actor = User::where('role', 'admin')->orderBy('id')->first() ?? User::where('role', 'hr_staff')->orderBy('id')->first();
 
         if (! $actor) {
-            $this->command?->warn('Penawaran demo dilewati: butuh akun Admin/Staf HR.');
+            $this->command?->warn('Penawaran contoh dilewati: butuh akun Admin/Staf HR.');
 
             return;
         }
@@ -59,10 +59,10 @@ class OfferSeeder extends Seeder
                 },
                 'join_date' => $today->copy()->addDays(30)->toDateString(),
                 'response_deadline' => $today->copy()->addDays(14)->toDateString(),
-                'terms' => 'Penawaran demo: gaji pokok, tunjangan kesehatan, dan cuti tahunan sesuai kebijakan perusahaan.',
+                'terms' => 'Penawaran mencakup gaji pokok, tunjangan kesehatan, dan cuti tahunan sesuai kebijakan perusahaan.',
                 'status' => $accepted ? 'accepted' : 'pending',
                 'response_date' => $accepted ? $today->copy()->subDays(2)->toDateString() : null,
-                'response_note' => $accepted ? 'Kandidat menerima penawaran demo melalui bukti tertulis.' : null,
+                'response_note' => $accepted ? 'Kandidat menerima penawaran melalui konfirmasi tertulis.' : null,
             ]);
 
             DB::table('recruitment_offers')->where('id', $offer->id)->update([

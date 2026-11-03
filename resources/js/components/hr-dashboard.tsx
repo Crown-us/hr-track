@@ -66,7 +66,7 @@ export default function HrDashboard({
                         [
                             'Tahap interview',
                             recruitment.counts.interview ?? 0,
-                            'Belum mencakup jadwal wawancara',
+                            'Lamaran aktif pada tahap ini',
                         ],
                     ].map(([label, count, note]) => (
                         <div key={label}>

@@ -8,6 +8,18 @@ export type AttendanceRecord = {
     tolerance_minutes: number;
     voided: boolean;
     source: string;
+    clock_in_source: 'web' | 'hr' | null;
+    clock_out_source: 'web' | 'hr' | null;
+};
+export type AttendancePunchData = {
+    server_now: string;
+    days: (AttendanceRecord & {
+        date: string;
+        can_in: boolean;
+        can_out: boolean;
+        message: string;
+        checkout_deadline: string;
+    })[];
 };
 export type AttendanceCell = {
     date: string;

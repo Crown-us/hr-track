@@ -21,21 +21,22 @@ class ContractSeeder extends Seeder
             ->get();
 
         if (! $actor || $employees->isEmpty()) {
-            $this->command?->warn('Kontrak demo dilewati: butuh akun HR dan pegawai aktif.');
+            $this->command?->warn('Kontrak contoh dilewati: butuh akun HR dan pegawai aktif.');
 
             return;
         }
 
         $today = Carbon::now('Asia/Jakarta');
+        $year = $today->year;
         $plans = [
-            ['DEMO-PKWT-001', 'pkwt', $today->copy()->subYear()->toDateString(), $today->copy()->addDays(14)->toDateString(), 'Kontrak demo berakhir dalam dua minggu.'],
-            ['DEMO-PKWT-002', 'pkwt', $today->copy()->subYears(2)->toDateString(), $today->copy()->subDays(20)->toDateString(), 'Kontrak demo sudah berakhir.'],
-            ['DEMO-PKWTT-001', 'pkwtt', $today->copy()->subYears(2)->toDateString(), null, 'Kontrak tetap demo.'],
-            ['DEMO-PKWT-003', 'pkwt', $today->copy()->subMonths(10)->toDateString(), $today->copy()->addDays(25)->toDateString(), 'Kontrak demo berakhir bulan depan.'],
-            ['DEMO-PKWT-004', 'pkwt', $today->copy()->addDays(30)->toDateString(), $today->copy()->addYear()->toDateString(), 'Kontrak demo dijadwalkan mulai bulan depan.'],
-            ['DEMO-PKWTT-002', 'pkwtt', $today->copy()->subYear()->toDateString(), null, 'Kontrak tetap demo untuk staf senior.'],
-            ['DEMO-PKWT-005', 'pkwt', $today->copy()->subMonths(11)->toDateString(), $today->copy()->addDays(5)->toDateString(), 'Kontrak demo hampir berakhir.'],
-            ['DEMO-PKWT-006', 'pkwt', $today->copy()->subYears(2)->toDateString(), $today->copy()->subDays(60)->toDateString(), 'Kontrak demo lama sudah berakhir.'],
+            ['PKWT/'.$year.'/001', 'pkwt', $today->copy()->subYear()->toDateString(), $today->copy()->addDays(14)->toDateString(), 'Kontrak berakhir dalam dua minggu.'],
+            ['PKWT/'.($year - 1).'/014', 'pkwt', $today->copy()->subYears(2)->toDateString(), $today->copy()->subDays(20)->toDateString(), 'Kontrak sudah berakhir dan menunggu pembaruan.'],
+            ['PKWTT/'.($year - 2).'/003', 'pkwtt', $today->copy()->subYears(2)->toDateString(), null, 'Kontrak tetap untuk staf senior.'],
+            ['PKWT/'.$year.'/002', 'pkwt', $today->copy()->subMonths(10)->toDateString(), $today->copy()->addDays(25)->toDateString(), 'Kontrak berakhir bulan depan.'],
+            ['PKWT/'.$year.'/003', 'pkwt', $today->copy()->addDays(30)->toDateString(), $today->copy()->addYear()->toDateString(), 'Kontrak dijadwalkan mulai bulan depan.'],
+            ['PKWTT/'.($year - 1).'/002', 'pkwtt', $today->copy()->subYear()->toDateString(), null, 'Kontrak tetap untuk staf senior.'],
+            ['PKWT/'.$year.'/004', 'pkwt', $today->copy()->subMonths(11)->toDateString(), $today->copy()->addDays(5)->toDateString(), 'Kontrak hampir berakhir.'],
+            ['PKWT/'.($year - 1).'/009', 'pkwt', $today->copy()->subYears(2)->toDateString(), $today->copy()->subDays(60)->toDateString(), 'Kontrak lama sudah berakhir.'],
         ];
 
         foreach ($employees as $index => $employee) {
@@ -46,6 +47,24 @@ class ContractSeeder extends Seeder
             }
 
             [$number, $type, $startsOn, $endsOn, $notes] = $plan;
+
+            $legacy = EmployeeContract::where('employee_id', $employee->id)
+                ->where('contract_number', 'like', 'DEMO-%')
+                ->orderBy('id')
+                ->first();
+
+            if ($legacy) {
+                $legacy->forceFill([
+                    'contract_number' => $number,
+                    'type' => $type,
+                    'starts_on' => $startsOn,
+                    'ends_on' => $endsOn,
+                    'notes' => $notes,
+                    'created_by' => $actor->id,
+                ])->save();
+
+                continue;
+            }
 
             $contract = EmployeeContract::firstOrCreate(
                 ['contract_number' => $number],

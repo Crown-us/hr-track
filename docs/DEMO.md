@@ -12,7 +12,7 @@ npm run build
 php artisan serve --host=127.0.0.1 --port=8000
 ```
 
-Seeder demo hanya berjalan pada environment `local`/`testing`, idempotent, dan membuat data contoh lengkap. Akun demo:
+Seeder demo hanya berjalan pada environment `local`/`testing`, idempotent, dan membuat data contoh lengkap: 25 pegawai, 6 lowongan, 30 lamaran, 8 wawancara, 8 kontrak, 3 pelatihan, 3 kasus disiplin, 14 penawaran, saldo cuti 12 hari untuk pegawai aktif, 5 pengajuan cuti/izin, 3 hari libur, dan catatan kehadiran ±50 hari kerja untuk tim demo. Akun demo:
 
 | Role | Email | Kata sandi |
 |---|---|---|
@@ -22,7 +22,7 @@ Seeder demo hanya berjalan pada environment `local`/`testing`, idempotent, dan m
 | Atasan | `atasan@example.test` | `DemoHris123!` |
 | Pegawai | `pegawai@example.test` | `DemoHris123!` |
 
-Kata sandi dapat diganti lewat `DEMO_PASSWORD` sebelum seeding. Seeding menyetel ulang kata sandi kelima akun demo. Akun ini hanya untuk local/testing, bukan production.
+Kata sandi dapat diganti lewat `DEMO_PASSWORD` sebelum seeding. Seeding menyetel ulang kata sandi kelima akun demo. Akun ini hanya untuk local/testing, bukan production. Akun `atasan@example.test` terhubung ke Andi Pratama, sedangkan `pegawai@example.test` terhubung ke Budi Saputra yang melapor langsung kepada Andi.
 
 ## Alur 3 menit
 
@@ -58,7 +58,7 @@ Kata sandi dapat diganti lewat `DEMO_PASSWORD` sebelum seeding. Seeding menyetel
 - Unduh undangan PDF; jelaskan berkas privat, tanpa catatan internal, dan tidak dikirim email otomatis.
 - Tunjukkan validasi bentrok jadwal dan pembatalan yang menyimpan riwayat.
 
-### 2:20 — Modul hubungan kerja
+### 2:10 — Modul hubungan kerja (pilih satu)
 
 Pilih satu atau dua sesuai waktu:
 
@@ -67,12 +67,19 @@ Pilih satu atau dua sesuai waktu:
 - **Pelanggaran/SP** (`/discipline`): SP1–3/konseling, tindak lanjut, audit.
 - **Laporan** (`/reports`): pratinjau dan ekspor XLSX/PDF untuk rekrutmen, pelatihan, kontrak, dan SP.
 
-### 2:40 — Role, keamanan, dan tes
+### 2:35 — Cuti, izin, dan kehadiran (`/leave`, `/attendance`)
+
+- Tunjukkan saldo cuti tahunan, pengajuan contoh, riwayat, dan alur persetujuan atasan → HR.
+- Buka kalender kehadiran: status tepat waktu/terlambat, cuti disetujui, dan detail tanggal.
+- Tunjukkan jadwal kerja massal (`/attendance/schedules`) untuk membuat jadwal beberapa pegawai sekaligus.
+
+### 2:55 — Role, keamanan, dan tes
 
 - Masuk sebagai `viewer`: tombol mutasi tidak muncul dan request mutasi ditolak 403.
-- Masuk sebagai `employee`/`supervisor`: portal `/me` dan `/team` hanya menampilkan data dasar; modul HR tetap ditolak.
-- Jalankan `php artisan test`: **125 tes / 1.811 assertions**, mencakup guest redirect, role enforcement, validasi, transisi status, audit, dokumen privat, PDF, dan rollback file.
-- Sebutkan batasan jujur: mailer lokal masih log, belum ada CAPTCHA/antivirus, belum ada payroll/absensi/cuti, belum ada 2FA/verifikasi email akun internal, dan UAT tim HR masih diperlukan.
+- Masuk sebagai `employee`/`supervisor`: portal `/me`, `/team`, `/leave`, dan `/attendance` hanya menampilkan data yang diizinkan; modul HR tetap ditolak.
+- Halaman galat 403/404/500 tampil dalam bahasa Indonesia.
+- Jalankan `php artisan test`: **155 tes / 2.361 assertions**, mencakup guest redirect, role enforcement, validasi, transisi status, audit, dokumen privat, PDF, cuti, kehadiran, jadwal massal, dan rollback file.
+- Sebutkan batasan jujur: mailer lokal masih log, belum ada CAPTCHA/antivirus, belum ada payroll/check-in mandiri/impor mesin absensi, belum ada 2FA/verifikasi email akun internal, dan UAT tim HR masih diperlukan.
 
 ## Demo lanjutan 5–7 menit
 
@@ -90,7 +97,7 @@ Pilih satu atau dua sesuai waktu:
 - Email verifikasi/notifikasi memakai mailer `log`; inbox nyata memerlukan SMTP dan worker antrean.
 - Belum ada antivirus/sanitasi PDF; lampiran diperlakukan sebagai dokumen tidak tepercaya.
 - Profil pelamar belum bisa diedit/dihapus dari UI; lowongan ditutup, bukan dihapus.
-- Belum ada payroll, absensi, cuti/izin, e-sign, template surat resmi, atau 2FA.
+- Belum ada payroll, check-in/out mandiri, impor mesin absensi, e-sign, template surat resmi, atau 2FA.
 - Verifikasi browser dan UAT HR untuk modul baru masih perlu dilakukan sebelum klaim produksi.
 
 ## Catatan untuk pewawancara

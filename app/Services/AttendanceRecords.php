@@ -61,6 +61,15 @@ class AttendanceRecords
                 foreach (['scheduled_start', 'scheduled_end', 'clock_in', 'clock_out'] as $field) {
                     $times[$field] = empty($data[$field]) ? null : CarbonImmutable::createFromFormat('!Y-m-d\TH:i', $data[$field], 'Asia/Jakarta')->utc();
                 }
+                $day ??= new AttendanceDay(['employee_id' => $e->id, 'date' => $data['date']]);
+                foreach (['clock_in', 'clock_out'] as $field) {
+                    // The HR form has minute precision; preserve web seconds/source when unchanged.
+                    if (($before[$field] ?? null) === ($data[$field] ?: null)) {
+                        $times[$field] = $day->$field;
+                    } else {
+                        $day->{$field.'_source'} = $times[$field] ? 'hr' : null;
+                    }
+                }
                 $start = $times['scheduled_start'];
                 $end = $times['scheduled_end'];
                 $in = $times['clock_in'];
@@ -74,7 +83,7 @@ class AttendanceRecords
                 if ($in && $out && AttendanceDay::where('employee_id', $e->id)->whereNull('voided_at')->where('date', '!=', $data['date'])->where('clock_in', '<', $out)->where('clock_out', '>', $in)->exists()) {
                     $this->error('clock_in', 'Jam hadir bertumpuk dengan catatan tanggal kerja lain.');
                 }
-                $day ??= new AttendanceDay(['employee_id' => $e->id, 'date' => $data['date']]);
+
                 $day->fill([...$times, 'tolerance_minutes' => $data['tolerance_minutes'], 'voided_at' => null]);
             }
             $day->version = ($before['version'] ?? 0) + 1;

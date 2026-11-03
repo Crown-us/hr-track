@@ -97,7 +97,7 @@
 }
 .hr-sidebar nav > p {
     font-size: 11px;
-    color: #767b84;
+    color: #5f646d;
     margin: 16px 10px 10px;
 }
 .hr-sidebar nav > p:first-child {
@@ -211,17 +211,17 @@
     align-items: center;
     gap: 13px;
     font-size: 11px;
-    color: #8b8e95;
+    color: #5f646d;
 }
 .hr-desktop-icon {
-    color: #8c8f96;
+    color: #5f646d;
     display: flex;
 }
 .hr-help {
     display: flex;
     align-items: center;
     gap: 7px;
-    color: #747982;
+    color: #5f646d;
     font-size: 11px;
 }
 .hr-preview-banner {
@@ -357,7 +357,7 @@
 }
 .hr-panel-title > span {
     font-size: 10px;
-    color: #7c818a;
+    color: #5f646d;
 }
 .hr-panel-title button {
     font-size: 11px;
@@ -409,13 +409,13 @@
 .hr-agenda-kind {
     margin-left: auto;
     font-size: 10px;
-    color: #81858e;
+    color: #5f646d;
 }
 .hr-footnote {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #81868e;
+    color: #5f646d;
     font-size: 10px;
     padding: 12px 18px;
 }
@@ -430,7 +430,7 @@
     align-items: center;
     gap: 14px;
     font-size: 11px;
-    color: #727782;
+    color: #5f646d;
 }
 .hr-pipeline-summary strong {
     text-align: right;
@@ -455,9 +455,9 @@
 .hr-vacancy-row > span:first-child {
     flex: 1;
 }
-.hr-vacancy-row > span:nth-child(2) {
+.hr-vacancy-row > span:nth-child(2):not(.inline-flex) {
     font-size: 11px;
-    color: #777d86;
+    color: #5f646d;
     white-space: nowrap;
 }
 .hr-table-scroll {
@@ -506,7 +506,7 @@
 }
 .hr-bottom-note {
     font-size: 10px;
-    color: #969aa2;
+    color: #5f646d;
     margin-top: 24px;
     text-align: right;
 }
@@ -549,7 +549,7 @@
     padding: 7px 10px;
     border-radius: 4px;
     font-size: 12px;
-    color: #757b84;
+    color: #5f646d;
 }
 .hr-filter select {
     background: white;
@@ -666,14 +666,14 @@
 }
 .hr-column-empty {
     padding: 16px 4px;
-    color: #969aa2;
+    color: #5f646d;
     font-size: 11px;
     line-height: 1.8;
 }
 .hr-empty {
     padding: 35px 20px;
     text-align: center;
-    color: #777e89;
+    color: #5f646d;
     font-size: 13px;
 }
 .hr-text-button {
@@ -909,7 +909,7 @@
     .hr-app .inline-flex {
         font-size: 10px;
     }
-    .hr-vacancy-row > span:nth-child(2) {
+    .hr-vacancy-row > span:nth-child(2):not(.inline-flex) {
         font-size: 10px;
     }
     .hr-table-scroll table {

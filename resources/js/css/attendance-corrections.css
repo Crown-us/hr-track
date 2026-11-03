@@ -1,0 +1,81 @@
+.ac-page {
+    min-width: 0;
+}
+.ac-compare {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    margin: 20px 0;
+    padding: 20px 0;
+    border-block: 1px solid #e0e5ea;
+}
+.ac-compare dt {
+    font-size: 12px;
+    color: #59616c;
+    margin-top: 14px;
+}
+.ac-compare dd {
+    margin: 5px 0 0;
+    font-size: 13px;
+    line-height: 1.7;
+    font-variant-numeric: tabular-nums;
+}
+.ac-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 16px 0;
+}
+.ac-check input {
+    flex: none;
+    margin-top: 4px;
+}
+.ac-status {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 5px;
+    background: #eef2f6;
+    color: #405065;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.ac-approved {
+    background: #ecf8f1;
+    color: #24674c;
+}
+.ac-rejected {
+    background: #fff0f0;
+    color: #9b3333;
+}
+.ac-pending_hr,
+.ac-pending_supervisor {
+    background: #eef4ff;
+    color: #29468d;
+}
+.ac-reason {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 14px;
+    line-height: 1.7;
+}
+.ac-tabs {
+    display: flex;
+    gap: 24px;
+    padding: 0 0 14px;
+    border-bottom: 1px solid #e0e5ea;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+.ac-tabs [aria-current] {
+    color: #29468d;
+    text-decoration: underline;
+    text-underline-offset: 16px;
+}
+@media (max-width: 640px) {
+    .ac-compare {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+}

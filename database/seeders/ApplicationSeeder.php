@@ -28,7 +28,7 @@ class ApplicationSeeder extends Seeder
         $remaining = 30 - Application::count();
 
         if ($remaining <= 0) {
-            $this->command?->info('Lamaran demo sudah tersedia; tidak ada duplikasi.');
+            $this->command?->info('Lamaran sudah tersedia; tidak ada duplikasi.');
 
             return;
         }
@@ -59,7 +59,7 @@ class ApplicationSeeder extends Seeder
                     'applicant_id' => $applicant->id,
                     'vacancy_id' => $vacancy->id,
                     'application_date' => $applicationDate,
-                    'notes' => 'Lamaran demo untuk posisi '.$vacancy->job_title.'.',
+                    'notes' => 'Lamaran untuk posisi '.$vacancy->job_title.' melalui portal karier.',
                 ]);
 
                 $application->forceFill(['status' => $status])->save();
@@ -92,7 +92,7 @@ class ApplicationSeeder extends Seeder
                 'actor_id' => $actor->id,
                 'old_status' => $old?->value,
                 'new_status' => $new->value,
-                'note' => 'Riwayat demo: '.$new->label().'.',
+                'note' => 'Tahap: '.$new->label().'.',
                 'created_at' => Carbon::parse($date)->addDays($offset)->setTime(3, 0),
             ]);
         }

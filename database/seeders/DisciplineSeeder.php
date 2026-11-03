@@ -21,42 +21,43 @@ class DisciplineSeeder extends Seeder
             ->get();
 
         if (! $actor || $employees->isEmpty()) {
-            $this->command?->warn('Catatan pelanggaran demo dilewati: butuh akun HR dan pegawai aktif.');
+            $this->command?->warn('Catatan pelanggaran contoh dilewati: butuh akun HR dan pegawai aktif.');
 
             return;
         }
 
         $today = Carbon::now('Asia/Jakarta');
+        $year = $today->year;
         $cases = [
             [
                 'employee' => $employees[0],
-                'reference_number' => 'DEMO-SP-001',
+                'reference_number' => 'SP-'.$year.'-014',
                 'kind' => 'sp1',
                 'incident_on' => $today->copy()->subDays(45)->toDateString(),
                 'subject' => 'Keterlambatan berulang',
-                'description' => 'Catatan demo: pegawai terlambat tiga kali dalam satu bulan dan sudah diberikan pembinaan lisan.',
+                'description' => 'Pegawai terlambat tiga kali dalam satu bulan dan sudah diberikan pembinaan lisan.',
                 'follow_up_on' => $today->copy()->subDays(30)->toDateString(),
                 'status' => 'resolved',
                 'result' => 'Pegawai menyelesaikan pembinaan dan menunjukkan perbaikan kehadiran.',
             ],
             [
                 'employee' => $employees[1] ?? $employees[0],
-                'reference_number' => 'DEMO-KONS-001',
+                'reference_number' => 'KONS-'.$year.'-006',
                 'kind' => 'counseling',
                 'incident_on' => $today->copy()->subDays(20)->toDateString(),
                 'subject' => 'Konseling beban kerja',
-                'description' => 'Catatan demo: sesi konseling untuk membahas pembagian beban kerja dan prioritas tim.',
+                'description' => 'Sesi konseling untuk membahas pembagian beban kerja dan prioritas tim.',
                 'follow_up_on' => $today->copy()->addDays(3)->toDateString(),
                 'status' => 'open',
                 'result' => null,
             ],
             [
                 'employee' => $employees[2] ?? $employees[0],
-                'reference_number' => 'DEMO-PEL-001',
+                'reference_number' => 'PEL-'.$year.'-011',
                 'kind' => 'violation',
                 'incident_on' => $today->copy()->subDays(10)->toDateString(),
                 'subject' => 'Pelanggaran prosedur keamanan data',
-                'description' => 'Catatan demo: dokumen internal dibagikan melalui kanal yang belum disetujui.',
+                'description' => 'Dokumen internal dibagikan melalui kanal yang belum disetujui.',
                 'follow_up_on' => null,
                 'status' => 'open',
                 'result' => null,
@@ -64,6 +65,25 @@ class DisciplineSeeder extends Seeder
         ];
 
         foreach ($cases as $case) {
+            $legacy = DisciplinaryCase::where('employee_id', $case['employee']->id)
+                ->where('reference_number', 'like', 'DEMO-%')
+                ->orderBy('id')
+                ->first();
+
+            if ($legacy) {
+                $legacy->forceFill([
+                    'reference_number' => $case['reference_number'],
+                    'kind' => $case['kind'],
+                    'incident_on' => $case['incident_on'],
+                    'subject' => $case['subject'],
+                    'description' => $case['description'],
+                    'follow_up_on' => $case['follow_up_on'],
+                    'created_by' => $actor->id,
+                ])->save();
+
+                continue;
+            }
+
             $record = DisciplinaryCase::firstOrCreate(
                 ['reference_number' => $case['reference_number']],
                 [

@@ -35,6 +35,13 @@ Dokumen ini untuk mengambil screenshot dokumentasi dan presentasi. Gunakan **dat
 | 27 | PDF undangan interview | Satu halaman A4, data fiktif |
 | 28 | PDF ringkasan penawaran | Ringkasan internal, bukan surat resmi |
 | 29 | XLSX/PDF laporan | Contoh ekspor dengan filter periode |
+| 30 | `/leave` | Saldo cuti, pengajuan, riwayat, dan aksi persetujuan |
+| 31 | `/leave/create` | Form cuti/izin dengan saldo dan tanggal libur |
+| 32 | `/leave/settings` | Alokasi tahunan dan kalender libur (HR) |
+| 33 | `/attendance` | Kalender kehadiran pegawai atau daftar pegawai untuk HR |
+| 34 | `/attendance/employees/{id}` | Detail kalender dan catatan harian (HR) |
+| 35 | `/attendance/schedules` | Jadwal kerja massal, pratinjau, dan hasil simpan |
+| 36 | 403/404/500 | Halaman galat berbahasa Indonesia |
 
 ## Persiapan viewport
 

@@ -6,6 +6,9 @@ use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationEmailVerificationController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AttendanceCorrectionController;
+use App\Http\Controllers\AttendancePunchController;
+use App\Http\Controllers\AttendanceRecapController;
 use App\Http\Controllers\AttendanceScheduleController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\ContractController;
@@ -64,6 +67,14 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/attendance/recap', [AttendanceRecapController::class, 'index'])->name('attendance.recap');
+    Route::get('/attendance/recap/export', [AttendanceRecapController::class, 'export'])->middleware('throttle:10,1,attendance-export')->name('attendance.recap.export');
+    Route::get('/attendance/corrections', [AttendanceCorrectionController::class, 'index'])->name('attendance.corrections.index');
+    Route::get('/attendance/corrections/create', [AttendanceCorrectionController::class, 'create'])->name('attendance.corrections.create');
+    Route::post('/attendance/corrections', [AttendanceCorrectionController::class, 'store'])->middleware('throttle:20,1,correction-submit')->name('attendance.corrections.store');
+    Route::get('/attendance/corrections/{correction}', [AttendanceCorrectionController::class, 'show'])->whereNumber('correction')->name('attendance.corrections.show');
+    Route::post('/attendance/corrections/{correction}/decision', [AttendanceCorrectionController::class, 'decision'])->whereNumber('correction')->name('attendance.corrections.decision');
+    Route::post('/attendance/punch', [AttendancePunchController::class, 'store'])->middleware('throttle:20,1,attendance-punch')->name('attendance.punch');
     Route::get('/attendance/schedules', [AttendanceScheduleController::class, 'create'])->name('attendance.schedules');
     Route::post('/attendance/schedules/preview', [AttendanceScheduleController::class, 'preview'])->name('attendance.schedules.preview');
     Route::post('/attendance/schedules', [AttendanceScheduleController::class, 'store'])->name('attendance.schedules.store');

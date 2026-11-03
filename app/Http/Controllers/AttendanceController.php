@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AttendanceDayRequest;
 use App\Models\Employee;
 use App\Services\AttendanceCalendar;
+use App\Services\AttendancePunches;
 use App\Services\AttendanceRecords;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -41,7 +42,7 @@ class AttendanceController
         }
         $isHr = $records->isHr($r->user());
 
-        return Inertia::render('attendance', ['mode' => 'show', 'isHr' => $isHr, 'isTeam' => ! $isHr && $employee->id !== $r->user()->employee_id, 'baseUrl' => $own ? route('attendance.index', absolute: false) : route('attendance.employee', $employee, absolute: false), 'employee' => [...$employee->only('id', 'full_name', 'employee_number'), 'join_date' => $employee->join_date->format('Y-m-d'), 'active' => ! $employee->trashed() && $employee->employment_status->value !== 'inactive'], 'calendar' => $calendar->build($employee, $year, $date, $isHr || $employee->id === $r->user()->employee_id)]);
+        return Inertia::render('attendance', ['mode' => 'show', 'isHr' => $isHr, 'isTeam' => ! $isHr && $employee->id !== $r->user()->employee_id, 'baseUrl' => $own ? route('attendance.index', absolute: false) : route('attendance.employee', $employee, absolute: false), 'employee' => [...$employee->only('id', 'full_name', 'employee_number'), 'join_date' => $employee->join_date->format('Y-m-d'), 'active' => ! $employee->trashed() && $employee->employment_status->value !== 'inactive'], 'punch' => ! $isHr && $employee->id === $r->user()->employee_id ? app(AttendancePunches::class)->panel($r->user()) : null, 'calendar' => $calendar->build($employee, $year, $date, $isHr || $employee->id === $r->user()->employee_id)]);
     }
 
     public function store(AttendanceDayRequest $r, Employee $employee, AttendanceRecords $records)

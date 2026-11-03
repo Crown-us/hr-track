@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\PrivateAuthResponse;
+use App\Http\Middleware\StagingNetwork;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(StagingNetwork::class);
         $middleware->web(append: [EnsureAccountActive::class, PrivateAuthResponse::class, HandleInertiaRequests::class]);
         $middleware->redirectGuestsTo('/login');
         $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->home() ?? '/hr');

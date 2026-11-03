@@ -99,6 +99,11 @@ export default function Reports(p: Props) {
                         <p>Rekap data sesuai periode, siap diunduh untuk kebutuhan tim.</p>
                     </div>
                 </div>
+                <p>
+                    <Link className="ep-back" href="/attendance/recap">
+                        Buka rekap absensi bulanan
+                    </Link>
+                </p>
                 <FiltersForm key={JSON.stringify(p.filters)} p={p} />
                 <RecordErrors errors={p.errors ?? {}} />
                 <section className="hr-panel">

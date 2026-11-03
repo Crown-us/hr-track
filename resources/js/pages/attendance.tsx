@@ -4,8 +4,9 @@ import { ArrowLeft, ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Plus } 
 import HrShell, { type HrUser } from '../components/hr-shell';
 import PortalShell from '../components/portal-shell';
 import AttendanceCalendar from '../components/attendance-calendar';
+import AttendancePunch from '../components/attendance-punch';
 import { attendanceDate } from '../components/attendance-format';
-import type { AttendanceCalendarData } from '../types/attendance';
+import type { AttendanceCalendarData, AttendancePunchData } from '../types/attendance';
 import { RecordField as Field, RecordPagination } from '../components/record-fields';
 import '../css/employees.css';
 import '../css/trainings.css';
@@ -28,6 +29,7 @@ type Props = {
     baseUrl?: string;
     employee?: Person;
     calendar?: AttendanceCalendarData;
+    punch?: AttendancePunchData | null;
     filters?: { q?: string };
     employees?: {
         data: Person[];
@@ -278,6 +280,18 @@ export default function Attendance(p: Props) {
                     ))}
                 </div>
             )}
+            <p>
+                <Link className="ep-back" href="/attendance/corrections">
+                    {p.isHr ? 'Periksa pengajuan koreksi absensi' : 'Pengajuan koreksi absensi'}
+                </Link>
+            </p>
+            {p.isHr && (
+                <p>
+                    <Link className="ep-back" href="/attendance/recap">
+                        Rekap absensi bulanan & ekspor
+                    </Link>
+                </p>
+            )}
             {p.mode === 'index' && (
                 <>
                     <form
@@ -344,6 +358,7 @@ export default function Attendance(p: Props) {
             )}
             {c && e && (
                 <>
+                    {p.punch && <AttendancePunch data={p.punch} />}
                     <section className="at-summary" aria-label="Ringkasan tahun sampai hari ini">
                         {[
                             ['Hadir lengkap', c.summary.present],
@@ -440,6 +455,19 @@ export default function Attendance(p: Props) {
                             {c.selected.holiday && (
                                 <p className="tr-caption">Libur kantor: {c.selected.holiday}</p>
                             )}
+                            {!p.isHr &&
+                                !p.isTeam &&
+                                c.selected.record &&
+                                !c.selected.record.voided && (
+                                    <p>
+                                        <Link
+                                            className="ep-secondary"
+                                            href={`/attendance/corrections/create?day_id=${c.selected.record.id}`}
+                                        >
+                                            Ajukan koreksi tanggal ini
+                                        </Link>
+                                    </p>
+                                )}
                             {c.selected.status === 'absent' && (
                                 <p className="at-notice">
                                     Jadwal sudah berakhir tanpa catatan masuk atau cuti/izin
@@ -456,9 +484,13 @@ export default function Attendance(p: Props) {
                                                 <strong>
                                                     {v.action === 'recorded'
                                                         ? 'Dicatat'
-                                                        : v.action === 'voided'
-                                                          ? 'Catatan dibatalkan'
-                                                          : 'Dikoreksi'}{' '}
+                                                        : v.action === 'clocked_in'
+                                                          ? 'Masuk melalui web'
+                                                          : v.action === 'clocked_out'
+                                                            ? 'Pulang melalui web'
+                                                            : v.action === 'voided'
+                                                              ? 'Catatan dibatalkan'
+                                                              : 'Dikoreksi'}{' '}
                                                     · {v.actor}
                                                 </strong>
                                                 <time>
@@ -491,8 +523,8 @@ export default function Attendance(p: Props) {
                                     <CalendarDays size={20} />
                                     <h2>Catatan yang jelas</h2>
                                     <p>
-                                        Pencatatan saat ini dikelola HR. Hubungi HR jika jam atau
-                                        status perlu diperbaiki.
+                                        Gunakan panel Catat kehadiran untuk jadwal aktif milik
+                                        sendiri. Hubungi HR jika jam atau status perlu diperbaiki.
                                     </p>
                                     <p>
                                         Merah hanya muncul pada jadwal yang sudah selesai. Abu-abu

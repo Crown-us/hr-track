@@ -32,21 +32,10 @@ class AttendanceCalendar
         for ($date = $first, $i = 0; $date <= $last; $date = $date->addDay(), $i++) {
             $key = $date->toDateString();
             $raw = $records[$key] ?? null;
-            $record = $raw && ! $raw->voided_at ? $raw : null;
             $l = $leave[$key] ?? null;
-            $late = $record?->clock_in ? max(0, (int) ceil($record->scheduled_start->diffInSeconds($record->clock_in, false) / 60)) : 0;
-            $status = match (true) {
-                $key < $e->join_date->format('Y-m-d') => 'not_employed',
-                $key > $today => 'future',
-                $l !== null && ($record?->clock_in || $record?->clock_out) => 'review',
-                $l !== null => $l['type'] === 'sick' ? 'sick' : 'leave',
-                $record?->clock_in !== null && $record?->clock_out !== null => $late > $record->tolerance_minutes ? 'late' : 'present',
-                $record !== null && $now->utc() >= $record->scheduled_end => $record->clock_in ? 'review' : 'absent',
-                $record?->clock_in !== null => 'working',
-                $record !== null => $now->utc() < $record->scheduled_start ? 'scheduled' : 'waiting',
-                isset($holidays[$key]) || $date->isWeekend() => 'off',
-                default => 'unknown',
-            };
+            $classification = app(AttendanceStatus::class)->classify($key, $e->join_date->format('Y-m-d'), $raw, $l, isset($holidays[$key]) || $date->isWeekend(), $now);
+            $status = $classification['status'];
+            $late = $classification['late_minutes'];
             if ($status === 'present' || $status === 'late') {
                 $summary['present']++;
                 $summary[$status === 'present' ? 'on_time' : 'late']++;

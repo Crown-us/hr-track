@@ -24,6 +24,7 @@ class DemoSeeder extends Seeder
             ContractSeeder::class,
             TrainingSeeder::class,
             DisciplineSeeder::class,
+            LeaveAttendanceSeeder::class,
         ]);
     }
 }

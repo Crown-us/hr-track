@@ -49,7 +49,12 @@ export default function HrShell({
     ];
     return (
         <div className="hr-app">
-            <Head title={title} />
+            <Head title={title}>
+                <meta
+                    name="description"
+                    content="Ruang kerja HRIS Lite untuk data pegawai, rekrutmen, cuti, dan kehadiran."
+                />
+            </Head>
             <a className="hr-skip" href="#hr-main">
                 Lewati ke konten
             </a>

@@ -70,15 +70,21 @@ class TabularWorkbook
                 foreach ($row as $j => $value) {
                     $xml->startElement('c');
                     $xml->writeAttribute('r', $this->column($j).($i + 1));
-                    $xml->writeAttribute('t', 'inlineStr');
+                    $numeric = is_int($value);
+                    $xml->writeAttribute('t', $numeric ? 'n' : 'inlineStr');
                     if ($i === 0 || $i === 5) {
                         $xml->writeAttribute('s', '1');
-                    }$xml->startElement('is');
-                    $xml->startElement('t');
-                    $xml->writeAttribute('xml:space', 'preserve');
-                    $xml->text(preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x{FFFE}\x{FFFF}]/u', '', (string) $value));
-                    $xml->endElement();
-                    $xml->endElement();
+                    }
+                    if ($numeric) {
+                        $xml->writeElement('v', (string) $value);
+                    } else {
+                        $xml->startElement('is');
+                        $xml->startElement('t');
+                        $xml->writeAttribute('xml:space', 'preserve');
+                        $xml->text(preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x{FFFE}\x{FFFF}]/u', '', (string) $value));
+                        $xml->endElement();
+                        $xml->endElement();
+                    }
                     $xml->endElement();
                 }$xml->endElement();
             }

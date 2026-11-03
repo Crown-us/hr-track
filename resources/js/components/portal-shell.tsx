@@ -34,7 +34,12 @@ export default function PortalShell({
     ];
     return (
         <div className="hr-app">
-            <Head title={title} />
+            <Head title={title}>
+                <meta
+                    name="description"
+                    content="Portal pegawai HRIS Lite untuk data pribadi, cuti, dan kehadiran."
+                />
+            </Head>
             <a className="hr-skip" href="#hr-main">
                 Lewati ke konten
             </a>
