@@ -114,7 +114,7 @@ export default function Departments({
         return (
             <HrShell
                 title={mode === 'create' ? 'Tambah Departemen' : 'Ubah Departemen'}
-                active="employees"
+                active="departments"
                 user={auth.user}
             >
                 <main id="hr-main" className="hr-main ep-main">
@@ -125,7 +125,7 @@ export default function Departments({
     }
 
     return (
-        <HrShell title="Departemen" active="employees" user={auth.user}>
+        <HrShell title="Departemen" active="departments" user={auth.user}>
             <main id="hr-main" className="hr-main ep-main">
                 <div className="hr-page-heading">
                     <div>

@@ -26,7 +26,17 @@ export default function HrShell({
     children,
 }: {
     title: string;
-    active: HrView | 'training' | 'contracts' | 'reports' | 'accounts' | 'leave' | 'attendance';
+    active:
+        | HrView
+        | 'training'
+        | 'contracts'
+        | 'reports'
+        | 'accounts'
+        | 'leave'
+        | 'attendance'
+        | 'applicants'
+        | 'departments'
+        | 'positions';
     user?: HrUser | null;
     onNavigate?: (view: HrView) => void;
     children: ReactNode;
@@ -115,15 +125,30 @@ export default function HrShell({
                     {user && !onNavigate && (
                         <>
                             <p>Data pendukung</p>
-                            <Link href="/applicants" onClick={() => setSidebar(false)}>
+                            <Link
+                                href="/applicants"
+                                className={active === 'applicants' ? 'active' : ''}
+                                aria-current={active === 'applicants' ? 'page' : undefined}
+                                onClick={() => setSidebar(false)}
+                            >
                                 <Users size={17} />
                                 Profil pelamar
                             </Link>
-                            <Link href="/departments" onClick={() => setSidebar(false)}>
+                            <Link
+                                href="/departments"
+                                className={active === 'departments' ? 'active' : ''}
+                                aria-current={active === 'departments' ? 'page' : undefined}
+                                onClick={() => setSidebar(false)}
+                            >
                                 <List size={17} />
                                 Departemen
                             </Link>
-                            <Link href="/positions" onClick={() => setSidebar(false)}>
+                            <Link
+                                href="/positions"
+                                className={active === 'positions' ? 'active' : ''}
+                                aria-current={active === 'positions' ? 'page' : undefined}
+                                onClick={() => setSidebar(false)}
+                            >
                                 <BriefcaseBusiness size={17} />
                                 Jabatan
                             </Link>

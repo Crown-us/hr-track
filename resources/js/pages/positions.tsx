@@ -134,7 +134,7 @@ export default function Positions({
         return (
             <HrShell
                 title={mode === 'create' ? 'Tambah Jabatan' : 'Ubah Jabatan'}
-                active="employees"
+                active="positions"
                 user={auth.user}
             >
                 <main id="hr-main" className="hr-main ep-main">
@@ -145,7 +145,7 @@ export default function Positions({
     }
 
     return (
-        <HrShell title="Jabatan" active="employees" user={auth.user}>
+        <HrShell title="Jabatan" active="positions" user={auth.user}>
             <main id="hr-main" className="hr-main ep-main">
                 <div className="hr-page-heading">
                     <div>

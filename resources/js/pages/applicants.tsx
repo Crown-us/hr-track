@@ -157,7 +157,7 @@ export default function Applicants({
 
     if (mode === 'create') {
         return (
-            <HrShell title="Tambah Profil Pelamar" active="recruitment" user={auth.user}>
+            <HrShell title="Tambah Profil Pelamar" active="applicants" user={auth.user}>
                 <main id="hr-main" className="hr-main ep-main">
                     <ApplicantForm applicant={null} />
                 </main>
@@ -167,7 +167,7 @@ export default function Applicants({
 
     if (mode === 'show' && applicant) {
         return (
-            <HrShell title="Detail Profil Pelamar" active="recruitment" user={auth.user}>
+            <HrShell title="Detail Profil Pelamar" active="applicants" user={auth.user}>
                 <main id="hr-main" className="hr-main ep-main">
                     <div className="hr-page-heading">
                         <div>
@@ -286,7 +286,7 @@ export default function Applicants({
     }
 
     return (
-        <HrShell title="Profil Pelamar" active="recruitment" user={auth.user}>
+        <HrShell title="Profil Pelamar" active="applicants" user={auth.user}>
             <main id="hr-main" className="hr-main ep-main">
                 <div className="hr-page-heading">
                     <div>
