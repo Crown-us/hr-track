@@ -17,7 +17,7 @@ export function PublicHeader({ careers = false }: { careers?: boolean }) {
                     <a href={`${home}#cara-kerja`}>Cara kerja</a>
                     <a href={`${home}#tampilan`}>Tampilan</a>
                     <a href="/karier" aria-current={careers ? 'page' : undefined}>
-                        Lowongan
+                        Lowongan <ArrowUpRight size={12} aria-hidden="true" />
                     </a>
                 </nav>
                 <a href="/login" className="taste-nav-access">

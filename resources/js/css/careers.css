@@ -15,10 +15,10 @@
     padding: 10px 0 58px;
 }
 .career-kicker {
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 1.4px;
     text-transform: uppercase;
-    color: #7d8798;
+    color: #556072;
     margin: 0 0 18px;
     font-weight: 500;
 }
@@ -35,7 +35,7 @@
 .career-intro > p:last-child {
     font-size: 17px;
     line-height: 1.8;
-    color: #707b8d;
+    color: #556072;
     max-width: 540px;
 }
 .career-filters {
@@ -53,7 +53,7 @@
     border: 1px solid #dfe4ed;
     border-radius: 5px;
     padding: 5px 6px 5px 14px;
-    color: #8a94a3;
+    color: #637083;
 }
 .career-filters input {
     font: inherit;
@@ -85,7 +85,7 @@
 }
 .career-count {
     font-size: 12px;
-    color: #8a95a6;
+    color: #637083;
     margin-bottom: 14px;
 }
 .career-jobs {
@@ -113,13 +113,13 @@
 .career-job p,
 .career-job > span {
     font-size: 13px;
-    color: #7b879b;
+    color: #556072;
     margin: 0;
 }
 .career-job small {
     display: block;
-    font-size: 11px;
-    color: #9aa4b2;
+    font-size: 12px;
+    color: #637083;
     margin-top: 7px;
 }
 .career-job > svg {
@@ -139,7 +139,7 @@
 }
 .career-empty p {
     font-size: 14px;
-    color: #818b9a;
+    color: #556072;
     line-height: 1.8;
 }
 .career-empty a {
@@ -156,8 +156,8 @@
     gap: 18px;
     align-items: center;
     padding-top: 25px;
-    font-size: 11px;
-    color: #8c96a5;
+    font-size: 12px;
+    color: #637083;
     flex-wrap: wrap;
 }
 .career-pagination nav {
@@ -180,7 +180,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: #8290a3;
+    color: #556072;
     font-size: 12px;
     margin-bottom: 42px;
 }
@@ -199,7 +199,7 @@
 }
 .career-job-heading > p:last-child {
     font-size: 14px;
-    color: #78879b;
+    color: #556072;
 }
 .career-job-heading span {
     margin-inline: 10px;
@@ -241,8 +241,8 @@
     margin: 0 0 24px;
 }
 .career-summary dt {
-    font-size: 11px;
-    color: #95a0af;
+    font-size: 12px;
+    color: #637083;
     margin: 19px 0 5px;
 }
 .career-summary dd {
@@ -259,14 +259,14 @@
     padding: 12px 14px;
 }
 .career-summary > p {
-    font-size: 11px;
-    color: #929dac;
+    font-size: 12px;
+    color: #637083;
     line-height: 1.8;
     margin: 18px 0 0;
 }
 .career-apply > p {
     font-size: 14px;
-    color: #7c8a9d;
+    color: #556072;
     line-height: 1.9;
     margin-bottom: 28px;
 }
@@ -298,8 +298,8 @@
 }
 .career-field small {
     display: block;
-    font-size: 11px;
-    color: #8e9aad;
+    font-size: 12px;
+    color: #637083;
     font-weight: 400;
     line-height: 1.8;
     margin-top: 8px;
@@ -321,7 +321,7 @@
     gap: 11px;
     align-items: flex-start;
     font-size: 12px;
-    color: #7a899f;
+    color: #556072;
     line-height: 1.9;
     margin-bottom: 23px;
 }
@@ -377,7 +377,7 @@
 .career-thanks p {
     font-size: 15px;
     line-height: 2;
-    color: #7a879a;
+    color: #556072;
     margin: 0 0 20px;
 }
 .career-thanks .taste-button {
@@ -393,7 +393,7 @@
 }
 .career-footer > span {
     font-size: 12px;
-    color: #97a1af;
+    color: #637083;
 }
 .career-latest {
     padding-block: 80px;
@@ -416,7 +416,7 @@
 }
 .career-latest-heading p {
     font-size: 14px;
-    color: #8190a5;
+    color: #556072;
     line-height: 1.8;
     margin: 0;
 }
@@ -516,7 +516,7 @@
     }
     .career-footer > span {
         text-align: right;
-        font-size: 11px;
+        font-size: 12px;
         max-width: 140px;
         line-height: 1.8;
     }

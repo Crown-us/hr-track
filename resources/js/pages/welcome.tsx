@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { CareerJobs, type PublicJob } from '../components/career-jobs';
 import '../css/careers.css';
 import { ApplicationTimeline, EmployeeTable } from '../components/specimens';
+import { TeamLanyardSection } from '../components/team-lanyard-section';
 import InkOrbitFeatures from '../components/ui/ink-orbit-features';
 import { StatusBadge, StatusPalette } from '../components/ui/status-badge';
 
@@ -131,28 +132,9 @@ export default function Welcome({ careerVacancies = [] }: { careerVacancies?: Pu
                         }}
                     />
                     <p className="taste-caption">
-                        Berkas, catatan, dan status terhubung dalam satu alur.
+                        Berkas, catatan, dan status terhubung dalam satu alur. Nama, angka, dan
+                        grafik pada ilustrasi di atas adalah data contoh.
                     </p>
-                </section>
-                <section id="lowongan" className="career-latest taste-wrap">
-                    <div className="career-latest-heading">
-                        <div>
-                            <h2>Langkah baru dimulai di sini.</h2>
-                            <p>
-                                Jelajahi lowongan yang sedang dibuka dan temukan posisi yang sesuai.
-                            </p>
-                        </div>
-                        <a href="/karier">
-                            Lihat semua lowongan <ArrowRight size={17} />
-                        </a>
-                    </div>
-                    <CareerJobs jobs={careerVacancies} />
-                    {!careerVacancies.length && (
-                        <div className="career-empty">
-                            <h3>Belum ada lowongan yang dibuka.</h3>
-                            <p>Kunjungi kembali untuk melihat kesempatan berikutnya.</p>
-                        </div>
-                    )}
                 </section>
                 <section id="fitur" className="taste-modules taste-wrap" data-od-id="features">
                     <div className="taste-section-intro">
@@ -163,7 +145,7 @@ export default function Welcome({ careerVacancies = [] }: { careerVacancies?: Pu
                         </h2>
                         <p>
                             Dari mengenal orang hingga menjaga administrasi. Pilih kebutuhan HR
-                            untuk melihat cakupan yang sedang disiapkan.
+                            untuk melihat cakupan modulnya.
                         </p>
                     </div>
                     <div className="taste-module-layout">
@@ -324,7 +306,7 @@ export default function Welcome({ careerVacancies = [] }: { careerVacancies?: Pu
                                         </div>
                                     )}
                                 </div>
-                                <a href="#tampilan">
+                                <a href="#tampilan" className="taste-textlink">
                                     Lihat cuplikan lainnya{' '}
                                     <ArrowRight size={17} aria-hidden="true" />
                                 </a>
@@ -389,11 +371,32 @@ export default function Welcome({ careerVacancies = [] }: { careerVacancies?: Pu
                                 <br />
                                 Sebuah perjalanan di baliknya.
                             </p>
-                            <a href="#cara-kerja">
+                            <a href="#cara-kerja" className="taste-textlink">
                                 Pahami cara kerjanya <ArrowRight size={18} aria-hidden="true" />
                             </a>
                         </div>
                     </div>
+                </section>
+                <TeamLanyardSection />
+                <section id="lowongan" className="career-latest taste-wrap">
+                    <div className="career-latest-heading">
+                        <div>
+                            <h2>Langkah baru dimulai di sini.</h2>
+                            <p>
+                                Jelajahi lowongan yang sedang dibuka dan temukan posisi yang sesuai.
+                            </p>
+                        </div>
+                        <a href="/karier" className="taste-textlink">
+                            Lihat semua lowongan <ArrowUpRight size={17} aria-hidden="true" />
+                        </a>
+                    </div>
+                    <CareerJobs jobs={careerVacancies} />
+                    {!careerVacancies.length && (
+                        <div className="career-empty">
+                            <h3>Belum ada lowongan yang dibuka.</h3>
+                            <p>Kunjungi kembali untuk melihat kesempatan berikutnya.</p>
+                        </div>
+                    )}
                 </section>
                 <section id="akses" className="taste-access" data-od-id="access">
                     <div className="taste-wrap taste-access-inner">
@@ -418,7 +421,9 @@ export default function Welcome({ careerVacancies = [] }: { careerVacancies?: Pu
                                 tersebut untuk mengaktifkan akun dan membuat kata sandi Anda.
                             </p>
                             <p>
-                                <a href="/login">Masuk ke akun →</a>
+                                <a href="/login" className="taste-textlink">
+                                    Masuk ke akun →
+                                </a>
                             </p>
                         </details>
                     </div>
@@ -431,7 +436,9 @@ export default function Welcome({ careerVacancies = [] }: { careerVacancies?: Pu
                         <br />
                         Tim bertumbuh.
                     </p>
-                    <a href="#konten">Kembali ke atas ↑</a>
+                    <a href="#konten" className="taste-textlink">
+                        Kembali ke atas ↑
+                    </a>
                 </div>
                 <a href="/" className="taste-footer-name" aria-label="HRIS Lite, beranda">
                     hris lite<span aria-hidden="true">↗</span>

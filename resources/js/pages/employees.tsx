@@ -1,6 +1,6 @@
 import { Link, router, useForm } from '@inertiajs/react';
 import { useState, type FormEvent } from 'react';
-import { ArrowLeft, ArrowRight, FileText, Plus, Search } from 'lucide-react';
+import { ArrowLeft, ArrowRight, FileText, Plus, Search, Upload } from 'lucide-react';
 import HrShell from '../components/hr-shell';
 import { StatusBadge } from '../components/ui/status-badge';
 import { initials } from '../data/hr-preview';
@@ -594,10 +594,16 @@ export default function Employees(props: EmployeeProps) {
                         </p>
                     </div>
                     {mode === 'index' && can.create && (
-                        <Link className="ep-primary" href="/employees/create">
-                            <Plus size={16} />
-                            Tambah pegawai
-                        </Link>
+                        <div className="ep-actions">
+                            <Link className="ep-secondary" href="/employees/import">
+                                <Upload size={16} />
+                                Impor dari file
+                            </Link>
+                            <Link className="ep-primary" href="/employees/create">
+                                <Plus size={16} />
+                                Tambah pegawai
+                            </Link>
+                        </div>
                     )}
                 </div>
                 {flash?.success && (

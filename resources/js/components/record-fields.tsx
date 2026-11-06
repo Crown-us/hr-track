@@ -38,11 +38,13 @@ export function RecordErrors({ errors }: { errors: Record<string, string> }) {
 export function RecordPagination({
     total,
     links,
+    perPage = 15,
 }: {
     total: number;
+    perPage?: number;
     links: { url: string | null; label: string; active: boolean }[];
 }) {
-    return total > 15 ? (
+    return total > perPage ? (
         <nav className="tr-pagination" aria-label="Halaman daftar">
             {links.map((l, i) =>
                 l.url ? (

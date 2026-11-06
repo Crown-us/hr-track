@@ -1,0 +1,80 @@
+.ip-upload {
+    max-width: 640px;
+    display: grid;
+    gap: 18px;
+}
+.ip-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+.ip-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 8px 24px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+}
+.ip-columns small {
+    margin-left: 6px;
+    font-size: 11px;
+    color: #6b7280;
+}
+.ip-rules {
+    margin: 16px 0 0;
+    padding-left: 18px;
+    font-size: 12px;
+    line-height: 1.9;
+    color: #59616c;
+}
+.ip-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+    padding: 18px 20px;
+    border-bottom: 1px solid #e6e8eb;
+    font-size: 13px;
+}
+.ip-summary span {
+    color: #59616c;
+}
+.ip-summary strong {
+    color: #111827;
+    font-weight: 550;
+}
+.ip-page td {
+    overflow-wrap: anywhere;
+    max-width: 240px;
+    vertical-align: top;
+}
+.ip-row-error td {
+    background: #fff8f7;
+}
+.ip-errors {
+    margin: 8px 0 0;
+    padding-left: 16px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #af3028;
+}
+.ip-alert {
+    margin: 20px;
+}
+.ip-commit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px 24px;
+    padding: 18px 20px;
+    border-top: 1px solid #e6e8eb;
+}
+.ip-commit p {
+    max-width: 560px;
+    font-size: 12px;
+    line-height: 1.8;
+    color: #59616c;
+}

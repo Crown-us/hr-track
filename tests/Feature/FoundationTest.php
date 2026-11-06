@@ -30,4 +30,13 @@ class FoundationTest extends TestCase
                 ->missing('applicants')
                 ->missing('database'));
     }
+
+    public function test_lab_page_is_unavailable_outside_local_and_testing(): void
+    {
+        foreach (['production', 'staging'] as $environment) {
+            $this->app->detectEnvironment(fn () => $environment);
+            // Staging only trusts its own hosts, so use one of them to reach the route itself.
+            $this->get('http://127.0.0.1/lab')->assertNotFound();
+        }
+    }
 }

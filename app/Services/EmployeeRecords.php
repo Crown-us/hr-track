@@ -14,10 +14,10 @@ use Throwable;
 
 class EmployeeRecords
 {
-    public function save(?Employee $employee, array $data, User $actor): Employee
+    public function save(?Employee $employee, array $data, User $actor, array $meta = []): Employee
     {
         try {
-            return DB::transaction(function () use ($employee, $data, $actor) {
+            return DB::transaction(function () use ($employee, $data, $actor, $meta) {
                 $record = $employee ? Employee::whereKey($employee->id)->lockForUpdate()->firstOrFail() : new Employee;
                 if ($employee) {
                     $this->checkVersion($record, $data['version']);
@@ -28,7 +28,7 @@ class EmployeeRecords
                     $record->version++;
                 }
                 $record->save();
-                $this->event($record, $actor, $employee ? 'updated' : 'created', ['changes' => ['before' => $before, 'after' => $record->only($record->getFillable())]]);
+                $this->event($record, $actor, $employee ? 'updated' : 'created', ['changes' => ['before' => $before, 'after' => $record->only($record->getFillable()), ...$meta]]);
 
                 return $record;
             });
