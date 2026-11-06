@@ -98,6 +98,22 @@ class ApplicationEmailVerificationTest extends TestCase
         ]);
     }
 
+    public function test_unverified_public_application_can_be_rejected_but_not_advanced(): void
+    {
+        Notification::fake();
+        $this->withoutVite();
+        $a = $this->submit();
+        $hr = User::factory()->create(['role' => 'hr_staff']);
+
+        $this->actingAs($hr)->post('/applications/'.$a->id.'/status', ['status' => 'interview', 'version' => 1])
+            ->assertSessionHasErrors('status');
+        $this->post('/applications/'.$a->id.'/status', ['status' => 'rejected', 'version' => 1, 'note' => 'Email tidak pernah diverifikasi.'])
+            ->assertSessionHasNoErrors()->assertRedirect();
+
+        $this->assertSame('rejected', $a->fresh()->status->value);
+        $this->assertNull($a->fresh()->email_verified_at);
+    }
+
     public function test_signed_confirmation_verifies_once_and_unblocks_hr_workflow(): void
     {
         Notification::fake();

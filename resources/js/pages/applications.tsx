@@ -386,21 +386,21 @@ function Directory(p: ApplicationProps) {
 
 function StatusForm({ a, stages }: { a: ApplicationRow; stages: Stage[] }) {
     const f = useForm({ status: '', note: '', version: a.version });
-    if (a.source === 'public' && !a.email_verified_at) {
-        return (
-            <section className="ep-card">
-                <h2>Tindak lanjut</h2>
-                <p>Menunggu pelamar memverifikasi email sebelum tahap dapat diubah.</p>
-            </section>
-        );
-    }
+    const awaitingEmail = a.source === 'public' && !a.email_verified_at;
+    const options = awaitingEmail ? stages.filter((s) => s.value === 'rejected') : stages;
     return (
         <section className="ep-card">
             <div className="ep-section-heading">
                 <h2>Tindak lanjut</h2>
                 <p>Perubahan tahap mencatat pelaku dan waktu.</p>
             </div>
-            {stages.length ? (
+            {awaitingEmail && (
+                <p className="ap-muted">
+                    Menunggu pelamar memverifikasi email. Sebelum itu lamaran hanya dapat ditolak,
+                    misalnya untuk pengajuan palsu atau spam.
+                </p>
+            )}
+            {options.length ? (
                 <form
                     className="ap-stacked"
                     onSubmit={(e) => {
@@ -418,7 +418,7 @@ function StatusForm({ a, stages }: { a: ApplicationRow; stages: Stage[] }) {
                             onChange={(e) => f.setData('status', e.target.value)}
                         >
                             <option value="">Pilih tahap</option>
-                            {stages.map((s) => (
+                            {options.map((s) => (
                                 <option key={s.value} value={s.value}>
                                     {s.label}
                                 </option>
