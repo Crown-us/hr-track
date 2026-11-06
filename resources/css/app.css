@@ -23,6 +23,23 @@
     --color-ok: var(--ok);
 }
 
+/* Neutral tokens for ui/team-lanyard-rail, mapped to the Northstar palette. */
+@theme static {
+    --color-background: #fff;
+    --color-foreground: #15181c;
+    --color-card: #fff;
+    --color-card-foreground: #15181c;
+    --color-muted: #f1f3f7;
+    --color-muted-foreground: #5b626b;
+    --color-border: #e7e8ec;
+    --color-ring: #233f8d;
+    --color-chart-1: #233f8d;
+    --color-chart-2: #2f6f8f;
+    --color-chart-3: #4a5fb5;
+    --color-chart-4: #3b7a6a;
+    --color-chart-5: #6b5ca5;
+}
+
 @layer base {
     body {
         @apply bg-paper font-sans text-ink antialiased;
@@ -1031,4 +1048,163 @@ html {
     html {
         scroll-padding-top: 140px;
     }
+}
+
+/* Polish pass: calmer rhythm, softer details. Pure CSS, no extra requests. */
+.northstar-page ::selection {
+    background: #dbe4fb;
+    color: var(--t-ink);
+}
+.northstar-page :is(h1, h2) {
+    text-wrap: balance;
+}
+.northstar-page p {
+    text-wrap: pretty;
+}
+
+/* Hero: staggered entrance (reduced-motion rule above disables it). */
+.taste-hero > p {
+    animation: northstar-enter 0.65s 0.08s both;
+}
+.northstar-actions {
+    animation: northstar-enter 0.65s 0.16s both;
+}
+@media (min-width: 901px) {
+    .taste-hero {
+        padding-block: 104px 72px;
+    }
+}
+
+/* Buttons: soft depth, small arrow nudge, 1px press (DESIGN.md micro-interaction). */
+.northstar-page .taste-button,
+.northstar-page .northstar-secondary {
+    transition:
+        background 0.2s,
+        border-color 0.2s,
+        box-shadow 0.2s,
+        transform 0.2s;
+}
+.northstar-page .taste-button {
+    box-shadow:
+        0 1px 2px rgb(35 63 141 / 28%),
+        inset 0 1px 0 rgb(255 255 255 / 12%);
+}
+.northstar-page .taste-button:hover {
+    box-shadow: 0 10px 20px -12px rgb(35 63 141 / 65%);
+    transform: translateY(-1px);
+}
+.northstar-page .northstar-secondary:hover {
+    border-color: #c3c9d6;
+    background: #fafbfd;
+    color: var(--t-ink);
+}
+.northstar-page .taste-button:active,
+.northstar-page .northstar-secondary:active {
+    transform: translateY(1px);
+}
+.northstar-page :is(.taste-button, .northstar-secondary) svg {
+    transition: transform 0.2s;
+}
+.northstar-page :is(.taste-button, .northstar-secondary):hover svg {
+    transform: translateX(2px);
+}
+
+/* Nav: roomier tap target, hairline underline on hover/current. */
+.taste-nav nav a {
+    position: relative;
+    padding-block: 10px;
+}
+.taste-nav nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    height: 1px;
+    background: currentcolor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s;
+}
+.taste-nav nav a:hover::after,
+.taste-nav nav a[aria-current='page']::after {
+    transform: scaleX(1);
+}
+
+/* Bento frame and job rows: softer corners, gentle hover. */
+.northstar-page .taste-ink {
+    border-radius: 14px;
+}
+.career-job > svg {
+    transition: transform 0.2s;
+}
+.career-job:hover > svg {
+    transform: translate(2px, -2px);
+}
+
+/* Round 1 critique: touch targets and a lighter sticky header on small screens. */
+.northstar-page .taste-textlink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+}
+@media (max-width: 900px) {
+    /* Only the wordmark + CTA row stays pinned; the link row scrolls away. */
+    .northstar-header {
+        top: -72px;
+    }
+    html {
+        scroll-padding-top: 76px;
+    }
+}
+
+/* Badge rail: reserve its height so the lazy load does not shift the page. */
+.taste-team {
+    padding-block: 0 80px;
+}
+.taste-team-stage {
+    min-height: 520px;
+}
+@media (max-width: 900px) {
+    .taste-team {
+        padding-bottom: 48px;
+    }
+}
+
+/* Lowongan now follows the badge rail, which already provides the spacing above it. */
+.taste-team + .career-latest {
+    margin-top: 0;
+}
+
+/* A nav link that leaves the page (Lowongan) carries the same arrow used on other page links. */
+.taste-nav nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+.taste-nav nav a svg {
+    opacity: 0.55;
+    transition:
+        opacity 0.2s,
+        transform 0.2s;
+}
+.taste-nav nav a:hover svg {
+    opacity: 1;
+    transform: translate(1px, -1px);
+}
+@media (prefers-reduced-motion: reduce) {
+    .taste-nav nav a svg {
+        transition: none;
+    }
+}
+
+/* One heading scale for every section title (was five sizes and two weights). */
+.northstar-page
+    :is(.taste-section-intro, .taste-workflow-inner, .taste-access-inner, .career-latest-heading)
+    h2 {
+    font-size: clamp(28px, 3.4vw + 8px, 36px);
+    font-weight: 600;
+    line-height: 1.16;
+    letter-spacing: -0.035em;
 }

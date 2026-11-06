@@ -115,7 +115,7 @@ export function EmployeeTable() {
         <figure data-od-id="specimen-table">
             <div className="flex items-baseline justify-between gap-4 border-t border-slate-900 pt-3 font-mono text-[10px] tracking-[0.18em] uppercase">
                 <span>Tabel 01 — Pegawai aktif</span>
-                <span className="text-slate-500">128 baris</span>
+                <span className="text-slate-500">Data contoh</span>
             </div>
 
             <table className="mt-5 w-full text-left">
@@ -232,7 +232,7 @@ export function ApplicationTimeline() {
         <figure data-od-id="specimen-timeline">
             <div className="flex items-baseline justify-between gap-4 border-t border-slate-900 pt-3 font-mono text-[10px] tracking-[0.18em] uppercase">
                 <span>Riwayat 03 — Lamaran</span>
-                <span className="text-slate-500">#A-014</span>
+                <span className="text-slate-500">Data contoh</span>
             </div>
 
             <div className="mt-6">

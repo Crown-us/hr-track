@@ -511,3 +511,8 @@
         min-width: 750px;
     }
 }
+.ep-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}

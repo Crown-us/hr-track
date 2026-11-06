@@ -10,37 +10,31 @@ use App\Http\Controllers\AttendanceCorrectionController;
 use App\Http\Controllers\AttendancePunchController;
 use App\Http\Controllers\AttendanceRecapController;
 use App\Http\Controllers\AttendanceScheduleController;
+use App\Http\Controllers\AuditController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DisciplineController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmployeeImportController;
 use App\Http\Controllers\EmployeePortalController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InvitationRegistrationController;
 use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\RecruitmentOfferController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\VacancyController;
-use App\Models\Employee;
-use App\Models\Interview;
-use App\Models\Vacancy;
-use App\Services\ApplicationWorkflow;
-use App\Services\ContractRecords;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('welcome', ['careerVacancies' => Vacancy::open()->with('department')->latest('id')->limit(3)->get()->map(fn ($v) => CareerController::job($v))]);
-})->name('home');
+Route::get('/', [PageController::class, 'home'])->name('home');
 
 Route::get('/karier', [CareerController::class, 'index'])->name('careers.index');
 Route::get('/karier/terima-kasih', [CareerController::class, 'thanks'])->name('careers.thanks');
-Route::get('/karier/email-terverifikasi', fn () => Inertia::render('careers', ['mode' => 'verified']))->name('careers.verified');
-Route::get('/karier/verifikasi/kirim-ulang', fn () => Inertia::render('careers', ['mode' => 'resend']))->name('careers.resend.form');
+Route::get('/karier/email-terverifikasi', [PageController::class, 'careerVerified'])->name('careers.verified');
+Route::get('/karier/verifikasi/kirim-ulang', [PageController::class, 'careerResendForm'])->name('careers.resend.form');
 Route::post('/karier/verifikasi/kirim-ulang', [ApplicationEmailVerificationController::class, 'resend'])->middleware('throttle:email-resend')->name('careers.resend');
 Route::get('/karier/verifikasi/{application}/{hash}', [ApplicationEmailVerificationController::class, 'show'])->middleware(['signed', 'throttle:30,1,email-view'])->name('careers.verify');
 Route::post('/karier/verifikasi/{application}/{hash}', [ApplicationEmailVerificationController::class, 'store'])->middleware(['signed', 'throttle:6,1,email-confirm'])->name('careers.verify.store');
@@ -48,15 +42,8 @@ Route::get('/karier/{vacancy}', [CareerController::class, 'show'])->name('career
 Route::get('/karier/{vacancy}/lamar', [CareerController::class, 'form'])->name('careers.apply');
 Route::post('/karier/{vacancy}/lamar', [CareerController::class, 'store'])->middleware('throttle:public-application')->name('careers.store');
 
-Route::get('/lab', function () {
-    return Inertia::render('lab');
-})->name('lab');
-
-Route::get('/preview/hr', function () {
-    abort_unless(app()->environment(['local', 'testing']), 404);
-
-    return Inertia::render('hr');
-})->name('preview.hr');
+Route::get('/lab', [PageController::class, 'lab'])->name('lab');
+Route::get('/preview/hr', [PageController::class, 'previewHr'])->name('preview.hr');
 
 Route::middleware('guest')->group(function () {
     Route::get('/reset-password/{token}', [AccountPasswordController::class, 'show'])->middleware('throttle:20,1')->name('account-password.form');
@@ -96,6 +83,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'can:manage-accounts'])->group(function () {
+    Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');
     Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.index');
     Route::get('/accounts/reporting', [AccountController::class, 'reporting'])->name('accounts.reporting');
     Route::get('/accounts/reporting/{employee}', [AccountController::class, 'reportingEdit'])->name('accounts.reporting.edit');
@@ -140,25 +128,7 @@ Route::middleware(['auth', 'can:access-hr'])->group(function () {
     Route::put('/trainings/{training}/participants/{participant}', [TrainingController::class, 'evaluate'])->name('trainings.evaluate');
     Route::post('/trainings/{training}/materials', [TrainingController::class, 'upload'])->name('trainings.upload');
     Route::get('/trainings/{training}/materials/{material}', [TrainingController::class, 'download'])->name('trainings.material');
-    Route::get('/hr', fn (Request $request) => $request->query('view') === 'recruitment' ? redirect('/applications') : Inertia::render('hr', [
-        'initialView' => $request->query('view') === 'recruitment' ? 'recruitment' : 'dashboard',
-        'employeeSummary' => ['count' => Employee::count(), 'recent' => Employee::with(['department', 'position'])->latest('id')->limit(4)->get()->map(fn ($employee) => $employee->forDisplay())],
-        'vacancySummary' => ['count' => Vacancy::open()->count(), 'recent' => Vacancy::open()->with('department')->latest('id')->limit(4)->get()->map(fn ($vacancy) => $vacancy->forDisplay())],
-        'recruitmentSummary' => app(ApplicationWorkflow::class)->summary(),
-        'contractSummary' => app(ContractRecords::class)->summary(),
-        'interviewSummary' => [
-            'count' => Interview::whereNull('cancelled_at')->where('starts_at', '>=', now())->count(),
-            'next' => Interview::with(['application.applicant', 'application.vacancy', 'interviewer'])
-                ->whereNull('cancelled_at')->where('starts_at', '>=', now())->orderBy('starts_at')->limit(5)->get()
-                ->map(fn (Interview $interview) => [
-                    'id' => $interview->id,
-                    'name' => $interview->application?->applicant?->full_name ?? 'Pelamar',
-                    'job_title' => $interview->application?->vacancy?->job_title ?? 'Lowongan',
-                    'interviewer' => $interview->interviewer?->name ?? 'Pewawancara',
-                    'starts_at' => $interview->starts_at->toIso8601String(),
-                ]),
-        ],
-    ]))->name('hr');
+    Route::get('/hr', [PageController::class, 'hr'])->name('hr');
     Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
     Route::get('/interviews', [InterviewController::class, 'index'])->name('interviews.index');
     Route::get('/interviews/create', [InterviewController::class, 'create'])->name('interviews.create');
@@ -184,6 +154,10 @@ Route::middleware(['auth', 'can:access-hr'])->group(function () {
     Route::get('/vacancies/{vacancy}', [VacancyController::class, 'show'])->name('vacancies.show');
     Route::get('/vacancies/{vacancy}/edit', [VacancyController::class, 'edit'])->name('vacancies.edit');
     Route::put('/vacancies/{vacancy}', [VacancyController::class, 'update'])->name('vacancies.update');
+    Route::get('/employees/import', [EmployeeImportController::class, 'create'])->name('employees.import');
+    Route::get('/employees/import/template', [EmployeeImportController::class, 'template'])->name('employees.import.template');
+    Route::post('/employees/import/preview', [EmployeeImportController::class, 'preview'])->middleware('throttle:10,1,employee-import-preview')->name('employees.import.preview');
+    Route::post('/employees/import', [EmployeeImportController::class, 'store'])->middleware('throttle:10,1,employee-import-commit')->name('employees.import.store');
     Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
     Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
     Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->withTrashed()->name('employees.show');

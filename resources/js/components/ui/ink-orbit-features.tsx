@@ -760,7 +760,7 @@ function FlowCard({
                                                 fill="var(--ib-muted)"
                                                 fontFamily="var(--ib-mono)"
                                             >
-                                                {'REKAP #' + reports}
+                                                {'REKAP · CONTOH'}
                                             </text>
                                             <rect
                                                 x="10"
@@ -1040,7 +1040,7 @@ function InsightsCard({
                         fill="var(--ib-faint)"
                         fontFamily="var(--ib-mono)"
                     >
-                        PROYEKSI
+                        PROYEKSI · CONTOH
                     </text>
                     {hover >= 0 && (
                         <line
@@ -1079,7 +1079,7 @@ function InsightsCard({
                             ')'
                         }
                     >
-                        <rect x="-30" y="-11" width="60" height="15" rx="2" fill="var(--ib-inv)" />
+                        <rect x="-36" y="-11" width="72" height="15" rx="2" fill="var(--ib-inv)" />
                         <text
                             x="0"
                             y="-1"
@@ -1088,7 +1088,7 @@ function InsightsCard({
                             fill="var(--ib-inv-ink)"
                             fontFamily="var(--ib-mono)"
                         >
-                            {(i >= split ? 'est ' : 'mg ' + (i + 1) + ' ') +
+                            {(i >= split ? 'contoh ' : 'mg ' + (i + 1) + ' ') +
                                 (pct >= 0 ? '+' : '') +
                                 pct +
                                 '%'}

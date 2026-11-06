@@ -9,6 +9,7 @@ import {
     LayoutDashboard,
     List,
     Menu,
+    ScrollText,
     Users,
     X,
 } from 'lucide-react';
@@ -36,7 +37,8 @@ export default function HrShell({
         | 'attendance'
         | 'applicants'
         | 'departments'
-        | 'positions';
+        | 'positions'
+        | 'audit';
     user?: HrUser | null;
     onNavigate?: (view: HrView) => void;
     children: ReactNode;
@@ -186,6 +188,17 @@ export default function HrShell({
                         >
                             <Users size={17} />
                             Kelola akun
+                        </Link>
+                    )}
+                    {user?.role === 'admin' && !onNavigate && (
+                        <Link
+                            href="/audit"
+                            className={active === 'audit' ? 'active' : ''}
+                            aria-current={active === 'audit' ? 'page' : undefined}
+                            onClick={() => setSidebar(false)}
+                        >
+                            <ScrollText size={17} />
+                            Jejak audit
                         </Link>
                     )}
                     {user && !onNavigate ? (
