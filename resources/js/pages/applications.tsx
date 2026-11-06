@@ -225,7 +225,11 @@ function Directory(p: ApplicationProps) {
                     <Search size={16} />
                     <input
                         aria-label="Cari pelamar"
-                        placeholder="Cari nama, email, atau posisi…"
+                        placeholder={
+                            p.canManage
+                                ? 'Cari nama, email, atau posisi…'
+                                : 'Cari nama atau posisi…'
+                        }
                         value={q}
                         onChange={(e) => setQ(e.target.value)}
                     />
@@ -329,7 +333,7 @@ function Directory(p: ApplicationProps) {
                                     <tr key={a.id}>
                                         <td>
                                             <strong>{a.name}</strong>
-                                            <small>{a.email}</small>
+                                            {a.email && <small>{a.email}</small>}
                                         </td>
                                         <td>{a.job_title}</td>
                                         <td>{date(a.application_date)}</td>
@@ -578,10 +582,12 @@ export default function Applications(p: ApplicationProps) {
                                     </StatusBadge>
                                 </div>
                                 <dl className="ep-details">
-                                    <div>
-                                        <dt>Email</dt>
-                                        <dd>{a.email}</dd>
-                                    </div>
+                                    {a.email !== undefined && (
+                                        <div>
+                                            <dt>Email</dt>
+                                            <dd>{a.email}</dd>
+                                        </div>
+                                    )}
                                     <div>
                                         <dt>Tanggal lamaran</dt>
                                         <dd>{date(a.application_date)}</dd>

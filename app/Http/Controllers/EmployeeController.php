@@ -22,6 +22,7 @@ class EmployeeController
     public function index(Request $request): Response
     {
         Gate::authorize('viewAny', Employee::class);
+        $canSeeContact = $request->user()->can('create', Employee::class);
         $filters = $request->validate(['q' => ['nullable', 'string', 'max:100'], 'department_id' => ['nullable', 'integer', 'exists:departments,id'],
             'status' => ['nullable', Rule::enum(EmploymentStatus::class)], 'archived' => ['sometimes', 'boolean'],
             'sort' => ['nullable', Rule::in(['name_asc', 'name_desc', 'joined_desc'])], 'page' => ['sometimes', 'integer', 'min:1']]);
@@ -33,7 +34,8 @@ class EmployeeController
             $query->onlyTrashed();
         }
         if ($q = trim($filters['q'] ?? '')) {
-            $query->where(fn ($query) => $query->where('full_name', 'like', '%'.$q.'%')->orWhere('employee_number', 'like', '%'.$q.'%')->orWhere('work_email', 'like', '%'.$q.'%'));
+            $query->where(fn ($query) => $query->where('full_name', 'like', '%'.$q.'%')->orWhere('employee_number', 'like', '%'.$q.'%')
+                ->when($canSeeContact, fn ($query) => $query->orWhere('work_email', 'like', '%'.$q.'%')));
         }
         if (! empty($filters['department_id'])) {
             $query->where('department_id', $filters['department_id']);
@@ -44,7 +46,7 @@ class EmployeeController
         [$column, $direction] = match ($filters['sort'] ?? 'name_asc') {
             'name_desc' => ['full_name', 'desc'], 'joined_desc' => ['join_date', 'desc'], default => ['full_name', 'asc']
         };
-        $employees = $query->orderBy($column, $direction)->orderBy('id')->paginate(15)->withQueryString()->through(fn (Employee $employee) => $employee->forDisplay());
+        $employees = $query->orderBy($column, $direction)->orderBy('id')->paginate(15)->withQueryString()->through(fn (Employee $employee) => $employee->forDisplay($canSeeContact));
 
         return Inertia::render('employees', [...$this->base($request), 'mode' => 'index', 'filters' => [...$filters, 'archived' => $request->boolean('archived')], 'employees' => $employees, 'employee' => null, 'events' => []]);
     }
@@ -128,6 +130,6 @@ class EmployeeController
             ->map(fn ($event) => ['id' => $event->id, 'action' => $event->action, 'reason' => $event->reason, 'actor' => $event->actor->name,
                 'created_at' => $event->created_at->toIso8601String(), 'has_document' => (bool) $event->document_path, 'changes' => $event->changes]) : [];
 
-        return Inertia::render('employees', [...$this->base($request), 'mode' => $mode, 'employee' => $employee?->load(['department', 'position'])->forDisplay(), 'events' => $events]);
+        return Inertia::render('employees', [...$this->base($request), 'mode' => $mode, 'employee' => $employee?->load(['department', 'position'])->forDisplay($request->user()->can('create', Employee::class)), 'events' => $events]);
     }
 }

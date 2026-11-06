@@ -198,6 +198,21 @@
     background: #1b3274;
     color: white;
 }
+.taste-nav-access-user {
+    padding-block: 8px;
+}
+.taste-nav-access-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.1;
+}
+.taste-nav-access-text small {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.78;
+}
 .taste-hero {
     text-align: center;
     padding-block: 90px 60px;

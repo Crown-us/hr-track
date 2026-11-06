@@ -32,8 +32,8 @@ class Application extends Model
 
     public function forDisplay(bool $private = false): array
     {
-        return [...$this->only('id', 'applicant_id', 'vacancy_id', 'version'), 'name' => $this->applicant->full_name, 'email' => $this->applicant->email,
+        return [...$this->only('id', 'applicant_id', 'vacancy_id', 'version'), 'name' => $this->applicant->full_name,
             'job_title' => $this->vacancy->job_title, 'status' => $this->status->value, 'status_label' => $this->status->label(), 'application_date' => $this->application_date->format('Y-m-d'),
-            ...($private ? ['notes' => $this->notes, 'phone' => $this->applicant->phone, 'source' => $this->source, 'submitted_name' => $this->submitted_name, 'submitted_phone' => $this->submitted_phone, 'email_verified_at' => $this->email_verified_at?->toIso8601String()] : [])];
+            ...($private ? ['email' => $this->applicant->email, 'notes' => $this->notes, 'phone' => $this->applicant->phone, 'source' => $this->source, 'submitted_name' => $this->submitted_name, 'submitted_phone' => $this->submitted_phone, 'email_verified_at' => $this->email_verified_at?->toIso8601String()] : [])];
     }
 }

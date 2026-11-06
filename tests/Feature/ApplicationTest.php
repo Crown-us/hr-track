@@ -129,7 +129,7 @@ class ApplicationTest extends TestCase
         $app = Application::firstOrFail();
         $doc = DB::table('applicant_documents')->first();
         $this->actingAs($this->actor('viewer'))->withoutVite()->get('/applications/'.$app->id)->assertOk()
-            ->assertInertia(fn (Assert $page) => $page->component('applications', false)->missing('application.notes')->missing('application.phone')->has('documents', 0));
+            ->assertInertia(fn (Assert $page) => $page->component('applications', false)->missing('application.notes')->missing('application.phone')->missing('application.email')->has('documents', 0));
         $this->post('/applications', $this->data($this->vacancy()))->assertForbidden();
         $this->post('/applications/'.$app->id.'/status', ['status' => 'interview', 'version' => 1])->assertForbidden();
         $this->post('/applications/'.$app->id.'/cv', ['cv' => $this->pdf()])->assertForbidden();

@@ -41,9 +41,10 @@ class Employee extends Model
         return $this->hasMany(EmployeeEvent::class);
     }
 
-    public function forDisplay(): array
+    public function forDisplay(bool $private = false): array
     {
-        return [...$this->only('id', 'employee_number', 'full_name', 'work_email', 'phone', 'department_id', 'position_id', 'version'),
+        return [...$this->only('id', 'employee_number', 'full_name', 'department_id', 'position_id', 'version'),
+            ...($private ? $this->only('work_email', 'phone') : []),
             'employment_status' => $this->employment_status->value, 'status_label' => $this->employment_status->label(),
             'join_date' => $this->join_date->format('Y-m-d'), 'department' => $this->department->name,
             'position' => $this->position->name, 'archived_at' => $this->deleted_at?->toIso8601String()];

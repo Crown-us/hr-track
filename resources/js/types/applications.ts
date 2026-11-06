@@ -5,7 +5,7 @@ export type ApplicationRow = {
     vacancy_id: number;
     version: number;
     name: string;
-    email: string;
+    email?: string;
     job_title: string;
     status: string;
     status_label: string;

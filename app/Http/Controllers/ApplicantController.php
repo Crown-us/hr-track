@@ -20,13 +20,15 @@ class ApplicantController
             'page' => ['sometimes', 'integer', 'min:1'],
         ]);
 
+        $canSeeContact = $request->user()->can('create', Applicant::class);
         $query = Applicant::query()->withCount('applications');
         if ($q = trim($filters['q'] ?? '')) {
-            $query->where('full_name', 'like', '%'.$q.'%')->orWhere('email', 'like', '%'.$q.'%');
+            $query->where(fn ($query) => $query->where('full_name', 'like', '%'.$q.'%')
+                ->when($canSeeContact, fn ($query) => $query->orWhere('email', 'like', '%'.$q.'%')));
         }
 
         $applicants = $query->orderBy('full_name')->paginate(15)->withQueryString()
-            ->through(fn (Applicant $a) => $a->forDisplay($request->user()->can('update', $a)));
+            ->through(fn (Applicant $a) => $a->forDisplay($canSeeContact));
 
         return Inertia::render('applicants', [
             'mode' => 'index',

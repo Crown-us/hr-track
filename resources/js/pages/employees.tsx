@@ -394,7 +394,9 @@ function EmployeeDirectory(props: EmployeeProps) {
                     <Search size={16} />
                     <input
                         aria-label="Cari pegawai"
-                        placeholder="Cari nama, nomor, atau email…"
+                        placeholder={
+                            can.create ? 'Cari nama, nomor, atau email…' : 'Cari nama atau nomor…'
+                        }
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
@@ -640,8 +642,10 @@ export default function Employees(props: EmployeeProps) {
                             <dl className="ep-details">
                                 {Object.entries({
                                     employee_number: employee.employee_number,
-                                    work_email: employee.work_email,
-                                    phone: employee.phone ?? '—',
+                                    ...(employee.work_email !== undefined && {
+                                        work_email: employee.work_email,
+                                        phone: employee.phone ?? '—',
+                                    }),
                                     department_id: employee.department,
                                     position_id: employee.position,
                                     employment_status: employee.status_label,

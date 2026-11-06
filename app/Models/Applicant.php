@@ -27,8 +27,7 @@ class Applicant extends Model
         return [
             'id' => $this->id,
             'full_name' => $this->full_name,
-            'email' => $this->email,
-            ...($private ? ['phone' => $this->phone] : []),
+            ...($private ? ['email' => $this->email, 'phone' => $this->phone] : []),
             'application_count' => $this->applications_count ?? ($this->relationLoaded('applications') ? $this->applications->count() : 0),
             'archived_at' => $this->deleted_at?->toIso8601String(),
         ];
