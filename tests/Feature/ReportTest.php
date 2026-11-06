@@ -143,4 +143,18 @@ class ReportTest extends TestCase
             $this->get($this->url('/reports/export', 'discipline', ['format' => $format]))->assertSessionHasErrors('limit')->assertRedirect($this->url('/reports'));
         }
     }
+
+    public function test_contract_report_can_follow_the_end_date_instead_of_the_start_date(): void
+    {
+        [$u,$e] = $this->setupHr();
+        EmployeeContract::create(['employee_id' => $e->id, 'contract_number' => 'CT-A', 'type' => 'pkwt', 'starts_on' => '2026-01-01', 'ends_on' => '2026-11-15', 'created_by' => $u->id]);
+        EmployeeContract::create(['employee_id' => $e->id, 'contract_number' => 'CT-B', 'type' => 'pkwtt', 'starts_on' => '2026-11-16', 'ends_on' => null, 'created_by' => $u->id]);
+
+        $this->get($this->url('/reports', 'contracts'))->assertInertia(fn (Assert $p) => $p->where('report.total', 1)->where('report.rows.0.2', 'CT-B')->where('report.basis', 'Tanggal mulai kontrak'));
+        $this->get($this->url('/reports', 'contracts', ['basis' => 'ends_on']))->assertInertia(fn (Assert $p) => $p->where('report.total', 1)->where('report.rows.0.2', 'CT-A')->where('report.basis', 'Tanggal berakhir kontrak'));
+        $this->get($this->url('/reports', 'contracts', ['basis' => 'ends_on', 'from' => '2026-12-01', 'to' => '2026-12-31']))->assertInertia(fn (Assert $p) => $p->where('report.total', 0));
+        $this->get($this->url('/reports', 'contracts', ['basis' => 'deleted_at']))->assertSessionHasErrors('basis');
+        $this->get($this->url('/reports/export', 'contracts', ['basis' => 'ends_on', 'format' => 'xlsx']))->assertOk();
+        $this->get($this->url('/reports', 'recruitment', ['basis' => 'ends_on']))->assertInertia(fn (Assert $p) => $p->where('report.basis', 'Tanggal lamaran'));
+    }
 }

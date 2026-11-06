@@ -20,6 +20,15 @@
 .ct-summary > :last-child {
     justify-self: start;
 }
+.tr-page .hr-table-scroll {
+    contain: layout paint;
+}
+.ct-row-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
 .ct-confirm {
     display: flex;
     gap: 10px;

@@ -39,6 +39,7 @@ export type EmployeeProps = {
         to: number | null;
         links: { url: string | null; label: string; active: boolean }[];
     };
+    needsContract?: boolean;
     events: {
         id: number;
         action: string;

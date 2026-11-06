@@ -13,6 +13,15 @@ export type ContractRecord = {
     status: 'active' | 'scheduled' | 'expired' | 'voided';
     status_label: string;
 };
+export type MissingContractEmployee = {
+    id: number;
+    employee_number: string;
+    full_name: string;
+    status: string;
+    status_label: string;
+    department: string;
+    join_date: string;
+};
 export type ContractSummary = {
     due_count: number;
     expired_count: number;

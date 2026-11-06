@@ -30,6 +30,7 @@ class ReportRequest extends FormRequest
 
         return ['module' => ['required', Rule::in(array_keys(HrReports::MODULES))], 'from' => ['required', 'date_format:Y-m-d'], 'to' => ['required', 'date_format:Y-m-d', 'after_or_equal:from'],
             'status' => ['nullable', Rule::in(array_keys(HrReports::STATUSES[$module] ?? []))],
+            'basis' => ['nullable', Rule::in(array_keys(HrReports::CONTRACT_BASES))],
             'format' => [$this->routeIs('reports.export') ? 'required' : 'sometimes', Rule::in(['xlsx', 'pdf'])]];
     }
 
@@ -47,11 +48,11 @@ class ReportRequest extends FormRequest
 
     public function messages(): array
     {
-        return ['to.after_or_equal' => 'Tanggal akhir tidak boleh sebelum awal.', 'module.in' => 'Pilih jenis laporan yang tersedia.', 'status.in' => 'Status tidak cocok dengan jenis laporan.'];
+        return ['to.after_or_equal' => 'Tanggal akhir tidak boleh sebelum awal.', 'module.in' => 'Pilih jenis laporan yang tersedia.', 'status.in' => 'Status tidak cocok dengan jenis laporan.', 'basis.in' => 'Pilih dasar tanggal yang tersedia.'];
     }
 
     public function attributes(): array
     {
-        return ['from' => 'Tanggal awal', 'to' => 'Tanggal akhir', 'module' => 'Jenis laporan'];
+        return ['from' => 'Tanggal awal', 'to' => 'Tanggal akhir', 'module' => 'Jenis laporan', 'basis' => 'Dasar tanggal'];
     }
 }

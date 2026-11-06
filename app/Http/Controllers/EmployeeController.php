@@ -130,6 +130,7 @@ class EmployeeController
             ->map(fn ($event) => ['id' => $event->id, 'action' => $event->action, 'reason' => $event->reason, 'actor' => $event->actor->name,
                 'created_at' => $event->created_at->toIso8601String(), 'has_document' => (bool) $event->document_path, 'changes' => $event->changes]) : [];
 
-        return Inertia::render('employees', [...$this->base($request), 'mode' => $mode, 'employee' => $employee?->load(['department', 'position'])->forDisplay($request->user()->can('create', Employee::class)), 'events' => $events]);
+        return Inertia::render('employees', [...$this->base($request), 'mode' => $mode, 'employee' => $employee?->load(['department', 'position'])->forDisplay($request->user()->can('create', Employee::class)), 'events' => $events,
+            'needsContract' => $mode === 'show' && $employee && Employee::withoutCurrentContract()->whereKey($employee->id)->exists()]);
     }
 }

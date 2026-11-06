@@ -28,12 +28,12 @@ Aplikasi HRIS mandiri berbahasa Indonesia untuk tim HR: rekrutmen, direktori peg
 | Portal karier | `/karier` | Form lamaran tanpa akun, CV wajib, honeypot, throttle, verifikasi email per lamaran. | [CAREERS-PLAN](docs/CAREERS-PLAN.md), [EMAIL-VERIFICATION-PLAN](docs/EMAIL-VERIFICATION-PLAN.md) |
 | Interview | `/interviews` | Jadwal WIB, bentrok pewawancara dan pelamar ditolak, undangan PDF, pembatalan dengan alasan. | [INTERVIEW-PLAN](docs/INTERVIEW-PLAN.md) |
 | Penawaran dan konversi | detail lamaran | Penawaran, respons dengan bukti PDF, konversi pelamar diterima menjadi pegawai. | [OFFERING-PLAN](docs/OFFERING-PLAN.md) |
-| Kontrak kerja | `/contracts` | PKWT/PKWTT, koreksi dengan alasan, PDF berversi, pembatalan tanpa menghapus riwayat, pengingat PKWT 30 hari. | [CONTRACT-PLAN](docs/CONTRACT-PLAN.md) |
+| Kontrak kerja | `/contracts` | PKWT/PKWTT, koreksi dengan alasan, PDF berversi, pembatalan tanpa menghapus riwayat, pengingat PKWT 30 hari, daftar pegawai aktif tanpa kontrak berjalan (`/contracts/missing`) dengan form terisi otomatis. | [CONTRACT-PLAN](docs/CONTRACT-PLAN.md) |
 | Pelatihan | `/trainings` | Jadwal, materi PDF berversi, peserta, kehadiran, pre-test dan post-test 0 sampai 100. | [TRAINING-PLAN](docs/TRAINING-PLAN.md) |
 | Pelanggaran, SP dan konseling | `/discipline` | Catatan SP1 sampai SP3 dengan PDF wajib, tingkat dipilih HR, tanpa kenaikan otomatis. | [DISCIPLINE-PLAN](docs/DISCIPLINE-PLAN.md) |
 | Absensi | `/attendance` | Kalender tahunan per pegawai, check-in/check-out web, jadwal kerja (satuan dan massal), pengajuan koreksi dengan alur atasan lalu HR, rekap bulanan dengan ekspor XLSX dan PDF. | [ATTENDANCE-PLAN](docs/ATTENDANCE-PLAN.md), [SCHEDULE](docs/ATTENDANCE-SCHEDULE-PLAN.md), [PUNCH](docs/ATTENDANCE-PUNCH-PLAN.md), [CORRECTION](docs/ATTENDANCE-CORRECTION-PLAN.md), [RECAP](docs/ATTENDANCE-RECAP-PLAN.md) |
 | Cuti dan izin | `/leave` | Pengajuan hari penuh, saldo tahunan, hari libur kantor, persetujuan atasan lalu HR, bukti PDF opsional. | [LEAVE-PLAN](docs/LEAVE-PLAN.md) |
-| Laporan HR | `/reports` | Pratinjau 10 baris, ekspor XLSX dan PDF untuk rekrutmen, evaluasi pelatihan, kontrak dan SP. | [REPORT-PLAN](docs/REPORT-PLAN.md) |
+| Laporan HR | `/reports` | Pratinjau 10 baris, ekspor XLSX dan PDF untuk rekrutmen, evaluasi pelatihan, kontrak (menurut tanggal mulai atau tanggal berakhir) dan SP. | [REPORT-PLAN](docs/REPORT-PLAN.md) |
 | Kelola akun | `/accounts` | Undangan sekali pakai, role, status, tautan pemulihan password, struktur atasan. Khusus Admin. | [ACCOUNT-MANAGEMENT-PLAN](docs/ACCOUNT-MANAGEMENT-PLAN.md) |
 | Jejak audit | `/audit` | Satu halaman yang menggabungkan seluruh riwayat modul. Khusus Admin. Lihat [aturan audit](#jejak-audit). | |
 | Portal pegawai dan atasan | `/me`, `/team` | Pegawai melihat data dan menu miliknya; atasan membaca tim langsung. | |

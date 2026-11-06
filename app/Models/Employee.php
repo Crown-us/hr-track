@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EmploymentStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -39,6 +40,16 @@ class Employee extends Model
     public function events(): HasMany
     {
         return $this->hasMany(EmployeeEvent::class);
+    }
+
+    public function scopeWithoutCurrentContract(Builder $query): void
+    {
+        $today = now('Asia/Jakarta')->toDateString();
+        $query->where('employment_status', '!=', 'inactive')->where('join_date', '<=', $today)
+            ->whereNotExists(fn ($contract) => $contract->selectRaw('1')->from('employee_contracts')
+                ->whereColumn('employee_contracts.employee_id', 'employees.id')->whereNull('employee_contracts.voided_at')
+                ->where('employee_contracts.starts_on', '<=', $today)
+                ->where(fn ($end) => $end->whereNull('employee_contracts.ends_on')->orWhere('employee_contracts.ends_on', '>=', $today)));
     }
 
     public function forDisplay(bool $private = false): array

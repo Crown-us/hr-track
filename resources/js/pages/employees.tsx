@@ -624,6 +624,16 @@ export default function Employees(props: EmployeeProps) {
                 )}
                 {mode === 'show' && employee && (
                     <>
+                        {props.needsContract && can.create && (
+                            <p className="ep-alert" role="status">
+                                Belum ada kontrak yang berjalan untuk pegawai ini.{' '}
+                                <Link
+                                    href={`/contracts/create?employee_id=${employee.id}&starts_on=${employee.join_date}`}
+                                >
+                                    Catat kontrak →
+                                </Link>
+                            </p>
+                        )}
                         <section className="ep-card ep-profile-card">
                             <div className="ep-profile-head">
                                 <span className="hr-avatar hr-avatar-large">

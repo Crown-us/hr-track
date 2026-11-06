@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\EmployeeContract;
 use App\Models\Position;
 use App\Models\User;
 use Illuminate\Database\Events\QueryExecuted;
@@ -232,5 +233,97 @@ class ContractTest extends TestCase
         $this->post('/contracts/'.$id.'/documents', ['document' => UploadedFile::fake()->createWithContent('k.pdf', "%PDF-1.4\n%%EOF")])->assertSessionHasErrors('contract');
         $this->assertDatabaseCount('contract_documents', 0);
         $this->assertSame([], Storage::disk('contract_documents')->allFiles());
+    }
+
+    public function test_missing_list_shows_active_employees_without_a_running_contract(): void
+    {
+        $hr = $this->hr();
+        $covered = $this->employee(1);
+        $this->employee(2);
+        $this->employee(3)->update(['employment_status' => 'inactive']);
+        $this->employee(4)->update(['join_date' => now('Asia/Jakarta')->addMonth()->toDateString()]);
+        $this->employee(5)->delete();
+        $expired = $this->employee(6);
+        $voided = $this->employee(7);
+        $this->employee(8)->update(['employment_status' => 'permanent']);
+        $past = now('Asia/Jakarta')->subMonth()->toDateString();
+        $future = now('Asia/Jakarta')->addMonth()->toDateString();
+        $longPast = now('Asia/Jakarta')->subMonths(3)->toDateString();
+        $make = fn (Employee $e, string $number, string $start, string $end) => EmployeeContract::create(['employee_id' => $e->id, 'contract_number' => $number, 'type' => 'pkwt', 'starts_on' => $start, 'ends_on' => $end, 'created_by' => $hr->id]);
+        $make($covered, 'C-1', $past, $future);
+        $make($expired, 'C-6', $longPast, $past);
+        $make($voided, 'C-7', $past, $future);
+        DB::table('employee_contracts')->where('contract_number', 'C-7')->update(['voided_at' => now()]);
+
+        $this->get('/contracts/missing')->assertOk()->assertInertia(fn (Assert $p) => $p->component('contracts')->where('mode', 'missing')->where('missing.total', 4)
+            ->where('missing.data.0.employee_number', 'CTR-2')->where('missing.data.1.employee_number', 'CTR-6')->where('missing.data.2.employee_number', 'CTR-7')->where('missing.data.3.employee_number', 'CTR-8')
+            ->missing('missing.data.0.work_email'));
+        $this->get('/contracts/missing?status=permanent')->assertInertia(fn (Assert $p) => $p->where('missing.total', 1)->where('missing.data.0.employee_number', 'CTR-8'));
+        $this->get('/contracts/missing?status=bukan-status')->assertSessionHasErrors('status');
+        $this->get('/contracts')->assertInertia(fn (Assert $p) => $p->where('missingCount', 4));
+    }
+
+    public function test_pkwtt_without_end_date_counts_as_a_running_contract_and_viewer_cannot_manage(): void
+    {
+        $hr = $this->hr();
+        $e = $this->employee(1);
+        EmployeeContract::create(['employee_id' => $e->id, 'contract_number' => 'T-1', 'type' => 'pkwtt', 'starts_on' => '2026-01-01', 'ends_on' => null, 'created_by' => $hr->id]);
+        $this->get('/contracts/missing')->assertInertia(fn (Assert $p) => $p->where('missing.total', 0));
+        $this->get('/employees/'.$e->id)->assertInertia(fn (Assert $p) => $p->where('needsContract', false));
+
+        $other = $this->employee(2);
+        $this->get('/employees/'.$other->id)->assertInertia(fn (Assert $p) => $p->where('needsContract', true));
+        $this->actingAs(User::factory()->create(['role' => 'viewer']));
+        $this->get('/contracts/missing')->assertOk()->assertInertia(fn (Assert $p) => $p->where('canManage', false)->where('missing.total', 1));
+        $this->post('/logout');
+        $this->get('/contracts/missing')->assertRedirect('/login');
+    }
+
+    public function test_create_form_is_prefilled_from_the_selected_employee(): void
+    {
+        $this->hr();
+        $contract = $this->employee(1);
+        $permanent = $this->employee(2);
+        $permanent->update(['employment_status' => 'permanent']);
+
+        $this->get('/contracts/create?employee_id='.$contract->id.'&starts_on=2026-03-01')->assertInertia(fn (Assert $p) => $p->where('selectedId', $contract->id)->where('defaultStart', '2026-03-01')->where('defaultType', 'pkwt'));
+        $this->get('/contracts/create?employee_id='.$permanent->id)->assertInertia(fn (Assert $p) => $p->where('selectedId', $permanent->id)->where('defaultStart', null)->where('defaultType', 'pkwtt'));
+        $this->get('/contracts/create?employee_id=999999')->assertInertia(fn (Assert $p) => $p->where('selectedId', null)->where('defaultType', 'pkwt'));
+        $this->get('/contracts/create?starts_on=bukan-tanggal')->assertSessionHasErrors('starts_on');
+    }
+
+    public function test_prefilled_start_follows_the_last_finished_contract_instead_of_overlapping_it(): void
+    {
+        $this->travelTo('2026-11-07 10:00:00');
+        $hr = $this->hr();
+        $renewal = $this->employee(1);
+        $make = fn (Employee $e, string $number, string $start, string $end) => EmployeeContract::create(['employee_id' => $e->id, 'contract_number' => $number, 'type' => 'pkwt', 'starts_on' => $start, 'ends_on' => $end, 'created_by' => $hr->id]);
+        $make($renewal, 'R-1', '2026-01-01', '2026-03-31');
+        $make($renewal, 'R-2', '2026-04-01', '2026-06-30');
+        $make($renewal, 'R-VOID', '2026-07-01', '2026-08-31');
+        DB::table('employee_contracts')->where('contract_number', 'R-VOID')->update(['voided_at' => now()]);
+
+        $this->get('/contracts/create?employee_id='.$renewal->id.'&starts_on=2026-01-01')->assertInertia(fn (Assert $p) => $p->where('defaultStart', '2026-07-01'));
+        $this->post('/contracts', $this->data(['employee_id' => $renewal->id, 'contract_number' => 'R-3', 'starts_on' => '2026-07-01', 'ends_on' => '2026-12-31']))->assertSessionHasNoErrors();
+
+        $voidedOnly = $this->employee(2);
+        $make($voidedOnly, 'V-1', '2026-01-01', '2026-03-31');
+        DB::table('employee_contracts')->where('contract_number', 'V-1')->update(['voided_at' => now()]);
+        $this->get('/contracts/create?employee_id='.$voidedOnly->id.'&starts_on=2026-01-01')->assertInertia(fn (Assert $p) => $p->where('defaultStart', '2026-01-01'));
+
+        $scheduledOnly = $this->employee(3);
+        $make($scheduledOnly, 'S-1', '2026-12-01', '2027-03-31');
+        $this->get('/contracts/create?employee_id='.$scheduledOnly->id.'&starts_on=2026-01-01')->assertInertia(fn (Assert $p) => $p->where('defaultStart', '2026-01-01'));
+    }
+
+    public function test_selected_employee_is_listed_even_beyond_the_first_twenty_options(): void
+    {
+        $this->hr();
+        for ($i = 1; $i <= 24; $i++) {
+            $this->employee($i);
+        }
+        $last = Employee::where('employee_number', 'CTR-9')->firstOrFail();
+        $this->get('/contracts/create')->assertInertia(fn (Assert $p) => $p->has('employees', 20));
+        $this->get('/contracts/create?employee_id='.$last->id)->assertInertia(fn (Assert $p) => $p->has('employees', 21)->where('employees.0.employee_number', 'CTR-9'));
     }
 }
