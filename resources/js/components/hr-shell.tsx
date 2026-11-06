@@ -1,23 +1,152 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState, type ReactNode } from 'react';
+import { Fragment, useState, type ReactNode } from 'react';
 import {
     ArrowLeft,
+    BadgeCheck,
+    Building2,
     BriefcaseBusiness,
+    CalendarClock,
     CalendarDays,
+    ChartColumn,
+    ContactRound,
     FileCheck2,
     GraduationCap,
     LayoutDashboard,
-    List,
     Menu,
     ScrollText,
+    ShieldCheck,
     Users,
     X,
+    type LucideIcon,
 } from 'lucide-react';
 import { initials } from '../data/hr-preview';
 import '../css/hr.css';
 
 export type HrUser = { name: string; email: string; role: string };
 export type HrView = 'dashboard' | 'employees' | 'recruitment';
+export type HrActive =
+    | HrView
+    | 'attendance'
+    | 'leave'
+    | 'training'
+    | 'contracts'
+    | 'applicants'
+    | 'departments'
+    | 'positions'
+    | 'reports'
+    | 'accounts'
+    | 'audit';
+
+type NavItem = {
+    id: HrActive;
+    label: string;
+    href: string;
+    icon: LucideIcon;
+    /** Preview-mode view key; the item then always shows, as a button when `onNavigate` is set. */
+    view?: HrView;
+    /** Roles allowed to see the item. Omitted means every signed-in HR user. */
+    roles?: string[];
+    /** Shown as a disabled "Segera" entry in the signed-out preview. */
+    soon?: boolean;
+};
+
+const hrRoles = ['admin', 'hr_staff'];
+const navGroups: { title: string; items: NavItem[] }[] = [
+    {
+        title: 'Ruang kerja',
+        items: [
+            {
+                id: 'dashboard',
+                label: 'Ringkasan',
+                href: '/hr',
+                icon: LayoutDashboard,
+                view: 'dashboard',
+            },
+            {
+                id: 'employees',
+                label: 'Pegawai',
+                href: '/employees',
+                icon: Users,
+                view: 'employees',
+            },
+            {
+                id: 'recruitment',
+                label: 'Rekrutmen',
+                href: '/vacancies',
+                icon: BriefcaseBusiness,
+                view: 'recruitment',
+            },
+        ],
+    },
+    {
+        title: 'Operasional',
+        items: [
+            {
+                id: 'attendance',
+                label: 'Absensi',
+                href: '/attendance',
+                icon: CalendarClock,
+                roles: hrRoles,
+            },
+            {
+                id: 'leave',
+                label: 'Cuti & izin',
+                href: '/leave',
+                icon: CalendarDays,
+                roles: hrRoles,
+            },
+            {
+                id: 'training',
+                label: 'Pelatihan',
+                href: '/trainings',
+                icon: GraduationCap,
+                soon: true,
+            },
+            {
+                id: 'contracts',
+                label: 'Hubungan kerja',
+                href: '/contracts',
+                icon: FileCheck2,
+                soon: true,
+            },
+        ],
+    },
+    {
+        title: 'Data pendukung',
+        items: [
+            { id: 'applicants', label: 'Profil pelamar', href: '/applicants', icon: ContactRound },
+            { id: 'departments', label: 'Departemen', href: '/departments', icon: Building2 },
+            { id: 'positions', label: 'Jabatan', href: '/positions', icon: BadgeCheck },
+        ],
+    },
+    {
+        title: 'Laporan & kontrol',
+        items: [
+            {
+                id: 'reports',
+                label: 'Laporan',
+                href: '/reports',
+                icon: ChartColumn,
+                roles: hrRoles,
+                soon: true,
+            },
+            {
+                id: 'accounts',
+                label: 'Kelola akun',
+                href: '/accounts',
+                icon: ShieldCheck,
+                roles: ['admin'],
+            },
+            {
+                id: 'audit',
+                label: 'Jejak audit',
+                href: '/audit',
+                icon: ScrollText,
+                roles: ['admin'],
+            },
+        ],
+    },
+];
 
 export default function HrShell({
     title,
@@ -27,18 +156,7 @@ export default function HrShell({
     children,
 }: {
     title: string;
-    active:
-        | HrView
-        | 'training'
-        | 'contracts'
-        | 'reports'
-        | 'accounts'
-        | 'leave'
-        | 'attendance'
-        | 'applicants'
-        | 'departments'
-        | 'positions'
-        | 'audit';
+    active: HrActive;
     user?: HrUser | null;
     onNavigate?: (view: HrView) => void;
     children: ReactNode;
@@ -49,16 +167,48 @@ export default function HrShell({
         hr_staff: 'Staf HR',
         viewer: 'Pembaca',
     };
-    const navigation = [
-        { id: 'dashboard' as const, label: 'Ringkasan', href: '/hr', icon: LayoutDashboard },
-        { id: 'employees' as const, label: 'Pegawai', href: '/employees', icon: Users },
-        {
-            id: 'recruitment' as const,
-            label: 'Rekrutmen',
-            href: '/vacancies',
-            icon: BriefcaseBusiness,
-        },
-    ];
+    const signedIn = Boolean(user) && !onNavigate;
+    const renderItem = ({ id, label, href, icon: Icon, view, roles: allowed, soon }: NavItem) => {
+        const current = active === id;
+        if (view && onNavigate) {
+            return (
+                <button
+                    key={id}
+                    className={current ? 'active' : ''}
+                    aria-current={current ? 'page' : undefined}
+                    onClick={() => {
+                        onNavigate(view);
+                        setSidebar(false);
+                    }}
+                >
+                    <Icon size={17} />
+                    {label}
+                </button>
+            );
+        }
+        if (!view && !signedIn) {
+            return soon ? (
+                <button key={id} disabled>
+                    <Icon size={17} />
+                    {label}
+                    <small>Segera</small>
+                </button>
+            ) : null;
+        }
+        if (allowed && !(user && allowed.includes(user.role))) return null;
+        return (
+            <Link
+                key={id}
+                href={href}
+                className={current ? 'active' : ''}
+                aria-current={current ? 'page' : undefined}
+                onClick={() => setSidebar(false)}
+            >
+                <Icon size={17} />
+                {label}
+            </Link>
+        );
+    };
     return (
         <div className="hr-app">
             <Head title={title}>
@@ -96,161 +246,15 @@ export default function HrShell({
                     </button>
                 </div>
                 <nav>
-                    <p>Ruang kerja</p>
-                    {navigation.map(({ id, label, href, icon: Icon }) =>
-                        onNavigate ? (
-                            <button
-                                key={id}
-                                className={active === id ? 'active' : ''}
-                                aria-current={active === id ? 'page' : undefined}
-                                onClick={() => {
-                                    onNavigate(id);
-                                    setSidebar(false);
-                                }}
-                            >
-                                <Icon size={17} />
-                                {label}
-                            </button>
-                        ) : (
-                            <Link
-                                key={id}
-                                href={href}
-                                className={active === id ? 'active' : ''}
-                                aria-current={active === id ? 'page' : undefined}
-                                onClick={() => setSidebar(false)}
-                            >
-                                <Icon size={17} />
-                                {label}
-                            </Link>
-                        ),
-                    )}
-                    {user && !onNavigate && (
-                        <>
-                            <p>Data pendukung</p>
-                            <Link
-                                href="/applicants"
-                                className={active === 'applicants' ? 'active' : ''}
-                                aria-current={active === 'applicants' ? 'page' : undefined}
-                                onClick={() => setSidebar(false)}
-                            >
-                                <Users size={17} />
-                                Profil pelamar
-                            </Link>
-                            <Link
-                                href="/departments"
-                                className={active === 'departments' ? 'active' : ''}
-                                aria-current={active === 'departments' ? 'page' : undefined}
-                                onClick={() => setSidebar(false)}
-                            >
-                                <List size={17} />
-                                Departemen
-                            </Link>
-                            <Link
-                                href="/positions"
-                                className={active === 'positions' ? 'active' : ''}
-                                aria-current={active === 'positions' ? 'page' : undefined}
-                                onClick={() => setSidebar(false)}
-                            >
-                                <BriefcaseBusiness size={17} />
-                                Jabatan
-                            </Link>
-                        </>
-                    )}
-                    <p>Pengembangan tim</p>
-                    {user && ['admin', 'hr_staff'].includes(user.role) && !onNavigate && (
-                        <Link
-                            href="/attendance"
-                            className={active === 'attendance' ? 'active' : ''}
-                            aria-current={active === 'attendance' ? 'page' : undefined}
-                            onClick={() => setSidebar(false)}
-                        >
-                            <CalendarDays size={17} />
-                            Absensi
-                        </Link>
-                    )}
-                    {user && ['admin', 'hr_staff'].includes(user.role) && !onNavigate && (
-                        <Link
-                            href="/leave"
-                            className={active === 'leave' ? 'active' : ''}
-                            aria-current={active === 'leave' ? 'page' : undefined}
-                            onClick={() => setSidebar(false)}
-                        >
-                            <CalendarDays size={17} />
-                            Cuti & izin
-                        </Link>
-                    )}
-                    {user?.role === 'admin' && !onNavigate && (
-                        <Link
-                            href="/accounts"
-                            className={active === 'accounts' ? 'active' : ''}
-                            aria-current={active === 'accounts' ? 'page' : undefined}
-                            onClick={() => setSidebar(false)}
-                        >
-                            <Users size={17} />
-                            Kelola akun
-                        </Link>
-                    )}
-                    {user?.role === 'admin' && !onNavigate && (
-                        <Link
-                            href="/audit"
-                            className={active === 'audit' ? 'active' : ''}
-                            aria-current={active === 'audit' ? 'page' : undefined}
-                            onClick={() => setSidebar(false)}
-                        >
-                            <ScrollText size={17} />
-                            Jejak audit
-                        </Link>
-                    )}
-                    {user && !onNavigate ? (
-                        <Link
-                            href="/trainings"
-                            className={active === 'training' ? 'active' : ''}
-                            aria-current={active === 'training' ? 'page' : undefined}
-                            onClick={() => setSidebar(false)}
-                        >
-                            <GraduationCap size={17} />
-                            Pelatihan
-                        </Link>
-                    ) : (
-                        <button disabled>
-                            <GraduationCap size={17} />
-                            Pelatihan<small>Segera</small>
-                        </button>
-                    )}
-                    {user && !onNavigate ? (
-                        <Link
-                            href="/contracts"
-                            className={active === 'contracts' ? 'active' : ''}
-                            aria-current={active === 'contracts' ? 'page' : undefined}
-                            onClick={() => setSidebar(false)}
-                        >
-                            <FileCheck2 size={17} />
-                            Hubungan kerja
-                        </Link>
-                    ) : (
-                        <button disabled>
-                            <FileCheck2 size={17} />
-                            Hubungan kerja<small>Segera</small>
-                        </button>
-                    )}
-                    {user && !onNavigate ? (
-                        ['admin', 'hr_staff'].includes(user.role) && (
-                            <Link
-                                href="/reports"
-                                className={active === 'reports' ? 'active' : ''}
-                                aria-current={active === 'reports' ? 'page' : undefined}
-                                onClick={() => setSidebar(false)}
-                            >
-                                <List size={17} />
-                                Laporan
-                            </Link>
-                        )
-                    ) : (
-                        <button disabled>
-                            <List size={17} />
-                            Laporan<small>Segera</small>
-                        </button>
-                    )}
+                    {navGroups.map(({ title, items }) => {
+                        const links = items.map(renderItem).filter(Boolean);
+                        return links.length ? (
+                            <Fragment key={title}>
+                                <p>{title}</p>
+                                {links}
+                            </Fragment>
+                        ) : null;
+                    })}
                 </nav>
                 <div className="hr-sidebar-bottom">
                     <Link href="/">
