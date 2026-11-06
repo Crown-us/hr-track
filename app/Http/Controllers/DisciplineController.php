@@ -61,7 +61,7 @@ class DisciplineController
     {
         $case = $this->run(fn () => $records->save(null, $r->validated(), $r->file('document'), $r->user()), route('discipline.create'));
 
-        return to_route('discipline.show', $case)->with('success', 'Catatan tersimpan beserta riwayatnya.');
+        return to_route('discipline.show', $case)->with('success', 'Catatan tersimpan beserta riwayatnya.')->with('warning', $records->escalationGap($case));
     }
 
     public function show(DisciplinaryCase $case)
