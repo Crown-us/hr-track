@@ -1,69 +1,88 @@
 # HRIS Lite
 
-**Jadwal kerja massal**: buka **Absensi → Jadwal massal** untuk memilih sampai50pegawai, rentang maksimal31hari, hari kerja, jam WIB (termasuk malam), toleransi dan alasan. Periksa pratinjau, lalu konfirmasi. Catatan lama/cuti/libur/jadwal bertumpuk atau sudah mulai tidak ditimpa; data berubah atau preview kedaluwarsa meminta pemeriksaan ulang. Seluruh jadwal baru serta audit disimpan satu transaksi, tanpa membuat jam hadir. [Batas lengkap](docs/ATTENDANCE-SCHEDULE-PLAN.md).
+Aplikasi HRIS mandiri berbahasa Indonesia untuk tim HR: rekrutmen, direktori pegawai, kontrak, pelatihan, pelanggaran/SP, absensi, cuti dan izin, laporan, serta manajemen akun. Dibangun dengan Laravel 13, Inertia 3, React 19, TypeScript, Tailwind 4, Vite dan MySQL 8.4.
 
-**Kalender kehadiran** tersedia di `/attendance`: grafik tahunan ala GitHub dengan warna status, ringkasan aktual, detail tanggal dan pilihan tahun. Pegawai melihat diri sendiri; Atasan dapat membuka kalender anggota langsung dari detail Tim; Admin/Staf HR memilih pegawai dan mencatat jadwal/jam masuk–pulang manual dengan alasan/audit. Tanggal tanpa data tidak dianggap mangkir; status tanpa keterangan hanya sesudah jadwal eksplisit berakhir, setelah mencocokkan cuti/izin disetujui. Mendukung jadwal malam/WIB, tanpa fingerprint/impor/GPS/selfie/payroll di fase ini. Lihat [aturan dan batas](docs/ATTENDANCE-PLAN.md).
+> **Status:** prototipe portofolio yang berjalan penuh di komputer lokal. Semua data pada demo fiktif (domain `example.test`). Belum ada UAT oleh tim HR dan belum ada hosting yang selalu aktif, jadi jangan diklaim siap production. Batas yang diketahui ada di bagian [Batasan](#batasan-yang-diketahui).
 
-**Cuti & izin** tersedia di `/leave`: Pegawai/Atasan mengajukan hari penuh, melihat saldo/riwayat dan membatalkan sesuai tahap; Atasan meninjau anggota langsung, Admin/Staf HR memberi keputusan akhir. HR menetapkan alokasi tahunan serta hari libur kantor di `/leave/settings`. Kalender awal Senin–Jumat, tanpa shift/setengah hari/accrual/carry-over. Saldo ditahan saat pengajuan dan tidak boleh dipakai ganda; bukti PDF opsional5MiB privat hanya pemohon/HR. Atasan/pegawai mendapat menu dari portal `/me`, HR dari sidebar. Belum email atau integrasi absensi. Lihat [aturan lengkap](docs/LEAVE-PLAN.md).
+## Daftar isi
 
-**Kelola akun** (`/accounts`, khusus Admin) menyediakan undangan sekali pakai48jam, pencabutan undangan, pengaturan role/status/link pegawai dan tautan pemulihan password60menit. Mutasi memerlukan kata sandi Admin; perubahan/reset/pencabutan/struktur atasan disertai alasan. Tidak ada password default atau email otomatis. Tautan ditampilkan setelah dibuat dan disalurkan secara privat. Undangan aktif harus dicabut sebelum diganti lewat UI; penerbitan reset dan perubahan akun menolak formulir versi lama. Perubahan akses membatalkan tautan reset lama, merotasi remember token dan mencabut sesi lama lintas driver session.
+- [Fitur](#fitur)
+- [Peran dan akses](#peran-dan-akses)
+- [Menjalankan](#menjalankan)
+- [Data demo dan akun lokal](#data-demo-dan-akun-lokal)
+- [Pemeriksaan kualitas](#pemeriksaan-kualitas)
+- [Keamanan dan keputusan desain](#keamanan-dan-keputusan-desain)
+- [Staging](#staging)
+- [Batasan yang diketahui](#batasan-yang-diketahui)
+- [Dokumentasi](#dokumentasi)
 
-Role sekarang **Admin, Staf HR, Pembaca, Pegawai dan Atasan**. Akun Pegawai/Atasan wajib terhubung unik ke pegawai aktif. Admin menetapkan atasan langsung melalui `/accounts/reporting`, dengan penolakan diri sendiri/siklus. Pegawai/Atasan masuk ke `/me`; Atasan membaca tim langsung melalui `/team` tanpa akses modul HR atau kontak/dokumen/kasus anggota. Akun nonaktif dan portal pegawai arsip/nonaktif ditolak di backend. Pengajuan cuti/izin dan absensi belum masuk tahap fondasi ini. Detail [ACCOUNT-MANAGEMENT-PLAN.md](docs/ACCOUNT-MANAGEMENT-PLAN.md).
+## Fitur
 
-**Pelanggaran, SP & konseling** tersedia di Hubungan kerja → Pelanggaran & SP (`/discipline`), khusus Admin/Staf HR. Catatan SP1–3 wajib PDF privat maksimal5MiB saat dibuat; tingkat dipilih HR, tidak dinaikkan otomatis. Koreksi memerlukan alasan dan versi; penyelesaian menyimpan hasil tindak lanjut, pembatalan administratif mempertahankan audit/berkas. Belum menerbitkan template surat resmi atau melakukan keputusan PHK. Lihat [DISCIPLINE-PLAN.md](docs/DISCIPLINE-PLAN.md).
+| Modul | Rute | Ringkasan | Detail |
+|---|---|---|---|
+| Direktori pegawai | `/employees` | Cari, filter, sort, pagination 15. Tambah/edit oleh Admin dan Staf HR. Penghapusan berarti arsip (soft delete) dengan alasan, PDF pendukung dan konfirmasi nomor; hanya Admin yang mengarsipkan dan memulihkan. | [EMPLOYEE-PLAN](docs/EMPLOYEE-PLAN.md) |
+| Impor pegawai | `/employees/import` | Unggah CSV atau XLSX, pratinjau dengan validasi per baris, lalu simpan semuanya atau tidak sama sekali. Ada template CSV. Lihat [aturan impor](#impor-pegawai). | |
+| Departemen dan jabatan | `/departments`, `/positions` | Master data yang dipakai pegawai dan lowongan. | |
+| Lowongan | `/vacancies` | Draft, dibuka, ditutup. Tampil di portal karier hanya dalam rentang tanggal WIB. | [VACANCY-PLAN](docs/VACANCY-PLAN.md) |
+| Pelamar dan pipeline | `/applicants`, `/applications` | Screening, Interview, Offering, Diterima atau Ditolak. CV PDF privat, riwayat tahap dengan aktor dan catatan. | [APPLICATION-PLAN](docs/APPLICATION-PLAN.md) |
+| Portal karier | `/karier` | Form lamaran tanpa akun, CV wajib, honeypot, throttle, verifikasi email per lamaran. | [CAREERS-PLAN](docs/CAREERS-PLAN.md), [EMAIL-VERIFICATION-PLAN](docs/EMAIL-VERIFICATION-PLAN.md) |
+| Interview | `/interviews` | Jadwal WIB, bentrok pewawancara dan pelamar ditolak, undangan PDF, pembatalan dengan alasan. | [INTERVIEW-PLAN](docs/INTERVIEW-PLAN.md) |
+| Penawaran dan konversi | detail lamaran | Penawaran, respons dengan bukti PDF, konversi pelamar diterima menjadi pegawai. | [OFFERING-PLAN](docs/OFFERING-PLAN.md) |
+| Kontrak kerja | `/contracts` | PKWT/PKWTT, koreksi dengan alasan, PDF berversi, pembatalan tanpa menghapus riwayat, pengingat PKWT 30 hari. | [CONTRACT-PLAN](docs/CONTRACT-PLAN.md) |
+| Pelatihan | `/trainings` | Jadwal, materi PDF berversi, peserta, kehadiran, pre-test dan post-test 0 sampai 100. | [TRAINING-PLAN](docs/TRAINING-PLAN.md) |
+| Pelanggaran, SP dan konseling | `/discipline` | Catatan SP1 sampai SP3 dengan PDF wajib, tingkat dipilih HR, tanpa kenaikan otomatis. | [DISCIPLINE-PLAN](docs/DISCIPLINE-PLAN.md) |
+| Absensi | `/attendance` | Kalender tahunan per pegawai, check-in/check-out web, jadwal kerja (satuan dan massal), pengajuan koreksi dengan alur atasan lalu HR, rekap bulanan dengan ekspor XLSX dan PDF. | [ATTENDANCE-PLAN](docs/ATTENDANCE-PLAN.md), [SCHEDULE](docs/ATTENDANCE-SCHEDULE-PLAN.md), [PUNCH](docs/ATTENDANCE-PUNCH-PLAN.md), [CORRECTION](docs/ATTENDANCE-CORRECTION-PLAN.md), [RECAP](docs/ATTENDANCE-RECAP-PLAN.md) |
+| Cuti dan izin | `/leave` | Pengajuan hari penuh, saldo tahunan, hari libur kantor, persetujuan atasan lalu HR, bukti PDF opsional. | [LEAVE-PLAN](docs/LEAVE-PLAN.md) |
+| Laporan HR | `/reports` | Pratinjau 10 baris, ekspor XLSX dan PDF untuk rekrutmen, evaluasi pelatihan, kontrak dan SP. | [REPORT-PLAN](docs/REPORT-PLAN.md) |
+| Kelola akun | `/accounts` | Undangan sekali pakai, role, status, tautan pemulihan password, struktur atasan. Khusus Admin. | [ACCOUNT-MANAGEMENT-PLAN](docs/ACCOUNT-MANAGEMENT-PLAN.md) |
+| Jejak audit | `/audit` | Satu halaman yang menggabungkan seluruh riwayat modul. Khusus Admin. Lihat [aturan audit](#jejak-audit). | |
+| Portal pegawai dan atasan | `/me`, `/team` | Pegawai melihat data dan menu miliknya; atasan membaca tim langsung. | |
 
-**Laporan HR** (`/reports`) menyediakan pratinjau10baris dan ekspor XLSX asli/PDF untuk rekrutmen, evaluasi training, kontrak dan SP/konseling. Filter tanggal maksimal366hari dan status diterapkan pada kedua format. Batas ekspor1.000baris XLSX/200baris PDF; hasil lebih besar harus dipersempit, tidak dipotong diam-diam. Laporan tidak memuat uraian kasus, kontak pribadi atau dokumen. Viewer ditolak. XLSX memakai XMLWriter/ZipArchive PHP yang sudah tersedia; PDF memakai Dompdf lokal tanpa akses remote/PHP/JS. Lihat [REPORT-PLAN.md](docs/REPORT-PLAN.md).
+Antarmuka berbahasa Indonesia. Waktu disimpan dalam UTC dan ditampilkan dalam WIB.
 
-**Kontrak kerja** tersedia di `/contracts` melalui sidebar **Hubungan kerja**. Admin/Staf HR mencatat PKWT/PKWTT, mengoreksi dengan alasan, mengunggah PDF privat maksimal 5 MiB berversi, dan membatalkan catatan salah tanpa menghapus riwayat. Viewer hanya membaca data dasar. Perpanjangan dibuat sebagai kontrak baru dengan periode tidak bertumpuk. Dashboard menampilkan pengingat PKWT 30 hari dan kontrak yang sudah berakhir; kontrak yang telah diperpanjang tanpa jeda tidak terus memicu pengingat. Tidak mengubah status pegawai otomatis. Lihat [CONTRACT-PLAN.md](docs/CONTRACT-PLAN.md).
+### Impor pegawai
 
-Modul **Pelatihan** tersedia di `/trainings`: jadwal dan pemateri, materi PDF privat berversi, peserta dari pegawai aktif, kehadiran dan pre-test/post-test0–100. Admin/Staf HR mengelola; Viewer hanya membaca jadwal serta jumlah peserta. Ringkasan memakai pasangan nilai lengkap dan menampilkan peningkatan dalam poin, bukan persentase efektivitas. Skor kosong tidak dianggap0. Post-test dicatat setelah sesi berakhir dan peserta hadir. Nilai tetap dapat dikoreksi setelah pelatihan selesai; perubahan selalu diaudit. Riwayat peserta tetap tersimpan jika pegawai kemudian diarsipkan.
+- Format CSV (pemisah `,` atau `;`, BOM dan Windows-1252 ditangani) atau XLSX sheet pertama. Maksimal 2 MB dan 500 baris.
+- XLSX dibaca dengan ZipArchive dan SimpleXML bawaan PHP, tanpa dependency baru. Berkas dengan `DOCTYPE`/`ENTITY` ditolak, dan formula tidak dihitung (hanya nilai tersimpan yang dibaca).
+- Judul kolom fleksibel (misalnya `Nomor Pegawai` atau `NIP`, `Email Kerja` atau `Email`). Unduh template CSV dari halaman impor untuk melihat kolom yang dipakai.
+- Departemen dicocokkan dengan nama atau kode, jabatan harus berada pada departemen itu, status dengan nilai atau label. Format tanggal `Y-m-d`, `d/m/Y`, `d-m-Y` dan serial tanggal Excel.
+- Nomor pegawai dan email kerja dicek terhadap isi berkas dan database, termasuk pegawai yang sudah diarsipkan.
+- Pratinjau disimpan di cache selama 30 menit per pengguna. Simpan hanya berhasil bila semua baris valid dan dicek ulang saat itu; satu transaksi untuk semua baris. Setiap pegawai mendapat catatan audit dengan `source: import`.
+- Siapa yang boleh: pengguna yang berhak menambah pegawai (Admin dan Staf HR). Pratinjau dan simpan dibatasi 10 permintaan per menit.
 
-Pelatihan dibatalkan dengan alasan tanpa menghapus data. Sesi yang pernah memiliki nilai tidak bisa digeser waktunya, termasuk setelah nilai dikosongkan. Upload PDF maksimal5MiB pada disk training_materials privat; versi lama tetap tersedia untuk Admin/Staf HR. Belum sertifikat, notifikasi email pelatihan, impor massal, penghapusan peserta atau ekspor laporan. Lihat [TRAINING-PLAN.md](docs/TRAINING-PLAN.md).
+### Jejak audit
 
-Panduan pengujian alur rekrutmen dan checklist pengguna HR: [RECRUITMENT-UAT.md](docs/RECRUITMENT-UAT.md).
+Aplikasi tidak memakai satu tabel audit pusat. Setiap modul punya tabel peristiwa sendiri (aktor, aksi, perubahan, waktu). Halaman `/audit` menggabungkan sepuluh sumber lewat `UNION ALL`: pegawai, lamaran, penawaran, pelatihan, kontrak, disiplin, akun, cuti, absensi dan koreksi absensi.
 
-Offering → pegawai tersedia melalui detail lamaran → **Penawaran, respons & data pegawai**. Admin/Staf HR mencatat penempatan/tanggal/ketentuan, merevisi sebelum respons, mengunduh ringkasan PDF internal, lalu mencatat respons dengan bukti PDF privat wajib. Menerima→Diterima; menolak/ditarik HR→Ditolak. Keputusan Diterima tidak dapat melewati penawaran yang diterima. Respons bertanggal sebelum revisi terakhir atau penerimaan melewati batas ditolak; revisi penawaran dahulu bila perlu memperpanjang batas. Ringkasan bukan surat resmi perusahaan atau kontrak.
+- Filter modul, aksi dan rentang tanggal (WIB), 25 baris per halaman, urut terbaru.
+- Yang ditampilkan: modul, aksi, pelaku (atau "Sistem"), nomor catatan dengan tautan, waktu. Isi perubahan, alasan dan catatan tidak ditampilkan di halaman ini; lihat riwayat pada modul masing-masing.
+- Khusus Admin (gate `manage-accounts`).
 
-Konversi memerlukan lamaran dan penawaran diterima serta konfirmasi identitas. Nama/telepon terisi dari profil dan dapat dikoreksi HR; nomor pegawai/email kerja wajib diisi. Penempatan/status/tanggal mengikuti penawaran. Satu profil hanya dapat menjadi satu pegawai, termasuk bila pegawai sudah diarsipkan; tidak membuat akun login atau menimpa profil pelamar. Penawaran/audit/bukti hanya untuk Admin/Staf HR. Lamaran lama yang sudah Diterima tanpa catatan penawaran tidak otomatis dikonversi atau dibuatkan bukti mundur; tinjau dan gunakan direktori pegawai secara manual. Lihat [OFFERING-PLAN.md](docs/OFFERING-PLAN.md).
+## Peran dan akses
 
-Aplikasi HRIS mandiri yang sedang disiapkan untuk kebutuhan magang. Antarmuka berbahasa Indonesia; data pada pratinjau bersifat fiktif. Fitur operasional diimplementasikan bertahap.
+Lima role: **Admin**, **Staf HR**, **Pembaca** (`viewer`), **Pegawai** (`employee`) dan **Atasan** (`supervisor`). Otorisasi ditegakkan di server lewat gate dan policy, bukan hanya dengan menyembunyikan tombol.
 
-## Status — fondasi dan autentikasi
+| Role | Cakupan |
+|---|---|
+| Admin | Semua modul HR, kelola akun, jejak audit, arsip dan pemulihan pegawai, unduh dokumen arsip. |
+| Staf HR | Modul HR: pegawai, impor, rekrutmen, kontrak, pelatihan, disiplin, laporan, absensi dan keputusan akhir cuti/koreksi. Tanpa kelola akun, audit dan arsip pegawai. |
+| Pembaca | Hanya baca data dasar. Tanpa laporan, kasus disiplin, CV, dokumen dan catatan privat. |
+| Pegawai | Portal `/me`, absensi sendiri, cuti dan koreksi sendiri. Wajib terhubung unik ke pegawai aktif. |
+| Atasan | Seperti Pegawai, ditambah `/team` dan peninjauan cuti/koreksi anggota langsung. Tanpa akses modul HR. |
 
-Fondasi Laravel 13 + Inertia 3 + React 19 + TypeScript + Tailwind 4 + Vite tersedia, dengan halaman awal bergaya berkas/editorial dan spesimen antarmuka berlabel data contoh. MySQL development/test terpisah; PHPUnit, Pint, ESLint dan Prettier dikonfigurasi. Versi persis dikunci di composer.lock dan package-lock.json.
+Akun nonaktif dan portal untuk pegawai yang diarsipkan atau nonaktif ditolak di backend.
 
-Login/logout Fortify, undangan/aktivasi akun, manajemen akun, master departemen dan jabatan, pegawai, lowongan, pelamar/lamaran, pipeline, interview, penawaran, kontrak, pelatihan, pelanggaran/SP, laporan, serta portal pegawai/atasan tersedia. Profil pelamar (halaman `/applicants`), CV privat, jadwal interview, undangan PDF, dan portal karier dengan form lamaran tanpa akun tersimpan di database. Tidak ada kredensial bawaan di production. Lihat [rencana](docs/PLAN.md), [ERD](docs/ERD.md), dan [progress](docs/PROGRESS.md).
+## Menjalankan
 
-## Data demo dan akun lokal
+### Prasyarat
 
-Pada environment `local`/`testing`, seeder dapat mengisi data fiktif lengkap dan akun demo:
+- PHP 8.3.36 atau patch lebih baru, dengan ekstensi `pdo_mysql`, `mbstring`, `fileinfo`, `openssl`, `dom`, `xml`, `xmlwriter`, `curl`, `zip`, `ctype`, `tokenizer`.
+- Node.js 24 LTS dan npm. Composer 2 (tersedia lokal lewat `php .tools/composer.phar`).
+- MySQL 8.4 LTS. Mesin pengembangan ini memakai binary Laragon 8.4.3 untuk demo loopback; itu bukan klaim patch MySQL terbaru.
 
-```powershell
-php artisan db:seed --force
-```
+### Checkout yang sudah disiapkan
 
-`DatabaseSeeder` hanya menjalankan `DemoSeeder` pada `local`/`testing`; di production data contoh dilewati. Seeder memakai `firstOrCreate`/kunci unik sehingga aman dijalankan ulang tanpa menggandakan data.
-
-| Akun | Email | Role |
-|---|---|---|
-| Admin | `admin@example.test` | `admin` |
-| Staf HR | `hr@example.test` | `hr_staff` |
-| Pembaca | `viewer@example.test` | `viewer` |
-| Atasan | `atasan@example.test` | `supervisor` |
-| Pegawai | `pegawai@example.test` | `employee` |
-
-Kata sandi default lokal adalah `DemoHris123!`; dapat diganti dengan variabel `DEMO_PASSWORD` sebelum seeding. Seeding menyetel ulang kata sandi kelima akun demo agar kredensial di dokumentasi selalu berlaku. Akun demo **hanya untuk local/testing** dan tidak boleh dipakai di production. Data contoh mencakup 5 departemen, 10 jabatan, 25 pegawai, 6 lowongan, 20 pelamar, 30 lamaran, 8 interview, 8 kontrak, 3 pelatihan, 3 catatan pelanggaran/SP, dan penawaran untuk lamaran tahap Offering/Diterima.
-
-## Prasyarat
-
-- PHP 8.3.36 atau patch lebih baru yang kompatibel; instalasi lokal sudah ditambal untuk PHP2Shell.
-- Ekstensi pdo_mysql, mbstring, fileinfo, openssl, dom, xml, xmlwriter, curl, zip, ctype, tokenizer.
-- Node.js 24 LTS, npm, Composer 2.
-- MySQL 8.4 LTS. Mesin saat ini memakai binary Laragon 8.4.3 untuk demo loopback, bukan klaim patch MySQL terbaru.
-
-## Menjalankan checkout yang sudah disiapkan
-
-PowerShell dari root proyek:
+Dari root proyek di PowerShell:
 
 ```powershell
 .\scripts\start-database.ps1
@@ -71,13 +90,13 @@ php artisan migrate:status
 php artisan serve --host=127.0.0.1 --port=8000
 ```
 
-Buka [aplikasi lokal](http://127.0.0.1:8000). Aset build sudah tersedia di mesin ini. Untuk mengedit frontend, jalankan `npm run dev` di terminal kedua; atau `npm run build` setelah perubahan untuk memakai aset statis.
+Buka <http://127.0.0.1:8000>. Untuk mengedit frontend, jalankan `npm run dev` di terminal kedua (Vite di `127.0.0.1`, port bawaan 5173). Setelah perubahan, `npm run build` menghasilkan aset statis.
 
-Composer lokal: `php .tools/composer.phar --version`, tanpa mengubah PATH global. MySQL memakai 127.0.0.1:3307, data .local/mysql-data dan lokasi binary dalam .local/runtime.json. Data Laragon lama tidak dipakai. Setelah restart Windows, jalankan start-database.ps1 lagi; tidak ada service/autostart baru.
+MySQL proyek berjalan di `127.0.0.1:3307` dengan data di `.local/mysql-data` dan lokasi binary di `.local/runtime.json`. Setelah Windows restart, jalankan `start-database.ps1` lagi; tidak ada service atau autostart baru. Untuk mematikan dengan aman, pakai `mysqladmin.exe --host=127.0.0.1 --port=3307 --user=root --password shutdown`, jangan hentikan prosesnya paksa.
 
-Password acak hanya tersimpan di .env, .env.testing dan .local/database-credentials.json yang diabaikan Git. Jangan mengunggah file itu. Untuk menghentikan MySQL secara aman, jalankan `mysqladmin.exe --host=127.0.0.1 --port=3307 --user=root --password shutdown` dari folder bin MySQL dan masukkan password root lokal ketika diminta. Jangan force-kill proses database.
+Password acak hanya tersimpan di `.env`, `.env.testing` dan `.local/database-credentials.json`, semuanya diabaikan Git. Jangan diunggah atau dibagikan.
 
-## Setup dari checkout baru
+### Setup dari checkout baru
 
 ```powershell
 .\scripts\install-composer.ps1
@@ -87,7 +106,7 @@ Copy-Item .env.example .env
 Copy-Item .env.testing.example .env.testing
 ```
 
-Sediakan MySQL lokal yang sudah diinisialisasi secara aman. Sebagai administrator database, jalankan SQL berikut; ganti placeholder dengan dua password acak berbeda:
+Siapkan MySQL lokal yang sudah diinisialisasi, lalu jalankan SQL berikut sebagai administrator database. Ganti placeholder dengan dua password acak yang berbeda:
 
 ```sql
 CREATE DATABASE hris_lite CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -98,113 +117,113 @@ GRANT ALL PRIVILEGES ON hris_lite.* TO 'hris_dev'@'localhost';
 GRANT ALL PRIVILEGES ON hris_lite_test.* TO 'hris_test'@'localhost';
 ```
 
-Isi password masing-masing pada .env dan .env.testing. Sesuaikan port; template memakai 3307. start-database.ps1 khusus direktori data proyek yang sudah diinisialisasi; gunakan service MySQL sendiri jika setup berbeda. Jangan initialize direktori data lama.
+Isi password pada `.env` dan `.env.testing`, sesuaikan port bila perlu (template memakai 3307), lalu:
 
 ```powershell
 php artisan key:generate
 php artisan key:generate --env=testing
 php artisan migrate
 php artisan migrate --env=testing
+php artisan db:seed --class=EmployeeMasterSeeder
 npm run build
 php artisan serve --host=127.0.0.1 --port=8000
 ```
 
-APP_DEBUG default false. Aktifkan hanya sementara di .env untuk debugging lokal, bukan pada lingkungan publik. MAIL_MAILER=log untuk pengembangan; notifikasi otomatis pelamar ditulis ke log setelah worker antrean memprosesnya, bukan ke inbox nyata.
+`start-database.ps1` hanya untuk direktori data proyek ini. Pakai service MySQL sendiri bila setup Anda berbeda, dan jangan menginisialisasi ulang direktori data yang sudah ada.
 
-## Pemeriksaan
+`APP_DEBUG` default `false`; aktifkan sementara hanya untuk debugging lokal. `MAIL_MAILER=log` untuk pengembangan, jadi email pelamar ditulis ke log dan bukan ke inbox.
+
+### Membuat akun pertama
 
 ```powershell
-php .tools/composer.phar validate --strict
-php .tools/composer.phar check-platform-reqs
+php artisan hr:create-admin
+php artisan hr:invite staf@example.test --role=hr_staff
+```
+
+`hr:create-admin` meminta nama, email dan password secara interaktif, dan ditolak bila admin sudah ada. `hr:invite` menerbitkan tautan undangan; salurkan secara privat karena tidak ada email otomatis. Command ini menerima role `admin`, `hr_staff` dan `viewer`; role Pegawai dan Atasan serta pemetaan ke pegawai diatur Admin lewat UI `/accounts`. Sesuaikan `APP_URL` agar tautan mengarah ke host yang benar.
+
+### Antrean email pelamar
+
+```powershell
+php artisan queue:work recruitment --queue=recruitment-mail --tries=3 --timeout=60
+```
+
+Koneksi `recruitment` memakai database aplikasi yang sama, sehingga pekerjaan, lamaran dan metadata berkas masuk satu transaksi. Untuk SMTP sungguhan, isi `MAIL_*`, alamat pengirim dan `APP_URL` (HTTPS di production), lalu restart worker. Periksa `failed_jobs` bila pengiriman gagal; retry dapat mengirim email dua kali.
+
+## Data demo dan akun lokal
+
+Di environment `local` dan `testing`, seeder mengisi data fiktif yang lengkap dan aman dijalankan ulang (memakai `firstOrCreate` dan kunci unik). Di production seeder demo dilewati.
+
+```powershell
+php artisan db:seed --force
+```
+
+| Akun | Email | Role |
+|---|---|---|
+| Admin | `admin@example.test` | `admin` |
+| Staf HR | `hr@example.test` | `hr_staff` |
+| Pembaca | `viewer@example.test` | `viewer` |
+| Atasan | `atasan@example.test` | `supervisor` |
+| Pegawai | `pegawai@example.test` | `employee` |
+
+Password default lokal `DemoHris123!`, dapat diganti lewat `DEMO_PASSWORD` sebelum seeding. Seeding menyetel ulang password kelima akun agar dokumentasi selalu berlaku. Akun ini hanya untuk local dan testing, dan tidak boleh dipakai di production. Isi data contoh dan alur presentasi ada di [DEMO.md](docs/DEMO.md).
+
+Pratinjau tanpa login tersedia di `/preview/hr` (hanya di environment local, 404 di production). Datanya fiktif dari `resources/js/data/hr-preview.ts` dan tidak disimpan.
+
+## Pemeriksaan kualitas
+
+```powershell
+php artisan test
 php vendor/bin/pint --test
 npm run lint
 npm run format:check
 npm run types:check
 npm run build
-php artisan test
 ```
 
-Tes memakai .env.testing dan akun hris_test. Jalankan migration test dahulu. Suite membuktikan koneksi MySQL serta akun test tidak bisa membaca database development. Build diperlukan untuk smoke test HTTP yang membaca manifest Vite. Gunakan `npm run format` dan `php vendor/bin/pint` untuk memperbaiki format.
+Untuk validasi dependensi: `php .tools/composer.phar validate --strict` dan `php .tools/composer.phar check-platform-reqs`. Perbaikan format: `php vendor/bin/pint` dan `npm run format`.
 
-Pada sandbox Codex Windows, socket localhost atau akses file PHP/Pint bisa ditolak meskipun terminal normal berhasil. Gunakan izin eksekusi yang sesuai; jangan mengubah validasi aplikasi untuk melewati sandbox.
+- Tes memakai `.env.testing` dan akun `hris_test` pada database `hris_lite_test`. Jalankan migration test lebih dulu, dan pastikan MySQL proyek menyala sebelum `php artisan test`.
+- Suite membuktikan koneksi MySQL dan bahwa akun test tidak bisa membaca database development.
+- Build diperlukan karena smoke test HTTP membaca manifest Vite.
+- Hasil lengkap terakhir yang tercatat di [STAGING.md](docs/STAGING.md): 185 tes dan 2.785 assertion lulus pada 3 November 2026. Tes impor pegawai dan jejak audit ditambahkan sesudahnya, jadi angka itu perlu dihitung ulang.
+- Pada sandbox Windows tertentu, akses socket localhost atau file PHP/Pint bisa ditolak meskipun terminal biasa berhasil. Gunakan izin eksekusi yang sesuai; jangan melonggarkan validasi aplikasi untuk melewatinya.
 
-## Arsitektur dan batasan
+## Keamanan dan keputusan desain
 
-Laravel menangani route, session dan response Inertia; React merender halaman. Entry resources/js/app.tsx, root resources/views/app.blade.php, middleware HandleInertiaRequests, halaman resources/js/pages/welcome.tsx. Token warna, tipografi dan aturan anti-AI-slop ada di [DESIGN.md](DESIGN.md). Tidak ada API atau layanan eksternal terpisah.
+- **Autentikasi.** Login lewat Fortify dibatasi 5 permintaan per menit per kombinasi email dan IP, serta 20 per IP. Password baru minimal 12 karakter dengan huruf besar, kecil dan angka, maksimal 72 byte (batas bcrypt). Session diregenerasi saat masuk dan dibatalkan saat keluar, CSRF aktif.
+- **Akun.** Tidak ada kredensial bawaan. Pendaftaran hanya lewat undangan sekali pakai (token disimpan sebagai hash SHA-256, berlaku 48 jam). Perubahan akses mencabut tautan reset lama, merotasi remember token dan mencabut sesi lama. Mutasi akun meminta password Admin, dan perubahan sensitif disertai alasan.
+- **Berkas privat.** PDF (CV, kontrak, SP, materi, bukti) disimpan di disk privat, tidak lewat URL publik. Diperiksa ekstensi, MIME dan header, maksimal 5 MiB, diunduh sebagai attachment `nosniff` setelah otorisasi, dan dibersihkan bila transaksi database gagal. Belum ada antivirus atau sanitasi PDF, jadi lampiran diperlakukan sebagai tidak tepercaya.
+- **Konkurensi.** Form memakai versi dan row lock. Formulir lama atau tab basi ditolak dan tidak menimpa perubahan pengguna lain. Jadwal interview dan absensi diserialisasi dengan lock agar tidak bentrok.
+- **Audit.** Mutasi penting menyimpan aktor dari session, waktu UTC, alasan dan perubahan sebelum/sesudah dalam transaksi yang sama dengan datanya.
+- **Tanpa penghapusan permanen.** Pegawai, kontrak, pelatihan dan kasus disiplin diarsipkan atau dibatalkan dengan alasan; tidak ada endpoint pemusnahan.
+- **Production.** Wajib HTTPS, `APP_ENV=production`, `APP_DEBUG=false` dan `SESSION_SECURE_COOKIE=true` (cookie secure sudah aktif secara default di production).
 
-Route `/hr` memakai session web dan gate untuk role admin/hr_staff/viewer; angka pegawai, lowongan, pelamar, pipeline, wawancara mendatang, dan kontrak berasal dari database. Direktori `/employees`, `/vacancies`, `/applications`, `/contracts`, `/trainings`, dan `/discipline` memakai policy per aksi. Tabel domain mencakup pegawai, lowongan, pelamar/lamaran, interview, penawaran, kontrak, pelatihan, disiplin, akun, dan audit; pratinjau lokal tetap terpisah.
+Pedoman visual, token warna dan larangan desain generik ada di [DESIGN.md](DESIGN.md). Route `/lab` menampilkan komponen impor sebagai spesimen dan sengaja tidak mengikuti aturan itu.
 
-Route `/lab` menampilkan komponen impor `ink-orbit-features` sebagai spesimen (tema gelap, copy Indonesia). Halaman ini bukan bagian alur produk dan sengaja tidak mengikuti aturan `DESIGN.md`; lihat bagian "Karantina" di sana.
+## Staging
 
-Panduan presentasi ada di [DEMO.md](docs/DEMO.md), daftar halaman screenshot di [SCREENSHOTS.md](docs/SCREENSHOTS.md), dan checklist UAT rekrutmen di [RECRUITMENT-UAT.md](docs/RECRUITMENT-UAT.md).
+Instance staging berjalan di komputer lokal pada `127.0.0.1:8002`, dengan database, session, cache, antrean, upload dan log terpisah dari development dan test, lalu dipublikasikan lewat Cloudflare Tunnel. Cara menyalakan semua prosesnya ada di [STAGING.md](docs/STAGING.md). Karena berjalan di PC lokal, staging belum menjadi layanan hosting yang selalu aktif. Jangan menjalankan `migrate:fresh` pada database apa pun yang berisi data pengguna.
 
-## Pratinjau ruang kerja HR
+## Batasan yang diketahui
 
-Buka http://127.0.0.1:8000/preview/hr pada environment local. Tersedia ringkasan, direktori pegawai serta board/daftar rekrutmen dengan filter dan detail kandidat. Data fiktif berada di resources/js/data/hr-preview.ts; perubahan belum disimpan. Route ini 404 di production dan tidak menggantikan implementasi autentikasi/otorisasi. Modul operasional tersedia di route masing-masing setelah login.
+- Pengiriman email memakai mailer `log`. Verifikasi pelamar dan tautan reset belum terkirim ke penerima sungguhan.
+- Belum ada CAPTCHA, antivirus berkas, 2FA, atau verifikasi email untuk akun internal.
+- Absensi web tidak memverifikasi lokasi. Tidak ada fingerprint, impor mesin absensi, payroll, lembur atau SP otomatis.
+- Cuti hanya hari penuh dengan kalender Senin sampai Jumat; belum ada shift, setengah hari, akrual atau carry-over.
+- Kebijakan retensi, pemusnahan permanen dan persetujuan dua orang untuk arsip belum ditentukan, dan itu keputusan perusahaan, bukan klaim kewajiban hukum.
+- Pembaca masih dapat melihat email dan telepon kerja pegawai serta email pelamar. Pembatasan kolom untuk role ini belum diputuskan.
+- Halaman audit menampilkan nomor catatan disiplin dan SP kepada Admin; sebagian peristiwa (cuti, absensi, penawaran) belum punya tautan ke catatannya.
+- Impor pegawai dibatasi 500 baris per berkas dan hanya membuat pegawai baru, belum memperbarui yang sudah ada.
+- UAT dengan tim HR sungguhan masih diperlukan sebelum dipakai untuk data nyata.
 
-## Pegawai dan pengarsipan
+## Dokumentasi
 
-Setelah migration dari checkout baru, isi master pilihan departemen/jabatan:
-
-```powershell
-php artisan db:seed --class=EmployeeMasterSeeder
-```
-
-Seeder idempoten menyediakan 5 departemen dan 10 jabatan awal. Master dapat dikelola melalui `/departments` dan `/positions` oleh Admin/Staf HR, atau disesuaikan lewat seeder/database oleh pengelola.
-
-`/employees` mendukung pencarian nama/nomor/email, filter departemen/status, sort whitelist dan pagination15. Admin serta Staf HR bisa tambah/edit; Viewer hanya membaca. Nomor pegawai dan email unik, termasuk catatan arsip. Jabatan harus berada pada departemen yang sama, dijaga validasi dan FK gabungan database. Form lama ditolak melalui versi integer agar tidak menimpa perubahan pengguna lain.
-
-Penghapusan dari direktori berarti **arsip/soft delete**. Hanya Admin dapat mengarsipkan dengan alasan minimal20 karakter, PDF pendukung maksimal5MiB, konfirmasi nomor pegawai dan pernyataan pemeriksaan. Riwayat menyimpan actor dari session, waktu UTC (tampilan WIB), alasan dan perubahan. PDF disimpan pada disk `employee_records` yang privat, tidak disajikan lewat URL storage publik, dan hanya Admin dapat mengunduhnya sebagai attachment setelah otorisasi. File dibersihkan jika transaksi database gagal. Tidak ada endpoint pemusnahan permanen.
-
-Admin membuka tab Arsip untuk melihat detail dan memulihkan pegawai dengan alasan serta konfirmasi nomor. Riwayat dan dokumen sebelumnya tetap disimpan. Untuk pegawai resign, gunakan status Nonaktif bila catatan masih perlu terlihat; arsip lebih cocok untuk duplikat/salah input. Ini pilihan workflow aplikasi, bukan klaim kewajiban hukum. Kebijakan retensi, pemusnahan permanen dan persetujuan dua orang perlu ditentukan perusahaan sebelum tahap tersebut dibuat. Belum ada antivirus/sanitasi PDF; lampiran diperlakukan sebagai dokumen tidak tepercaya.
-
-## Lowongan internal
-
-Menu Rekrutmen membuka `/vacancies` dengan tab Lowongan dan Pipeline kandidat. Admin/Staf HR dapat menambah, melihat, mengedit dan mengubah status draft/dibuka/ditutup; Viewer hanya membaca. Form memuat departemen, jenis kerja, lokasi, deskripsi/persyaratan dan tanggal buka/tutup. Pencarian judul/lokasi, filter departemen/status, sorting whitelist dan pagination15 tersedia. Form lama ditolak melalui version+row lock.
-
-Status Dibuka dihitung aktif pada dashboard dan ditampilkan ke publik hanya dalam rentang tanggal buka/tutup menurut tanggal WIB (kedua batas inklusif). Sebelum tanggal buka tampil Terjadwal; setelah tanggal tutup tampil Berakhir. Menutup lowongan menyembunyikannya dari karier tanpa menghapus catatan. Belum ada endpoint hapus lowongan. Pipeline di tab sebelah memakai lamaran tersimpan. Detail di [VACANCY-PLAN.md](docs/VACANCY-PLAN.md).
-
-## Pelamar dan lamaran
-
-Buka Rekrutmen → Pipeline kandidat (`/applications`). Admin/Staf HR dapat mencatat profil baru atau memilih Pelamar terdaftar melalui pencarian (20 hasil). Email profil unik dan dinormalisasi lowercase; identitas lama tidak ditimpa ketika membuat lamaran lain. Satu profil dapat melamar ke beberapa lowongan; pasangan profil/lowongan tidak boleh duplikat. Lowongan harus sedang menerima lamaran dan tanggal lamaran berada dalam periodenya, tidak di masa depan.
-
-CV PDF opsional saat input internal dan dapat ditambahkan dari detail sebagai versi baru. Maksimal5MiB, ekstensi/MIME/header PDF diperiksa; disk applicant_documents privat serve=false. CV unggahan HR dibagikan antar lamaran profil; CV publik dibatasi ke lamaran terkait. Unduh attachment/nosniff hanya bagi Admin/Staf HR, dengan pemeriksaan kepemilikan profil dan lamaran. Viewer tidak menerima CV, telepon, catatan HR atau catatan privat riwayat. Belum ada antivirus/sanitasi PDF.
-
-Lamaran dimulai Screening. Transisi manual: Screening→Interview/Ditolak, Interview→Offering/Ditolak, Offering→Diterima/Ditolak. Diterima/Ditolak terminal, tanpa reopen. Riwayat menyimpan actor session, waktu UTC (tampilan WIB) dan catatan opsional. Row lock+version menolak perubahan dari formulir lama. File dibersihkan jika transaksi DB gagal.
-
-Board/daftar memiliki search/filter dan pagination15. Jumlah tahap mencakup seluruh hasil filter; kartu board hanya halaman aktif. Dashboard memakai angka dan aktivitas aktual, tanpa jadwal interview fiktif. Belum ada edit/hapus profil atau penghapusan dokumen. Scope di [APPLICATION-PLAN.md](docs/APPLICATION-PLAN.md).
-
-Portal `/karier` menyediakan pencarian, filter, detail dan form lamaran tanpa akun. Landing menampilkan maksimal tiga lowongan aktif. Form mewajibkan CV PDF dan persetujuan penggunaan data, memakai CSRF, honeypot dan batas tiga pengiriman per jam/IP (termasuk permintaan tidak valid). Lamaran baru masuk Screening dan menunggu verifikasi email sebelum HR dapat mengubah tahap; duplikat mendapat respons generik tanpa membocorkan profil. Identitas pengajuan disimpan terpisah tanpa menimpa profil lama. Verifikasi mailbox tidak membuktikan identitas atau kebenaran CV. Belum CAPTCHA atau pemindaian antivirus. Lihat [CAREERS-PLAN.md](docs/CAREERS-PLAN.md).
-
-Verifikasi pelamar menggunakan Laravel Notifications dan temporary signed URL 24 jam. GET membuka konfirmasi; POST dengan CSRF menandai email terverifikasi per lamaran dan mengantrekan bukti penerimaan. Bukti bukan keputusan lolos seleksi. `/karier/verifikasi/kirim-ulang` memberi respons generik, batas tiga permintaan/jam/IP, cooldown10menit per lamaran dan maksimal lima lamaran pending per permintaan. Lamaran publik lama yang belum memiliki penanda verifikasi perlu memakai kirim ulang sebelum tahap dapat diubah.
-
-Jalankan worker dengan `php artisan queue:work recruitment --queue=recruitment-mail --tries=3 --timeout=60`. Koneksi antrean recruitment sengaja memakai database aplikasi yang sama: insert pekerjaan terenkripsi, lamaran dan file metadata satu transaksi; rollback membersihkan CV. Konfigurasi lokal aktif memakai mailer log, sehingga belum mengirim ke inbox. Untuk SMTP perusahaan, isi konfigurasi MAIL_* privat, alamat pengirim dan APP_URL yang benar (HTTPS di production), lalu restart worker. Jangan commit kredensial atau membagikan log yang memuat tautan verifikasi. Periksa failed_jobs bila pengiriman gagal; retry dapat menyebabkan email terkirim ulang. Panduan di [EMAIL-VERIFICATION-PLAN.md](docs/EMAIL-VERIFICATION-PLAN.md).
-
-## Login dan pendaftaran akun internal
-
-Halaman `/login` menerima email dan kata sandi. `/register` tanpa undangan menampilkan petunjuk akses; form aktivasi muncul setelah membuka undangan valid. Token disimpan sebagai hash SHA-256, berlaku 48 jam dan hanya bisa dipakai sekali. Email/role ditentukan undangan di server; input role/email dari form tidak bisa menaikkan akses. Undangan baru membatalkan tautan lama untuk email tersebut.
-
-Sesudah migration, buat admin pertama melalui terminal proyek:
-
-```powershell
-php artisan hr:create-admin
-```
-
-Perintah meminta nama, email dan kata sandi secara interaktif; kata sandi tidak ditampilkan. Bootstrap ditolak bila admin sudah ada. Tidak ada password default. Untuk menambah akun:
-
-```powershell
-php artisan hr:invite staf@example.test --role=hr_staff
-```
-
-Command legacy menerima `admin`, `hr_staff`, `viewer`; lima role termasuk Pegawai/Atasan dan pemetaan pegawai tersedia melalui UI Admin. Salurkan tautan secara privat. Tidak ada email otomatis. Sesuaikan `APP_URL` dengan alamat aplikasi agar tautan mengarah ke host yang benar. Akses terminal/server setara dengan wewenang operator; command eksplisit tetap dapat menerbitkan ulang undangan email yang sama, sedangkan UI mewajibkan pencabutan undangan aktif dahulu.
-
-Login dibatasi 5 request per menit per kombinasi email/IP dan 20 per IP; aktivasi10/IP, reset6/IP/menit. Password baru minimal12 karakter dengan huruf besar/kecil dan angka, maksimal72byte sesuai bcrypt. Session diregenerasi saat masuk, dibatalkan saat keluar; CSRF aktif. Untuk production wajib HTTPS, APP_DEBUG=false, APP_ENV=production dan SESSION_SECURE_COOKIE=true; cookie secure default aktif pada APP_ENV production. Reset password melalui tautan Admin tersedia; verifikasi email akun internal dan2FA belum diaktifkan. Verifikasi email lamaran publik merupakan alur terpisah.
-
-
-## Jadwal interview dan undangan
-
-Buka Rekrutmen → Jadwal interview (`/interviews`), atau tombol Jadwalkan interview pada detail lamaran di tahap Interview. Admin/Staf HR memilih waktu WIB, durasi15–480menit, pewawancara dan lokasi/tautan HTTPS. Waktu disimpan UTC. Bentrok pewawancara maupun pelamar (termasuk lintas lamaran) ditolak; slot bersebelahan diperbolehkan.
-
-Agenda memiliki tab Mendatang/Semua riwayat/Dibatalkan dan pagination15. Pembatalan memerlukan alasan dan menyimpan pelaku/waktu/versi. Untuk menjadwalkan ulang, batalkan jadwal lama lalu buat jadwal baru. Keluar tahap Interview otomatis membatalkan jadwal belum selesai. Viewer hanya melihat agenda dasar, tanpa lokasi/tautan/catatan/PDF.
-
-Unduh undangan PDF dari kartu agenda. PDF memuat jadwal dan petunjuk konfirmasi ke HR, tanpa catatan internal, resource remote atau eksekusi PHP/JS dari HTML. Tidak ada pengiriman undangan otomatis. Jadwal batal tidak dapat menghasilkan undangan baru. Scope di docs/INTERVIEW-PLAN.md.
+- Pedoman kerja repositori dan agen: [AGENTS.md](AGENTS.md)
+- Brief, rencana dan skema: [BRIEF](docs/BRIEF.md), [PLAN](docs/PLAN.md), [ERD](docs/ERD.md)
+- Catatan pengerjaan dan hasil verifikasi per fitur: [PROGRESS](docs/PROGRESS.md)
+- Presentasi dan demo: [DEMO](docs/DEMO.md), [SCREENSHOTS](docs/SCREENSHOTS.md), [SCREENSHOTS-CRUD](docs/SCREENSHOTS-CRUD.md)
+- Pengujian pengguna: [RECRUITMENT-UAT](docs/RECRUITMENT-UAT.md), [UAT-CRUD](docs/UAT-CRUD.md), [VOICEOVER-UAT](docs/VOICEOVER-UAT.md)
+- Staging dan tunnel: [STAGING](docs/STAGING.md), [STAGING-TUNNEL-PLAN](docs/STAGING-TUNNEL-PLAN.md)
+- Autentikasi dan tinjauan desain: [AUTH-PLAN](docs/AUTH-PLAN.md), [TASTE-REVIEW](docs/TASTE-REVIEW.md)
+- Rencana per modul: lihat kolom Detail pada tabel [Fitur](#fitur)
