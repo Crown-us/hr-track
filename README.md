@@ -66,7 +66,7 @@ Lima role: **Admin**, **Staf HR**, **Pembaca** (`viewer`), **Pegawai** (`employe
 |---|---|
 | Admin | Semua modul HR, kelola akun, jejak audit, arsip dan pemulihan pegawai, unduh dokumen arsip. |
 | Staf HR | Modul HR: pegawai, impor, rekrutmen, kontrak, pelatihan, disiplin, laporan, absensi dan keputusan akhir cuti/koreksi. Tanpa kelola akun, audit dan arsip pegawai. |
-| Pembaca | Hanya baca data dasar. Tanpa laporan, kasus disiplin, CV, dokumen dan catatan privat. |
+| Pembaca | Hanya baca data dasar. Tanpa laporan, kasus disiplin, CV, dokumen dan catatan privat. Email kerja dan telepon pegawai serta email pelamar tidak dikirim ke browser dan tidak ikut pencarian; nama, nomor pegawai, departemen, jabatan dan status tetap terlihat. |
 | Pegawai | Portal `/me`, absensi sendiri, cuti dan koreksi sendiri. Wajib terhubung unik ke pegawai aktif. |
 | Atasan | Seperti Pegawai, ditambah `/team` dan peninjauan cuti/koreksi anggota langsung. Tanpa akses modul HR. |
 
@@ -212,7 +212,6 @@ Instance staging berjalan di komputer lokal pada `127.0.0.1:8002`, dengan databa
 - Absensi web tidak memverifikasi lokasi. Tidak ada fingerprint, impor mesin absensi, payroll, lembur atau SP otomatis.
 - Cuti hanya hari penuh dengan kalender Senin sampai Jumat; belum ada shift, setengah hari, akrual atau carry-over.
 - Kebijakan retensi, pemusnahan permanen dan persetujuan dua orang untuk arsip belum ditentukan, dan itu keputusan perusahaan, bukan klaim kewajiban hukum.
-- Pembaca masih dapat melihat email dan telepon kerja pegawai serta email pelamar. Pembatasan kolom untuk role ini belum diputuskan.
 - Halaman audit menampilkan nomor catatan disiplin dan SP kepada Admin; sebagian peristiwa (cuti, absensi, penawaran) belum punya tautan ke catatannya.
 - Impor pegawai dibatasi 500 baris per berkas dan hanya membuat pegawai baru, belum memperbarui yang sudah ada.
 - UAT dengan tim HR sungguhan masih diperlukan sebelum dipakai untuk data nyata.
