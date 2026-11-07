@@ -30,6 +30,10 @@ type Case = {
     description: string;
     incident_on: string;
     follow_up_on: string | null;
+    issued_on: string | null;
+    valid_until: string | null;
+    validity: string | null;
+    validity_label: string | null;
     status: string;
     status_label: string;
     version: number;
@@ -37,7 +41,7 @@ type Case = {
 type Employee = { id: number; full_name: string; employee_number: string };
 type Props = {
     auth: { user: HrUser };
-    flash: { success: string | null };
+    flash: { success: string | null; warning?: string | null };
     errors?: Record<string, string>;
     mode: 'index' | 'create' | 'edit' | 'show';
     case?: Case;
@@ -75,6 +79,11 @@ const tones: Record<string, StatusVariant> = {
     resolved: 'success',
     voided: 'failed',
 };
+const validityTones: Record<string, StatusVariant> = {
+    active: 'success',
+    expired: 'expired',
+    unset: 'pending',
+};
 const actions: Record<string, string> = {
     created: 'Catatan dibuat',
     updated: 'Data dikoreksi',
@@ -95,6 +104,8 @@ function CaseForm({ p }: { p: Props }) {
         subject: c?.subject ?? '',
         description: c?.description ?? '',
         follow_up_on: c?.follow_up_on ?? '',
+        issued_on: c ? (c.issued_on ?? '') : (p.today ?? ''),
+        valid_until: c?.valid_until ?? '',
         reason: '',
         version: c?.version ?? 1,
         document: null as File | null,
@@ -205,6 +216,32 @@ function CaseForm({ p }: { p: Props }) {
                         />
                     </Field>
                 </div>
+                {f.data.kind.startsWith('sp') && (
+                    <div className="tr-form-grid">
+                        <Field label="Tanggal terbit surat" error={f.errors.issued_on}>
+                            <input
+                                type="date"
+                                required
+                                min={f.data.incident_on || undefined}
+                                max={p.today}
+                                value={f.data.issued_on}
+                                onChange={(e) => f.setData('issued_on', e.target.value)}
+                            />
+                        </Field>
+                        <Field label="Berlaku sampai (opsional)" error={f.errors.valid_until}>
+                            <input
+                                type="date"
+                                min={f.data.issued_on || undefined}
+                                value={f.data.valid_until}
+                                onChange={(e) => f.setData('valid_until', e.target.value)}
+                            />
+                            <small className="tr-sub">
+                                Kosongkan untuk 6 bulan sejak tanggal terbit. Ubah jika peraturan
+                                perusahaan atau PKB menentukan lain.
+                            </small>
+                        </Field>
+                    </div>
+                )}
                 <Field label="Judul catatan" error={f.errors.subject}>
                     <input
                         required
@@ -439,6 +476,11 @@ export default function Discipline(p: Props) {
                         {p.flash.success}
                     </p>
                 )}
+                {p.flash?.warning && (
+                    <p role="alert" className="ep-alert">
+                        {p.flash.warning}
+                    </p>
+                )}
                 <Errors errors={p.errors ?? {}} />
                 {(p.mode === 'create' || p.mode === 'edit') && (
                     <CaseForm key={c ? `${c.id}-${c.version}` : 'new'} p={p} />
@@ -502,6 +544,7 @@ export default function Discipline(p: Props) {
                                             <th>Jenis</th>
                                             <th>Kejadian</th>
                                             <th>Tindak lanjut</th>
+                                            <th>Masa berlaku</th>
                                             <th>Status</th>
                                             <th>
                                                 <span className="sr-only">Detail</span>
@@ -521,6 +564,24 @@ export default function Discipline(p: Props) {
                                                 <td>{date(c.incident_on)}</td>
                                                 <td>
                                                     {c.follow_up_on ? date(c.follow_up_on) : '—'}
+                                                </td>
+                                                <td>
+                                                    {c.validity ? (
+                                                        <>
+                                                            <StatusBadge
+                                                                variant={validityTones[c.validity]}
+                                                            >
+                                                                {c.validity_label}
+                                                            </StatusBadge>
+                                                            {c.valid_until && (
+                                                                <small className="tr-sub">
+                                                                    s.d. {date(c.valid_until)}
+                                                                </small>
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                        '—'
+                                                    )}
                                                 </td>
                                                 <td>
                                                     <StatusBadge variant={tones[c.status]}>
@@ -579,6 +640,16 @@ export default function Discipline(p: Props) {
                             <div>
                                 <section className="ep-card">
                                     <h2>{c.subject}</h2>
+                                    {c.validity && (
+                                        <p className="tr-copy">
+                                            <StatusBadge variant={validityTones[c.validity]}>
+                                                {c.validity_label}
+                                            </StatusBadge>{' '}
+                                            {c.issued_on && c.valid_until
+                                                ? `Terbit ${date(c.issued_on)} · berlaku sampai ${date(c.valid_until)}`
+                                                : 'Koreksi catatan untuk mengisi tanggal terbit dan masa berlaku.'}
+                                        </p>
+                                    )}
                                     <p className="tr-copy">{c.description}</p>
                                 </section>
                                 <CaseDocuments p={p} />

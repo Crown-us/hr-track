@@ -6,7 +6,8 @@ import EmploymentTabs from '../components/employment-tabs';
 import { applicationDate as date } from '../components/application-format';
 import { StatusBadge, type StatusVariant } from '../components/ui/status-badge';
 import { ProcessTimeline } from '../components/ui/process-timeline';
-import type { ContractRecord } from '../types/contracts';
+import { RecordPagination } from '../components/record-fields';
+import type { ContractRecord, MissingContractEmployee } from '../types/contracts';
 import '../css/employees.css';
 import '../css/applications.css';
 import '../css/directories.css';
@@ -17,7 +18,7 @@ type Props = {
     auth: { user: HrUser };
     flash: { success: string | null };
     errors?: Record<string, string>;
-    mode: 'index' | 'create' | 'edit' | 'show';
+    mode: 'index' | 'create' | 'edit' | 'show' | 'missing';
     canManage: boolean;
     contract?: ContractRecord;
     contracts?: {
@@ -25,8 +26,17 @@ type Props = {
         total: number;
         links: { url: string | null; label: string; active: boolean }[];
     };
+    missing?: {
+        data: MissingContractEmployee[];
+        total: number;
+        links: { url: string | null; label: string; active: boolean }[];
+    };
+    missingCount?: number;
+    selectedId?: number | null;
+    defaultStart?: string | null;
+    defaultType?: 'pkwt' | 'pkwtt';
     employees?: { id: number; full_name: string; employee_number: string }[];
-    filters?: { q?: string; attention?: string; employee_q?: string };
+    filters?: { q?: string; attention?: string; employee_q?: string; status?: string };
     documents?: { id: number; version: number; size_bytes: number; created_at: string }[];
     events?: {
         id: number;
@@ -78,16 +88,14 @@ function Errors({ errors }: { errors: Record<string, string> }) {
 function ContractForm({ p }: { p: Props }) {
     const c = p.contract;
     const [employeeSearch, setEmployeeSearch] = useState(p.filters?.employee_q ?? '');
-    const [selected, setSelected] = useState<{
-        id: number;
-        full_name: string;
-        employee_number: string;
-    } | null>(null);
+    const [selected, setSelected] = useState(
+        () => p.employees?.find((e) => e.id === p.selectedId) ?? null,
+    );
     const f = useForm({
-        employee_id: c?.employee_id.toString() ?? '',
+        employee_id: c?.employee_id.toString() ?? p.selectedId?.toString() ?? '',
         contract_number: c?.contract_number ?? '',
-        type: c?.type ?? 'pkwt',
-        starts_on: c?.starts_on ?? '',
+        type: c?.type ?? p.defaultType ?? 'pkwt',
+        starts_on: c?.starts_on ?? p.defaultStart ?? '',
         ends_on: c?.ends_on ?? '',
         notes: c?.notes ?? '',
         reason: '',
@@ -343,6 +351,93 @@ function VoidForm({ c }: { c: ContractRecord }) {
         </section>
     );
 }
+const employmentStatuses: Record<string, string> = {
+    contract: 'Kontrak',
+    probation: 'Percobaan',
+    intern: 'Magang',
+    permanent: 'Tetap',
+};
+function MissingList({ p }: { p: Props }) {
+    const [status, setStatus] = useState(p.filters?.status ?? '');
+    const list = p.missing;
+    return (
+        <>
+            <form
+                className="tr-list-filters"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    router.get('/contracts/missing', { status });
+                }}
+            >
+                <select
+                    aria-label="Status kepegawaian"
+                    value={status}
+                    onChange={(e) => {
+                        setStatus(e.target.value);
+                        router.get('/contracts/missing', { status: e.target.value });
+                    }}
+                >
+                    <option value="">Semua status kepegawaian</option>
+                    {Object.entries(employmentStatuses).map(([v, l]) => (
+                        <option key={v} value={v}>
+                            {l}
+                        </option>
+                    ))}
+                </select>
+            </form>
+            <section className="hr-panel">
+                <div className="tr-panel-heading">
+                    <h2>{list?.total ?? 0} pegawai belum punya kontrak berjalan</h2>
+                    <p>Pegawai kontrak dan percobaan ditampilkan lebih dulu.</p>
+                </div>
+                <div className="hr-table-scroll">
+                    <table className="hr-table">
+                        <thead>
+                            <tr>
+                                <th>Pegawai</th>
+                                <th>Status kepegawaian</th>
+                                <th>Bergabung</th>
+                                <th>
+                                    <span className="sr-only">Tindakan</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {list?.data.map((e) => (
+                                <tr key={e.id}>
+                                    <td>
+                                        <Link href={`/employees/${e.id}`}>
+                                            <strong>{e.full_name}</strong>
+                                        </Link>
+                                        <small className="tr-sub">
+                                            {e.employee_number} · {e.department}
+                                        </small>
+                                    </td>
+                                    <td>{e.status_label}</td>
+                                    <td>{date(e.join_date)}</td>
+                                    <td>
+                                        {p.canManage && (
+                                            <Link
+                                                className="ct-row-action"
+                                                href={`/contracts/create?employee_id=${e.id}&starts_on=${e.join_date}`}
+                                            >
+                                                Catat kontrak <ArrowRight size={14} />
+                                            </Link>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                {!list?.data.length && (
+                    <p className="hr-empty">Tidak ada pegawai yang cocok dengan filter ini.</p>
+                )}
+            </section>
+            {list && <RecordPagination total={list.total} links={list.links} />}
+        </>
+    );
+}
 export default function Contracts(p: Props) {
     const c = p.contract;
     const [q, setQ] = useState(p.filters?.q ?? '');
@@ -354,7 +449,9 @@ export default function Contracts(p: Props) {
               ? 'Koreksi kontrak'
               : p.mode === 'show'
                 ? 'Detail kontrak'
-                : 'Kontrak kerja';
+                : p.mode === 'missing'
+                  ? 'Pegawai tanpa kontrak'
+                  : 'Kontrak kerja';
     return (
         <HrShell title={title} active="contracts" user={p.auth.user}>
             <main id="hr-main" className="hr-main ep-main tr-page">
@@ -376,7 +473,9 @@ export default function Contracts(p: Props) {
                                 ? 'Pantau periode kerja dan kontrak yang perlu ditinjau.'
                                 : p.mode === 'show'
                                   ? `${c!.type.toUpperCase()} · ${c!.employee_name}`
-                                  : 'Catat periode sesuai dokumen kontrak pegawai.'}
+                                  : p.mode === 'missing'
+                                    ? 'Pegawai aktif yang belum punya kontrak berjalan hari ini (WIB).'
+                                    : 'Catat periode sesuai dokumen kontrak pegawai.'}
                         </p>
                     </div>
                     {p.mode === 'index' && p.canManage && (
@@ -400,8 +499,15 @@ export default function Contracts(p: Props) {
                 {(p.mode === 'create' || p.mode === 'edit') && (
                     <ContractForm key={c ? `${c.id}-${c.version}` : 'new'} p={p} />
                 )}
+                {p.mode === 'missing' && <MissingList p={p} />}
                 {p.mode === 'index' && (
                     <>
+                        {p.missingCount ? (
+                            <p className="ep-alert">
+                                {p.missingCount} pegawai aktif belum punya kontrak berjalan.{' '}
+                                <Link href="/contracts/missing">Lihat daftar</Link>
+                            </p>
+                        ) : null}
                         <form
                             className="tr-list-filters"
                             onSubmit={(e) => {

@@ -67,7 +67,7 @@ class RecruitmentOfferController
     {
         $employee = $offers->convert($application, $request->validated(), $request->user());
 
-        return to_route('employees.show', $employee)->with('success', 'Pegawai dibuat dari penawaran yang diterima. Akun login tidak dibuat otomatis.');
+        return to_route('employees.show', $employee)->with('success', 'Pegawai dibuat dari penawaran yang diterima. Akun login tidak dibuat otomatis. Catat kontrak kerja pegawai dari halaman detail ini.');
     }
 
     private function offer(Application $application): RecruitmentOffer

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EmploymentStatus;
 use App\Http\Requests\ContractActionRequest;
 use App\Http\Requests\ContractRequest;
 use App\Models\ContractDocument;
@@ -40,20 +41,40 @@ class ContractController
             $q->attention($f['attention']);
         }
 
-        return Inertia::render('contracts', ['mode' => 'index', 'canManage' => $r->user()->can('create', EmployeeContract::class), 'filters' => $f,
+        return Inertia::render('contracts', ['mode' => 'index', 'canManage' => $r->user()->can('create', EmployeeContract::class), 'filters' => $f, 'missingCount' => Employee::withoutCurrentContract()->count(),
             'contracts' => $q->orderByRaw('ends_on IS NULL')->orderBy('ends_on')->orderBy('id')->paginate(15)->withQueryString()->through(fn ($c) => $c->forDisplay())]);
+    }
+
+    public function missing(Request $r)
+    {
+        Gate::authorize('viewAny', EmployeeContract::class);
+        $f = $r->validate(['status' => ['nullable', Rule::in(['contract', 'probation', 'intern', 'permanent'])], 'page' => ['sometimes', 'integer', 'min:1']]);
+        $q = Employee::withoutCurrentContract()->with('department')->when(! empty($f['status']), fn ($e) => $e->where('employment_status', $f['status']));
+
+        return Inertia::render('contracts', ['mode' => 'missing', 'canManage' => $r->user()->can('create', EmployeeContract::class), 'filters' => $f,
+            'missing' => $q->orderByRaw("FIELD(employment_status, 'contract', 'probation', 'intern', 'permanent')")->orderBy('join_date')->orderBy('id')->paginate(15)->withQueryString()->through(fn ($e) => [
+                ...$e->only('id', 'employee_number', 'full_name'), 'status' => $e->employment_status->value, 'status_label' => $e->employment_status->label(),
+                'department' => $e->department->name, 'join_date' => $e->join_date->format('Y-m-d')])]);
     }
 
     public function create(Request $r)
     {
         Gate::authorize('create', EmployeeContract::class);
-        $f = $r->validate(['employee_q' => ['nullable', 'string', 'max:100']]);
+        $f = $r->validate(['employee_q' => ['nullable', 'string', 'max:100'], 'employee_id' => ['nullable', 'integer'], 'starts_on' => ['nullable', 'date_format:Y-m-d']]);
         $q = Employee::where('employment_status', '!=', 'inactive');
         if ($term = trim($f['employee_q'] ?? '')) {
             $q->where(fn ($e) => $e->where('full_name', 'like', '%'.$term.'%')->orWhere('employee_number', 'like', '%'.$term.'%'));
         }
+        $employees = $q->orderBy('full_name')->limit(20)->get(['id', 'full_name', 'employee_number'])->map->only(['id', 'full_name', 'employee_number']);
+        $selected = isset($f['employee_id']) ? Employee::where('employment_status', '!=', 'inactive')->find($f['employee_id']) : null;
+        if ($selected && ! $employees->contains('id', $selected->id)) {
+            $employees->prepend($selected->only(['id', 'full_name', 'employee_number']));
+        }
+        $lastEnd = $selected ? EmployeeContract::where('employee_id', $selected->id)->whereNull('voided_at')->where('ends_on', '<', now('Asia/Jakarta')->toDateString())->max('ends_on') : null;
 
-        return Inertia::render('contracts', ['mode' => 'create', 'canManage' => true, 'filters' => $f, 'employees' => $q->orderBy('full_name')->limit(20)->get(['id', 'full_name', 'employee_number'])]);
+        return Inertia::render('contracts', ['mode' => 'create', 'canManage' => true, 'filters' => $f, 'employees' => $employees->values(),
+            'selectedId' => $selected?->id, 'defaultStart' => $lastEnd ? CarbonImmutable::parse($lastEnd)->addDay()->format('Y-m-d') : ($selected ? ($f['starts_on'] ?? null) : null),
+            'defaultType' => $selected?->employment_status === EmploymentStatus::Permanent ? 'pkwtt' : 'pkwt']);
     }
 
     public function store(ContractRequest $r, ContractRecords $records)

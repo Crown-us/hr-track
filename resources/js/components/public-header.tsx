@@ -1,4 +1,35 @@
+import { usePage } from '@inertiajs/react';
 import { ArrowUpRight } from 'lucide-react';
+
+type SessionUser = { role_label: string; home: string };
+
+function AccessLink() {
+    const user = usePage<{ auth?: { user: SessionUser | null } }>().props.auth?.user;
+
+    if (!user) {
+        return (
+            <a href="/login" className="taste-nav-access">
+                Masuk <ArrowUpRight size={16} aria-hidden="true" />
+            </a>
+        );
+    }
+
+    const destination = user.home === '/me' ? 'Portal saya' : 'Dasbor HR';
+
+    return (
+        <a
+            href={user.home}
+            className="taste-nav-access taste-nav-access-user"
+            aria-label={`${destination}, masuk sebagai ${user.role_label}`}
+        >
+            <span className="taste-nav-access-text">
+                {destination}
+                <small>{user.role_label}</small>
+            </span>
+            <ArrowUpRight size={16} aria-hidden="true" />
+        </a>
+    );
+}
 
 export function PublicHeader({ careers = false }: { careers?: boolean }) {
     const home = careers ? '/' : '';
@@ -20,9 +51,7 @@ export function PublicHeader({ careers = false }: { careers?: boolean }) {
                         Lowongan <ArrowUpRight size={12} aria-hidden="true" />
                     </a>
                 </nav>
-                <a href="/login" className="taste-nav-access">
-                    Masuk HR <ArrowUpRight size={16} aria-hidden="true" />
-                </a>
+                <AccessLink />
             </header>
         </div>
     );

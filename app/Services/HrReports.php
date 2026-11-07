@@ -16,6 +16,8 @@ class HrReports
 
     public const BASES = ['recruitment' => 'Tanggal lamaran', 'training' => 'Tanggal mulai pelatihan (WIB)', 'contracts' => 'Tanggal mulai kontrak', 'discipline' => 'Tanggal kejadian'];
 
+    public const CONTRACT_BASES = ['starts_on' => 'Tanggal mulai kontrak', 'ends_on' => 'Tanggal berakhir kontrak'];
+
     public const STATUSES = [
         'recruitment' => ['screening' => 'Screening', 'interview' => 'Interview', 'offering' => 'Offering', 'accepted' => 'Diterima', 'rejected' => 'Ditolak'],
         'training' => ['scheduled' => 'Dijadwalkan', 'completed' => 'Selesai', 'cancelled' => 'Dibatalkan'],
@@ -28,6 +30,7 @@ class HrReports
         return DB::transaction(function () use ($f, $format) {
             $module = $f['module'];
             $status = $f['status'] ?? null;
+            $basis = self::BASES[$module];
             $headers = [];
             $map = null;
             if ($module === 'recruitment') {
@@ -49,7 +52,9 @@ class HrReports
                 $headers = ['Pelatihan', 'Tanggal mulai WIB', 'Pegawai', 'Nomor pegawai', 'Kehadiran', 'Pre-test', 'Post-test', 'Selisih poin'];
                 $map = fn ($p) => [$p->training_title, CarbonImmutable::parse($p->session_start, 'UTC')->timezone('Asia/Jakarta')->format('Y-m-d'), $p->employee->full_name, $p->employee->employee_number, ['registered' => 'Terdaftar', 'attended' => 'Hadir', 'absent' => 'Tidak hadir'][$p->attendance], $p->pre_test === null ? '' : (string) $p->pre_test, $p->post_test === null ? '' : (string) $p->post_test, ($p->attendance === 'attended' && $p->pre_test !== null && $p->post_test !== null) ? (string) round($p->post_test - $p->pre_test, 2) : ''];
             } elseif ($module === 'contracts') {
-                $q = EmployeeContract::with('employee')->whereBetween('starts_on', [$f['from'], $f['to']]);
+                $column = $f['basis'] ?? 'starts_on';
+                $basis = self::CONTRACT_BASES[$column];
+                $q = EmployeeContract::with('employee')->whereBetween($column, [$f['from'], $f['to']]);
                 $today = now('Asia/Jakarta')->toDateString();
                 if ($status === 'voided') {
                     $q->whereNotNull('voided_at');
@@ -63,7 +68,7 @@ class HrReports
                         $q->where('starts_on', '<=', $today)->where(fn ($q) => $q->whereNull('ends_on')->orWhere('ends_on', '>=', $today));
                     }
                 }
-                $q->orderBy('starts_on')->orderBy('id');
+                $q->orderBy($column)->orderBy('starts_on')->orderBy('id');
                 $headers = ['Pegawai', 'Nomor pegawai', 'Nomor kontrak', 'Jenis', 'Mulai', 'Berakhir', 'Status saat ekspor'];
                 $map = function ($c) {
                     $d = $c->forDisplay();
@@ -82,10 +87,10 @@ class HrReports
             $total = (clone $q)->count();
             $limit = $format === 'xlsx' ? 1000 : ($format === 'pdf' ? 200 : 10);
             if ($format && $total > $limit) {
-                throw ValidationException::withMessages(['limit' => 'Hasil '.$total.' baris melebihi batas '.$limit.' baris untuk '.strtoupper($format).'. Persempit tanggal atau status.'])->redirectTo(route('reports.index', array_intersect_key($f, array_flip(['module', 'from', 'to', 'status']))));
+                throw ValidationException::withMessages(['limit' => 'Hasil '.$total.' baris melebihi batas '.$limit.' baris untuk '.strtoupper($format).'. Persempit tanggal atau status.'])->redirectTo(route('reports.index', array_intersect_key($f, array_flip(['module', 'from', 'to', 'status', 'basis']))));
             }
 
-            return ['title' => self::MODULES[$module], 'basis' => self::BASES[$module], 'from' => $f['from'], 'to' => $f['to'], 'status_label' => $status ? (self::STATUSES[$module][$status] ?? 'Semua status') : 'Semua status', 'generated_at' => now()->toIso8601String(), 'headers' => $headers, 'rows' => $q->limit($limit)->get()->map($map)->values()->all(), 'total' => $total];
+            return ['title' => self::MODULES[$module], 'basis' => $basis, 'from' => $f['from'], 'to' => $f['to'], 'status_label' => $status ? (self::STATUSES[$module][$status] ?? 'Semua status') : 'Semua status', 'generated_at' => now()->toIso8601String(), 'headers' => $headers, 'rows' => $q->limit($limit)->get()->map($map)->values()->all(), 'total' => $total];
         });
     }
 }

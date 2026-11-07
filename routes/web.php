@@ -109,6 +109,7 @@ Route::middleware(['auth', 'can:access-hr'])->group(function () {
     Route::get('/discipline/{case}/documents/{document}', [DisciplineController::class, 'download'])->name('discipline.document');
     Route::get('/contracts', [ContractController::class, 'index'])->name('contracts.index');
     Route::get('/contracts/create', [ContractController::class, 'create'])->name('contracts.create');
+    Route::get('/contracts/missing', [ContractController::class, 'missing'])->name('contracts.missing');
     Route::post('/contracts', [ContractController::class, 'store'])->name('contracts.store');
     Route::get('/contracts/{contract}', [ContractController::class, 'show'])->name('contracts.show');
     Route::get('/contracts/{contract}/edit', [ContractController::class, 'edit'])->name('contracts.edit');

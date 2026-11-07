@@ -47,7 +47,7 @@ class DisciplineTest extends TestCase
 
     private function data(array $extra = []): array
     {
-        return [...['employee_id' => Employee::withTrashed()->first()->id, 'reference_number' => 'HR/SP/001', 'kind' => 'violation', 'incident_on' => now('Asia/Jakarta')->subDay()->toDateString(), 'subject' => 'Ketidaksesuaian prosedur', 'description' => 'Catatan kejadian yang ditinjau tim HR.', 'follow_up_on' => now('Asia/Jakarta')->addWeek()->toDateString(), 'reason' => '', 'version' => 1], ...$extra];
+        return [...['employee_id' => Employee::withTrashed()->first()->id, 'reference_number' => 'HR/SP/001', 'kind' => 'violation', 'incident_on' => now('Asia/Jakarta')->subDay()->toDateString(), 'issued_on' => now('Asia/Jakarta')->subDay()->toDateString(), 'subject' => 'Ketidaksesuaian prosedur', 'description' => 'Catatan kejadian yang ditinjau tim HR.', 'follow_up_on' => now('Asia/Jakarta')->addWeek()->toDateString(), 'reason' => '', 'version' => 1], ...$extra];
     }
 
     private function pdf(): UploadedFile
@@ -151,5 +151,71 @@ class DisciplineTest extends TestCase
         $this->assertDatabaseCount('disciplinary_cases', 0);
         $this->assertDatabaseCount('discipline_documents', 0);
         $this->assertSame([], Storage::disk('discipline_documents')->allFiles());
+    }
+
+    public function test_warning_requires_issue_date_and_defaults_validity_to_six_months(): void
+    {
+        $this->setupHr();
+        $this->post('/discipline', $this->data(['kind' => 'sp1', 'issued_on' => null, 'document' => $this->pdf()]))->assertSessionHasErrors('issued_on');
+        $this->post('/discipline', $this->data(['kind' => 'sp1', 'issued_on' => now('Asia/Jakarta')->addDay()->toDateString(), 'document' => $this->pdf()]))->assertSessionHasErrors('issued_on');
+        $this->post('/discipline', $this->data(['kind' => 'sp1', 'incident_on' => now('Asia/Jakarta')->subDays(3)->toDateString(), 'issued_on' => now('Asia/Jakarta')->subDays(5)->toDateString(), 'document' => $this->pdf()]))->assertSessionHasErrors('issued_on');
+        $issued = now('Asia/Jakarta')->subDay()->toDateString();
+        $this->post('/discipline', $this->data(['kind' => 'sp1', 'valid_until' => $issued, 'document' => $this->pdf()]))->assertSessionHasErrors('valid_until');
+        $this->assertDatabaseCount('disciplinary_cases', 0);
+
+        $id = $this->record(['kind' => 'sp1', 'document' => $this->pdf()]);
+        $row = DB::table('disciplinary_cases')->find($id);
+        $this->assertSame($issued, $row->issued_on);
+        $this->assertSame(now('Asia/Jakarta')->subDay()->addMonthsNoOverflow(6)->toDateString(), $row->valid_until);
+
+        $custom = now('Asia/Jakarta')->addMonths(3)->toDateString();
+        $other = $this->record(['kind' => 'sp1', 'reference_number' => 'HR/SP/002', 'valid_until' => $custom, 'document' => $this->pdf()]);
+        $this->assertSame($custom, DB::table('disciplinary_cases')->find($other)->valid_until);
+    }
+
+    public function test_non_warning_records_do_not_store_validity_dates(): void
+    {
+        $this->setupHr();
+        $id = $this->record(['kind' => 'violation', 'valid_until' => now('Asia/Jakarta')->addMonth()->toDateString()]);
+        $row = DB::table('disciplinary_cases')->find($id);
+        $this->assertNull($row->issued_on);
+        $this->assertNull($row->valid_until);
+        $this->get('/discipline/'.$id)->assertInertia(fn (Assert $p) => $p->where('case.validity', null));
+    }
+
+    public function test_validity_status_is_active_expired_or_unset_for_legacy_rows(): void
+    {
+        $this->setupHr();
+        $old = now('Asia/Jakarta')->subMonths(8)->toDateString();
+        $expired = $this->record(['kind' => 'sp1', 'reference_number' => 'HR/SP/OLD', 'incident_on' => $old, 'issued_on' => $old, 'document' => $this->pdf()]);
+        $active = $this->record(['kind' => 'sp1', 'reference_number' => 'HR/SP/NEW', 'document' => $this->pdf()]);
+        $legacy = $this->record(['kind' => 'sp1', 'reference_number' => 'HR/SP/LEG', 'document' => $this->pdf()]);
+        DB::table('disciplinary_cases')->where('id', $legacy)->update(['issued_on' => null, 'valid_until' => null]);
+
+        $this->get('/discipline/'.$expired)->assertInertia(fn (Assert $p) => $p->where('case.validity', 'expired')->where('case.validity_label', 'Kedaluwarsa'));
+        $this->get('/discipline/'.$active)->assertInertia(fn (Assert $p) => $p->where('case.validity', 'active'));
+        $this->get('/discipline/'.$legacy)->assertInertia(fn (Assert $p) => $p->where('case.validity', 'unset'));
+        $this->put('/discipline/'.$legacy, $this->data(['kind' => 'sp1', 'issued_on' => null, 'reason' => 'Melengkapi tanggal terbit', 'version' => 1]))->assertSessionHasErrors('issued_on');
+        $this->put('/discipline/'.$legacy, $this->data(['kind' => 'sp1', 'reference_number' => 'HR/SP/LEG', 'reason' => 'Melengkapi tanggal terbit', 'version' => 1]))->assertSessionHasNoErrors();
+        $this->get('/discipline/'.$legacy)->assertInertia(fn (Assert $p) => $p->where('case.validity', 'active'));
+    }
+
+    public function test_follow_up_warning_without_active_previous_level_warns_but_still_saves(): void
+    {
+        $this->setupHr();
+        $this->post('/discipline', $this->data(['kind' => 'sp2', 'reference_number' => 'HR/SP/201', 'document' => $this->pdf()]))
+            ->assertSessionHasNoErrors()->assertSessionHas('warning');
+        $this->assertDatabaseCount('disciplinary_cases', 1);
+
+        $this->post('/discipline', $this->data(['kind' => 'sp1', 'reference_number' => 'HR/SP/101', 'document' => $this->pdf()]))
+            ->assertSessionHasNoErrors()->assertSessionMissing('warning');
+        $this->post('/discipline', $this->data(['kind' => 'sp2', 'reference_number' => 'HR/SP/202', 'document' => $this->pdf()]))
+            ->assertSessionHasNoErrors()->assertSessionMissing('warning');
+
+        DB::table('disciplinary_cases')->where('reference_number', 'HR/SP/101')->update(['status' => 'voided']);
+        $this->post('/discipline', $this->data(['kind' => 'sp2', 'reference_number' => 'HR/SP/203', 'document' => $this->pdf()]))
+            ->assertSessionHasNoErrors()->assertSessionHas('warning');
+        $this->post('/discipline', $this->data(['kind' => 'sp3', 'reference_number' => 'HR/SP/301', 'document' => $this->pdf()]))
+            ->assertSessionHasNoErrors()->assertSessionMissing('warning');
     }
 }

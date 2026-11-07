@@ -4,18 +4,20 @@ import { Download, SlidersHorizontal } from 'lucide-react';
 import HrShell, { type HrUser } from '../components/hr-shell';
 import { RecordField as Field, RecordErrors } from '../components/record-fields';
 import { applicationDate as date } from '../components/application-format';
+import { cn } from '../lib/utils';
 import '../css/employees.css';
 import '../css/applications.css';
 import '../css/trainings.css';
 import '../css/reports.css';
 
-type Filters = { module: string; from: string; to: string; status?: string };
+type Filters = { module: string; from: string; to: string; status?: string; basis?: string };
 type Props = {
     auth: { user: HrUser };
     errors?: Record<string, string>;
     filters: Filters;
     modules: Record<string, string>;
     statuses: Record<string, string>;
+    contractBases: Record<string, string>;
     report: {
         title: string;
         basis: string;
@@ -32,7 +34,7 @@ function FiltersForm({ p }: { p: Props }) {
     const [f, setF] = useState({ ...p.filters, status: p.filters.status ?? '' });
     return (
         <form
-            className="ep-card rp-filters"
+            className={cn('ep-card rp-filters', f.module === 'contracts' && 'rp-filters-wide')}
             onSubmit={(e) => {
                 e.preventDefault();
                 router.get('/reports', f);
@@ -43,7 +45,7 @@ function FiltersForm({ p }: { p: Props }) {
                     value={f.module}
                     onChange={(e) => {
                         const module = e.target.value;
-                        router.get('/reports', { ...f, module, status: '' });
+                        router.get('/reports', { ...f, module, status: '', basis: '' });
                     }}
                 >
                     {Object.entries(p.modules).map(([v, l]) => (
@@ -53,6 +55,20 @@ function FiltersForm({ p }: { p: Props }) {
                     ))}
                 </select>
             </Field>
+            {f.module === 'contracts' && (
+                <Field label="Dasar tanggal" error={p.errors?.basis}>
+                    <select
+                        value={f.basis || 'starts_on'}
+                        onChange={(e) => setF({ ...f, basis: e.target.value })}
+                    >
+                        {Object.entries(p.contractBases).map(([v, l]) => (
+                            <option key={v} value={v}>
+                                {l}
+                            </option>
+                        ))}
+                    </select>
+                </Field>
+            )}
             <Field label="Tanggal awal" error={p.errors?.from}>
                 <input
                     type="date"
@@ -89,7 +105,11 @@ function FiltersForm({ p }: { p: Props }) {
 }
 export default function Reports(p: Props) {
     const r = p.report;
-    const query = new URLSearchParams({ ...p.filters, status: p.filters.status ?? '' });
+    const query = new URLSearchParams({
+        ...p.filters,
+        status: p.filters.status ?? '',
+        basis: p.filters.basis ?? '',
+    });
     return (
         <HrShell title="Laporan HR" active="reports" user={p.auth.user}>
             <main id="hr-main" className="hr-main ep-main rp-page">

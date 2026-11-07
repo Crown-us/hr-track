@@ -6,6 +6,7 @@ use App\Models\DisciplinaryCase;
 use App\Models\DisciplineDocument;
 use App\Models\Employee;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -64,14 +65,14 @@ class DisciplineRecords
                     if (! $e) {
                         throw ValidationException::withMessages(['employee_id' => 'Pilih pegawai aktif yang belum diarsipkan.']);
                     }
-                    if (in_array($data['kind'], ['sp1', 'sp2', 'sp3'], true) && ! $file) {
+                    if (DisciplinaryCase::isWarning($data['kind']) && ! $file) {
                         throw ValidationException::withMessages(['document' => 'Lampirkan PDF surat peringatan.']);
                     }
                     $c = new DisciplinaryCase(['employee_id' => $e->id, 'kind' => $data['kind'], 'created_by' => $u->id]);
                 }
-                $fields = ['reference_number', 'incident_on', 'subject', 'description', 'follow_up_on'];
+                $fields = ['reference_number', 'incident_on', 'subject', 'description', 'follow_up_on', 'issued_on', 'valid_until'];
                 $before = $case ? $c->only($fields) : [];
-                $c->fill([...array_intersect_key($data, array_flip($fields)), 'follow_up_on' => $data['follow_up_on'] ?? null]);
+                $c->fill([...array_intersect_key($data, array_flip($fields)), 'follow_up_on' => $data['follow_up_on'] ?? null, ...$this->validity($c->kind, $data)]);
                 if ($case) {
                     $c->version++;
                 }
@@ -92,6 +93,29 @@ class DisciplineRecords
             }
             throw $e;
         }
+    }
+
+    private function validity(string $kind, array $data): array
+    {
+        if (! DisciplinaryCase::isWarning($kind)) {
+            return ['issued_on' => null, 'valid_until' => null];
+        }
+        $months = DisciplinaryCase::WARNING_VALIDITY_MONTHS;
+
+        return ['issued_on' => $data['issued_on'], 'valid_until' => $data['valid_until'] ?? CarbonImmutable::parse($data['issued_on'])->addMonthsNoOverflow($months)->toDateString()];
+    }
+
+    public function escalationGap(DisciplinaryCase $case): ?string
+    {
+        $previous = ['sp2' => 'sp1', 'sp3' => 'sp2'][$case->kind] ?? null;
+        if (! $previous || ! $case->issued_on) {
+            return null;
+        }
+        $issued = $case->issued_on->toDateString();
+        $covered = DisciplinaryCase::where('employee_id', $case->employee_id)->where('kind', $previous)->where('status', '!=', 'voided')
+            ->where('issued_on', '<=', $issued)->where('valid_until', '>=', $issued)->exists();
+
+        return $covered ? null : DisciplinaryCase::KINDS[$case->kind].' tersimpan tanpa '.DisciplinaryCase::KINDS[$previous].' yang masih berlaku pada tanggal terbit. Periksa peraturan perusahaan atau PKB sebelum surat diberikan kepada pegawai.';
     }
 
     public function status(DisciplinaryCase $case, array $data, User $u): void

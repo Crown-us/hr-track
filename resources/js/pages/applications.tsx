@@ -225,7 +225,11 @@ function Directory(p: ApplicationProps) {
                     <Search size={16} />
                     <input
                         aria-label="Cari pelamar"
-                        placeholder="Cari nama, email, atau posisi…"
+                        placeholder={
+                            p.canManage
+                                ? 'Cari nama, email, atau posisi…'
+                                : 'Cari nama atau posisi…'
+                        }
                         value={q}
                         onChange={(e) => setQ(e.target.value)}
                     />
@@ -329,7 +333,7 @@ function Directory(p: ApplicationProps) {
                                     <tr key={a.id}>
                                         <td>
                                             <strong>{a.name}</strong>
-                                            <small>{a.email}</small>
+                                            {a.email && <small>{a.email}</small>}
                                         </td>
                                         <td>{a.job_title}</td>
                                         <td>{date(a.application_date)}</td>
@@ -382,21 +386,21 @@ function Directory(p: ApplicationProps) {
 
 function StatusForm({ a, stages }: { a: ApplicationRow; stages: Stage[] }) {
     const f = useForm({ status: '', note: '', version: a.version });
-    if (a.source === 'public' && !a.email_verified_at) {
-        return (
-            <section className="ep-card">
-                <h2>Tindak lanjut</h2>
-                <p>Menunggu pelamar memverifikasi email sebelum tahap dapat diubah.</p>
-            </section>
-        );
-    }
+    const awaitingEmail = a.source === 'public' && !a.email_verified_at;
+    const options = awaitingEmail ? stages.filter((s) => s.value === 'rejected') : stages;
     return (
         <section className="ep-card">
             <div className="ep-section-heading">
                 <h2>Tindak lanjut</h2>
                 <p>Perubahan tahap mencatat pelaku dan waktu.</p>
             </div>
-            {stages.length ? (
+            {awaitingEmail && (
+                <p className="ap-muted">
+                    Menunggu pelamar memverifikasi email. Sebelum itu lamaran hanya dapat ditolak,
+                    misalnya untuk pengajuan palsu atau spam.
+                </p>
+            )}
+            {options.length ? (
                 <form
                     className="ap-stacked"
                     onSubmit={(e) => {
@@ -414,7 +418,7 @@ function StatusForm({ a, stages }: { a: ApplicationRow; stages: Stage[] }) {
                             onChange={(e) => f.setData('status', e.target.value)}
                         >
                             <option value="">Pilih tahap</option>
-                            {stages.map((s) => (
+                            {options.map((s) => (
                                 <option key={s.value} value={s.value}>
                                     {s.label}
                                 </option>
@@ -578,10 +582,12 @@ export default function Applications(p: ApplicationProps) {
                                     </StatusBadge>
                                 </div>
                                 <dl className="ep-details">
-                                    <div>
-                                        <dt>Email</dt>
-                                        <dd>{a.email}</dd>
-                                    </div>
+                                    {a.email !== undefined && (
+                                        <div>
+                                            <dt>Email</dt>
+                                            <dd>{a.email}</dd>
+                                        </div>
+                                    )}
                                     <div>
                                         <dt>Tanggal lamaran</dt>
                                         <dd>{date(a.application_date)}</dd>

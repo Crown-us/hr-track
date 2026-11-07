@@ -27,8 +27,8 @@ interface DocumentRow {
 interface ApplicantData {
     id: number;
     full_name: string;
-    email: string;
-    phone: string | null;
+    email?: string;
+    phone?: string | null;
     application_count: number;
     applications: ApplicationRow[];
     documents: DocumentRow[];
@@ -173,7 +173,7 @@ export default function Applicants({
                         <div>
                             <h1>{applicant.full_name}</h1>
                             <p>
-                                {applicant.email} · {applicant.phone ?? '—'}
+                                {applicant.email ?? '—'} · {applicant.phone ?? '—'}
                             </p>
                         </div>
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
@@ -305,7 +305,7 @@ export default function Applicants({
                     </p>
                 )}
                 <FilterBar
-                    searchPlaceholder="Cari nama atau email…"
+                    searchPlaceholder={canCreate ? 'Cari nama atau email…' : 'Cari nama…'}
                     q={filters.q ?? ''}
                     departmentId={null}
                     employmentType={null}
@@ -345,7 +345,7 @@ export default function Applicants({
                                         <td>
                                             <strong>{a.full_name}</strong>
                                         </td>
-                                        <td>{a.email}</td>
+                                        <td>{a.email ?? '—'}</td>
                                         <td>{a.phone ?? '—'}</td>
                                         <td>{a.application_count}</td>
                                         <td>

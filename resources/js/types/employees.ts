@@ -4,8 +4,8 @@ export type EmployeeRecord = {
     id: number;
     employee_number: string;
     full_name: string;
-    work_email: string;
-    phone: string | null;
+    work_email?: string;
+    phone?: string | null;
     department_id: number;
     position_id: number;
     department: string;
@@ -39,6 +39,7 @@ export type EmployeeProps = {
         to: number | null;
         links: { url: string | null; label: string; active: boolean }[];
     };
+    needsContract?: boolean;
     events: {
         id: number;
         action: string;

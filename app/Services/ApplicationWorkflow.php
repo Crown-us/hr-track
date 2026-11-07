@@ -63,8 +63,8 @@ class ApplicationWorkflow
                 throw ValidationException::withMessages(['version' => 'Tahap sudah berubah. Muat ulang detail sebelum melanjutkan.']);
             }
             $next = ApplicationStatus::from($data['status']);
-            if ($record->source === 'public' && ! $record->email_verified_at) {
-                throw ValidationException::withMessages(['status' => 'Email lamaran publik harus diverifikasi sebelum tahap diubah.']);
+            if ($record->source === 'public' && ! $record->email_verified_at && $next !== ApplicationStatus::Rejected) {
+                throw ValidationException::withMessages(['status' => 'Email lamaran publik harus diverifikasi sebelum tahap maju. Lamaran yang belum terverifikasi hanya dapat ditolak.']);
             }
             if (! in_array($next, $record->status->next(), true)) {
                 throw ValidationException::withMessages(['status' => 'Perpindahan tahap tidak diizinkan. Diterima/Ditolak merupakan tahap akhir.']);

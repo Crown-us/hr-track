@@ -14,7 +14,7 @@ class ReportController
     {
         $f = $r->validated();
 
-        return Inertia::render('reports', ['filters' => $f, 'modules' => HrReports::MODULES, 'statuses' => HrReports::STATUSES[$f['module']], 'report' => $reports->make($f)]);
+        return Inertia::render('reports', ['filters' => $f, 'modules' => HrReports::MODULES, 'statuses' => HrReports::STATUSES[$f['module']], 'contractBases' => HrReports::CONTRACT_BASES, 'report' => $reports->make($f)]);
     }
 
     public function export(ReportRequest $r, HrReports $reports, TabularWorkbook $workbook)

@@ -27,9 +27,11 @@ class ApplicationController
     {
         Gate::authorize('viewAny', Application::class);
         $filters = $request->validate(['q' => ['nullable', 'string', 'max:100'], 'vacancy_id' => ['nullable', 'integer', 'exists:vacancies,id'], 'status' => ['nullable', Rule::enum(ApplicationStatus::class)], 'view' => ['nullable', Rule::in(['board', 'list'])], 'page' => ['sometimes', 'integer', 'min:1']]);
+        $canSeeContact = $request->user()->can('create', Application::class);
         $query = Application::whereHas('applicant')->with(['applicant', 'vacancy']);
         if ($q = trim($filters['q'] ?? '')) {
-            $query->where(fn ($query) => $query->whereHas('applicant', fn ($query) => $query->where('full_name', 'like', '%'.$q.'%')->orWhere('email', 'like', '%'.$q.'%'))->orWhereHas('vacancy', fn ($query) => $query->where('job_title', 'like', '%'.$q.'%')));
+            $query->where(fn ($query) => $query->whereHas('applicant', fn ($query) => $query->where('full_name', 'like', '%'.$q.'%')
+                ->when($canSeeContact, fn ($query) => $query->orWhere('email', 'like', '%'.$q.'%')))->orWhereHas('vacancy', fn ($query) => $query->where('job_title', 'like', '%'.$q.'%')));
         }
         if (! empty($filters['vacancy_id'])) {
             $query->where('vacancy_id', $filters['vacancy_id']);
@@ -44,7 +46,7 @@ class ApplicationController
 
         return Inertia::render('applications', [...$this->base($request), 'mode' => 'index', 'filters' => $filters, 'counts' => $counts,
             'vacancies' => Vacancy::orderBy('job_title')->get(['id', 'job_title']),
-            'applications' => $query->latest('id')->paginate(15)->withQueryString()->through(fn ($application) => $application->forDisplay())]);
+            'applications' => $query->latest('id')->paginate(15)->withQueryString()->through(fn ($application) => [...$application->forDisplay(), ...($canSeeContact ? ['email' => $application->applicant->email] : [])])]);
     }
 
     public function create(Request $request)
